@@ -1,0 +1,50 @@
+<div class="container mt-5">
+  <h1 class="mb-4">プロフィール登録</h1>
+
+  <%= form_with(model: @user, local: true, class: "needs-validation") do |f| %>
+    <% if @user.errors.any? %>
+      <div class="alert alert-danger">
+        <h2><%= pluralize(@user.errors.count, "error") %> prohibited this user from being saved:</h2>
+        <ul>
+          <% @user.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+
+    <div class="mb-3">
+      <%= f.label :name, "名前", class: "form-label" %>
+      <%= f.text_field :name, class: "form-control", required: true %>
+    </div>
+
+    <div class="mb-3">
+      <%= f.label :generation, "在籍期", class: "form-label" %>
+      <%= f.number_field :generation, class: "form-control", required: true %>
+    </div>
+
+    <div class="mb-3">
+      <%= f.label :gender, "性別", class: "form-label" %>
+      <%= f.select :gender, [['男性', 'male'], ['女性', 'female']], {}, class: "form-select", required: true %>
+    </div>
+
+    <div class="mb-3">
+      <%= f.label :birthday, "誕生日", class: "form-label" %>
+      <%= f.date_field :birthday, class: "form-control", required: true %>
+    </div>
+
+    <div class="mb-3">
+      <%= f.label :profile_image_url, "プロフィール画像URL", class: "form-label" %>
+      <%= f.url_field :profile_image_url, class: "form-control" %>
+    </div>
+
+    <div class="mb-3">
+      <%= f.label :bio, "自己紹介", class: "form-label" %>
+      <%= f.text_area :bio, class: "form-control", rows: 5 %>
+    </div>
+
+    <div class="mb-3">
+      <%= f.submit "登録", class: "btn btn-primary" %>
+    </div>
+  <% end %>
+</div>
