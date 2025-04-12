@@ -10,9 +10,50 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_11_160313) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_16_110910) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "best_time_tables", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "50m_fr", default: "-"
+    t.string "50m_fr_note"
+    t.string "100m_fr", default: "-"
+    t.string "100m_fr_note"
+    t.string "200m_fr", default: "-"
+    t.string "200m_fr_note"
+    t.string "400m_fr", default: "-"
+    t.string "400m_fr_note"
+    t.string "800m_fr", default: "-"
+    t.string "800m_fr_note"
+    t.string "50m_br", default: "-"
+    t.string "50m_br_note"
+    t.string "100m_br", default: "-"
+    t.string "100m_br_note"
+    t.string "200m_br", default: "-"
+    t.string "200m_br_note"
+    t.string "50m_ba", default: "-"
+    t.string "50m_ba_note"
+    t.string "100m_ba", default: "-"
+    t.string "100m_ba_note"
+    t.string "200m_ba", default: "-"
+    t.string "200m_ba_note"
+    t.string "50m_fly", default: "-"
+    t.string "50m_fly_note"
+    t.string "100m_fly", default: "-"
+    t.string "100m_fly_note"
+    t.string "200m_fly", default: "-"
+    t.string "200m_fly_note"
+    t.string "100m_im", default: "-"
+    t.string "100m_im_note"
+    t.string "200m_im", default: "-"
+    t.string "200m_im_note"
+    t.string "400m_im", default: "-"
+    t.string "400m_im_note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_best_time_tables_on_user_id"
+  end
 
   create_table "user_auths", force: :cascade do |t|
     t.string "email", default: "", null: false
@@ -40,5 +81,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_11_160313) do
     t.text "bio", default: ""
   end
 
+  add_foreign_key "best_time_tables", "users"
   add_foreign_key "user_auths", "users"
 end

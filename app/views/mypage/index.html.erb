@@ -1,0 +1,240 @@
+<% content_for :title, 'マイページ' %>
+
+<div class="bg-white shadow rounded-lg p-6">
+  <% if @user.present? %>
+    <div class="flex items-center space-x-6 mb-4">
+      <div class="flex-shrink-0">
+        <% if @user.profile_image_url.present? %>
+          <img src="<%= @user.profile_image_url %>" alt="プロフィール画像" class="w-24 h-24 rounded-full">
+        <% else %>
+          <div class="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center">
+            <span class="text-white text-3xl"><%= @user.name[0] %></span>
+          </div>
+        <% end %>
+      </div>
+      <div class="flex-1">
+        <h2 class="text-2xl font-bold text-gray-900"><%= @user.name %></h2>
+        <p class="text-gray-500"><%= @user.generation %><%= ordinal_suffix(@user.generation) %></p>
+        <p class="text-gray-500"><%= @user.birthday.strftime('%Y年%m月%d日') %></p>
+      </div>
+    </div>
+
+    <% if @user.bio.present? %>
+      <div class="mt-4">
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">自己紹介</h3>
+        <p class="text-gray-700 whitespace-pre-wrap"><%= @user.bio %></p>
+      </div>
+    <% end %>
+
+    <!-- アカウント管理セクション -->
+    <div class="mt-6 border-t border-gray-200 pt-6">
+      <h3 class="text-lg font-semibold text-gray-900 mb-4">アカウント管理</h3>
+      <div class="space-y-4">
+        <%= link_to "新規ユーザー登録", new_user_auth_registration_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+      </div>
+    </div>
+
+    <div class="mt-6 flex justify-end">
+      <%# 編集機能は後で実装 %>
+      <%#= link_to '編集', '#', class: 'inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500' %>
+    </div>
+  <% else %>
+    <div class="text-center py-8">
+      <p class="text-gray-500">ユーザー情報が見つかりませんでした。</p>
+      <%= link_to 'トップページへ戻る', root_path, class: 'mt-4 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500' %>
+    </div>
+  <% end %>
+</div>
+
+<% if @user.present? %>
+  <div class="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">
+                今月の出席回数
+              </dt>
+              <dd class="flex items-baseline">
+                <div class="text-2xl font-semibold text-gray-900">
+                  15回
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">
+                ベストタイム（50m自由形）
+              </dt>
+              <dd class="flex items-baseline">
+                <div class="text-2xl font-semibold text-gray-900">
+                  <%= @best_time_table['50m_fr'].presence || '-' %>
+                </div>
+                <span class="ml-2 text-sm text-gray-500">秒</span>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white overflow-hidden shadow rounded-lg">
+      <div class="p-5">
+        <div class="flex items-center">
+          <div class="flex-shrink-0">
+            <svg class="h-6 w-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+          </div>
+          <div class="ml-5 w-0 flex-1">
+            <dl>
+              <dt class="text-sm font-medium text-gray-500 truncate">
+                目標達成率
+              </dt>
+              <dd class="flex items-baseline">
+                <div class="text-2xl font-semibold text-gray-900">
+                  75%
+                </div>
+              </dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ベストタイムテーブル -->
+  <div class="mt-8 bg-white shadow rounded-lg overflow-hidden">
+    <div class="px-4 py-5 sm:px-6">
+      <h3 class="text-lg font-medium leading-6 text-gray-900">ベストタイム</h3>
+    </div>
+    <div class="border-t border-gray-200">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">種目</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">タイム</th>
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">メモ</th>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <!-- 自由形 -->
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">50m自由形</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['50m_fr'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['50m_fr_note'].presence || '-' %></td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">100m自由形</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['100m_fr'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['100m_fr_note'].presence || '-' %></td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">200m自由形</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['200m_fr'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['200m_fr_note'].presence || '-' %></td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">400m自由形</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['400m_fr'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['400m_fr_note'].presence || '-' %></td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">800m自由形</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['800m_fr'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['800m_fr_note'].presence || '-' %></td>
+            </tr>
+            
+            <!-- 平泳ぎ -->
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">50m平泳ぎ</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['50m_br'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['50m_br_note'].presence || '-' %></td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">100m平泳ぎ</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['100m_br'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['100m_br_note'].presence || '-' %></td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">200m平泳ぎ</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['200m_br'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['200m_br_note'].presence || '-' %></td>
+            </tr>
+            
+            <!-- 背泳ぎ -->
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">50m背泳ぎ</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['50m_ba'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['50m_ba_note'].presence || '-' %></td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">100m背泳ぎ</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['100m_ba'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['100m_ba_note'].presence || '-' %></td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">200m背泳ぎ</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['200m_ba'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['200m_ba_note'].presence || '-' %></td>
+            </tr>
+            
+            <!-- バタフライ -->
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">50mバタフライ</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['50m_fly'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['50m_fly_note'].presence || '-' %></td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">100mバタフライ</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['100m_fly'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['100m_fly_note'].presence || '-' %></td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">200mバタフライ</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['200m_fly'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['200m_fly_note'].presence || '-' %></td>
+            </tr>
+            
+            <!-- 個人メドレー -->
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">100m個人メドレー</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['100m_im'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['100m_im_note'].presence || '-' %></td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">200m個人メドレー</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['200m_im'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['200m_im_note'].presence || '-' %></td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">400m個人メドレー</td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['400m_im'].presence || '-' %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= @best_time_table['400m_im_note'].presence || '-' %></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+<% end %> 

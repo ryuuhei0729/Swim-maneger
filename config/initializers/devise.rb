@@ -14,7 +14,7 @@ Devise.setup do |config|
   # confirmation, reset password and unlock tokens in the database.
   # Devise will use the `secret_key_base` as its `secret_key`
   # by default. You can change it below and use your own secret key.
-  # config.secret_key = '7fd64b7eb44197fd20d10a79082368fdc36d6cdea21830752ac1223e17a8c0297773c9f3e3b370ab5ec21aa8d6ce7c03e2d9d279c04d64e456b39d18b5f53d52'
+  # config.secret_key = '5fe33b35a18629d9ce7aff47200b2aff34d7e28fc34ce534582983244498fcde8f3e58fd47b315bff8235be64caf5c7907b7f5c79c5135328d3395fe6ac3ed16'
 
   # ==> Controller configuration
   # Configure the parent class to the devise controllers.
@@ -65,21 +65,20 @@ Devise.setup do |config|
   # modifying a user and when used to authenticate or find a user. Default is :email.
   config.strip_whitespace_keys = [:email]
 
-  # Tell if authentication through request params is enabled. True by default.
+  # Tell if authentication through request.params is enabled. True by default.
   # It can be set to an array that will enable params authentication only for the
   # given strategies, for example, `config.params_authenticatable = [:database]` will
-  # enable params authentication only for database (email + password) authentication.
+  # enable it only for database (email + password) authentication.
   # config.params_authenticatable = true
 
   # Tell if authentication through HTTP Auth is enabled. False by default.
   # It can be set to an array that will enable http authentication only for the
   # given strategies, for example, `config.http_authenticatable = [:database]` will
-  # enable HTTP authentication only for database authentication. The supported
-  # strategies are:
+  # enable it only for database authentication.
+  # For API-only applications to support authentication "out-of-the-box", you will likely want to
+  # enable this with :database unless you are using a custom strategy.
+  # The supported strategies are:
   # :database      = Support basic authentication with authentication key + password
-  # :token         = Support basic authentication with token key + password
-  # :token_options = Support token authentication with options provided by token
-  #                 in request headers
   # config.http_authenticatable = false
 
   # If 401 status code should be returned for AJAX requests. True by default.
@@ -106,21 +105,28 @@ Devise.setup do |config|
   # from the server. You can disable this option at your own risk.
   # config.clean_up_csrf_token_on_authentication = true
 
-  # When false, Devise will not attempt to reload routes as eager_loaded.
+  # When false, Devise will not attempt to reload routes on eager load.
+  # This can reduce the time taken to boot the app but if your application
+  # requires the Devise mappings to be loaded during boot time the application
+  # won't boot properly.
   # config.reload_routes = true
 
   # ==> Configuration for :database_authenticatable
   # For bcrypt, this is the cost for hashing the password and defaults to 12. If
-  # using other algorithms, it sets how many times you want the password to be
-  # hashed. The number of stretches used for generating the password is
-  # calculated from the complexity required of your password and your password
-  # storage's stretch ability (e.g. bcrypt). The default cost is 12 and any
-  # value lower than 12 is considered as 'not secure'. You may want to increase
-  # this value to make the password more secure.
-  # config.stretches = Rails.env.test? ? 1 : 12
+  # using other algorithms, it sets how many times you want the password to be hashed.
+  # The number of stretches used for generating the hashed password are stored
+  # with the hashed password. This allows you to change the stretches without
+  # invalidating existing passwords.
+  #
+  # Limiting the stretches to just one in testing will increase the performance of
+  # your test suite dramatically. However, it is STRONGLY RECOMMENDED to not use
+  # a value less than 10 in other environments. Note that, for bcrypt (the default
+  # algorithm), the cost increases exponentially with the number of stretches (e.g.
+  # a value of 20 is already extremely slow: approx. 60 seconds for 1 calculation).
+  config.stretches = Rails.env.test? ? 1 : 12
 
   # Set up a pepper to generate the hashed password.
-  # config.pepper = '82b37b8c624613a6b1c89c02ea8374c36718d37486f6953ddcb2db939f371a55c97ba9e7e54b5dceaf659ace4dc9225d86fb1657ce3d9c9224772003b8f4403b'
+  # config.pepper = '5bd6b6833754cc96887bddc908bde2e09d2b1cf9022144d51343cbf478ef49f2e7c606a43eccf1c73b8a1db0bf3aea36813025c5ca44352cc01c683878b786eb'
 
   # Send a notification to the original email when the user's email is changed.
   # config.send_email_changed_notification = false
@@ -147,11 +153,10 @@ Devise.setup do |config|
   # before confirming their account.
   # config.confirm_within = 3.days
 
-  # If true, requires any email changes to be confirmed (exactly the same
-  # action as required for initial account confirmation) to be applied. Requires
-  # additional unconfirmed_email db field (see migrations). Until confirmed,
-  # new email is stored in an unconfirmed_email column, and copied to the
-  # email column on successful confirmation.
+  # If true, requires any email changes to be confirmed (exactly the same way as
+  # initial account confirmation) to be applied. Requires additional unconfirmed_email
+  # db field (see migrations). Until confirmed, new email is stored in
+  # unconfirmed_email column, and copied to email column on successful confirmation.
   config.reconfirmable = true
 
   # Defines which key will be used when confirming an account
@@ -217,8 +222,8 @@ Devise.setup do |config|
   # config.reset_password_keys = [:email]
 
   # Time interval you can reset your password with a reset password key.
-  # Don't put a too small value or your users won't have the time to
-  # their password.
+  # Don't put a too small interval or your users won't have the time to
+  # change their passwords.
   config.reset_password_within = 6.hours
 
   # When set to false, does not sign a user in automatically after their password is
@@ -229,7 +234,7 @@ Devise.setup do |config|
   # Allow you to use another hashing or encryption algorithm besides bcrypt (default).
   # You can use :sha1, :sha512 or algorithms from others authentication tools as
   # :clearance_sha1, :authlogic_sha512 (then you should set stretches above to 20
-  # for default values) and :restful_authentication_sha1 (then you should set
+  # for default behavior) and :restful_authentication_sha1 (then you should set
   # stretches to 10, and copy REST_AUTH_SITE_KEY to pepper).
   #
   # Require the `devise-encryptable` gem when using anything other than bcrypt
@@ -251,7 +256,7 @@ Devise.setup do |config|
 
   # ==> Navigation configuration
   # Lists the formats that should be treated as navigational. Formats like
-  # :html, should redirect to the sign in page when the user does not have
+  # :html should redirect to the sign in page when the user does not have
   # access, but formats like :xml or :json, should return 401.
   #
   # If you have any extra navigational formats, like :iphone or :mobile, you

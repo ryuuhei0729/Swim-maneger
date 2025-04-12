@@ -1,0 +1,95 @@
+ja:
+  hello: "こんにちは"
+  time:
+    formats:
+      default: "%Y年%m月%d日 %H時%M分"
+      short: "%m月%d日 %H時%M分"
+      long: "%Y年%m月%d日 %H時%M分%S秒"
+  date:
+    formats:
+      default: "%Y年%m月%d日"
+      short: "%m月%d日"
+      long: "%Y年%m月%d日"
+    day_names: [日曜日, 月曜日, 火曜日, 水曜日, 木曜日, 金曜日, 土曜日]
+    abbr_day_names: [日, 月, 火, 水, 木, 金, 土]
+    month_names: [~, 1月, 2月, 3月, 4月, 5月, 6月, 7月, 8月, 9月, 10月, 11月, 12月]
+    abbr_month_names: [~, 1月, 2月, 3月, 4月, 5月, 6月, 7月, 8月, 9月, 10月, 11月, 12月]
+    order: [年, 月, 日]
+  number:
+    currency:
+      format:
+        unit: "¥"
+        format: "%n%u"
+    format:
+      separator: ","
+      delimiter: ","
+      precision: 3
+      significant: false
+      strip_insignificant_zeros: false
+  support:
+    array:
+      last_word_connector: "、"
+      two_words_connector: "と"
+      words_connector: "、"
+  devise:
+    confirmations:
+      confirmed: "メールアドレスが正しく確認されました。"
+      send_instructions: "メールアドレスの確認方法を数分以内にメールでお送りします。"
+      send_paranoid_instructions: "メールアドレスが存在する場合、メールアドレスの確認方法を数分以内にメールでお送りします。"
+    failure:
+      already_authenticated: "すでにログインしています。"
+      inactive: "アカウントが有効化されていません。"
+      invalid: "メールアドレスまたはパスワードが違います。"
+      locked: "アカウントがロックされています。"
+      last_attempt: "アカウントがロックされる前に、あと1回試行できます。"
+      not_found_in_database: "メールアドレスまたはパスワードが違います。"
+      timeout: "セッションが終了しました。続けるには再度ログインしてください。"
+      unauthenticated: "ログインまたは登録が必要です。"
+      unconfirmed: "メールアドレスの確認が必要です。"
+    mailer:
+      confirmation_instructions:
+        subject: "メールアドレス確認メール"
+      reset_password_instructions:
+        subject: "パスワード再設定メール"
+      unlock_instructions:
+        subject: "アカウントロック解除メール"
+      email_changed:
+        subject: "メールアドレス変更のお知らせ"
+      password_change:
+        subject: "パスワード変更のお知らせ"
+    omniauth_callbacks:
+      failure: "%{kind}から認証できませんでした。理由: \"%{reason}\""
+      success: "%{kind}アカウントから認証しました。"
+    passwords:
+      no_token: "このページはパスワードリセットメールからアクセスしてください。パスワードリセットメールからアクセスした場合は、URLが正しいかご確認ください。"
+      send_instructions: "パスワードの再設定方法を数分以内にメールでお送りします。"
+      send_paranoid_instructions: "メールアドレスが存在する場合、パスワードの再設定方法を数分以内にメールでお送りします。"
+      updated: "パスワードを変更しました。ログインしました。"
+      updated_not_active: "パスワードを変更しました。"
+    registrations:
+      destroyed: "アカウントを削除しました。またのご利用をお待ちしております。"
+      signed_up: "ようこそ！アカウントが作成されました。"
+      signed_up_but_inactive: "アカウントは作成されましたが、まだ有効化されていないためログインできません。"
+      signed_up_but_locked: "アカウントは作成されましたが、ロックされているためログインできません。"
+      signed_up_but_unconfirmed: "確認メールを送信しました。メール内のリンクからアカウントを有効化してください。"
+      update_needs_confirmation: "アカウントを更新しましたが、新しいメールアドレスの確認が必要です。確認メールを確認し、新しいメールアドレスを有効化してください。"
+      updated: "アカウントを更新しました。"
+      updated_but_not_signed_in: "アカウントを更新しましたが、パスワードが変更されたため、再度ログインしてください。"
+    sessions:
+      signed_in: "ログインしました。"
+      signed_out: "ログアウトしました。"
+      already_signed_out: "ログアウトしました。"
+    unlocks:
+      send_instructions: "アカウントのロック解除方法を数分以内にメールでお送りします。"
+      send_paranoid_instructions: "アカウントが存在する場合、ロック解除方法を数分以内にメールでお送りします。"
+      unlocked: "アカウントのロックを解除しました。ログインしてください。"
+  errors:
+    messages:
+      already_confirmed: "は既に確認済みです。ログインしてください"
+      confirmation_period_expired: "は%{period}以内に確認する必要があります。新しくリクエストしてください"
+      expired: "の有効期限が切れています。新しくリクエストしてください"
+      not_found: "は見つかりませんでした"
+      not_locked: "はロックされていませんでした"
+      not_saved:
+        one: "1件のエラーが発生したため、%{resource}は保存されませんでした："
+        other: "%{count}件のエラーが発生したため、%{resource}は保存されませんでした：" 

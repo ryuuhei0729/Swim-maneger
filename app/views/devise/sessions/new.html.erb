@@ -1,7 +1,6 @@
-<div class="min-h-[80vh] flex items-center justify-center">
-  <div class="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg">
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow">
     <div>
-      <h1 class="text-center text-3xl font-bold text-gray-900">Swim Manager</h1>
       <h2 class="mt-4 text-center text-xl text-gray-600">ログイン</h2>
     </div>
 
@@ -9,34 +8,32 @@
       <div class="space-y-4 rounded-md">
         <div>
           <%= f.label :email, "メールアドレス", class: "block text-sm font-medium text-gray-700" %>
-          <div class="mt-1">
-            <%= f.email_field :email, autofocus: true, autocomplete: "email", 
-                class: "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
-          </div>
+          <%= f.email_field :email, autofocus: true, autocomplete: "email", class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3 px-3" %>
         </div>
 
         <div>
           <%= f.label :password, "パスワード", class: "block text-sm font-medium text-gray-700" %>
-          <div class="mt-1">
-            <%= f.password_field :password, autocomplete: "current-password",
-                class: "appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500" %>
-          </div>
+          <%= f.password_field :password, autocomplete: "current-password", class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm py-3 px-3" %>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mt-6">
+        <div class="flex items-center">
+          <%= f.check_box :remember_me, class: "h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" %>
+          <%= f.label :remember_me, "ログイン状態を保持", class: "ml-2 block text-sm text-gray-900" %>
         </div>
 
-        <% if devise_mapping.rememberable? %>
-          <div class="flex items-center">
-            <%= f.check_box :remember_me, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
-            <%= f.label :remember_me, "ログイン状態を保持する", class: "ml-2 block text-sm text-gray-900" %>
-          </div>
-        <% end %>
+        <div class="text-sm">
+          <%= link_to "パスワードをお忘れですか？", new_password_path(resource_name), class: "font-medium text-blue-600 hover:text-blue-700" %>
+        </div>
       </div>
 
       <div class="mt-6">
-        <%= f.submit "ログイン", class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        <%= f.submit "ログイン", class: "group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer" %>
       </div>
     <% end %>
 
-    <div class="mt-6 flex flex-col space-y-2">
+    <div class="text-center mt-6">
       <%= render "devise/shared/links" %>
     </div>
   </div>
