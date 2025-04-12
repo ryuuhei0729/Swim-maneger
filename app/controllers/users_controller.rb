@@ -1,22 +1,37 @@
 class UsersController < ApplicationController
+  before_action :authenticate_user_auth!
+  before_action :set_user, only: [:edit, :update]
+
   def new
     @user = User.new
   end
 
   def create
-    @user = User.new(user_params)
-    @user.user_type = 'member'  # デフォルト値を設定
-    @user.user_auth = UserAuth.find(session[:user_auth_id])
-
+    @user = current_user_auth.build_user(user_params)
     if @user.save
-      session.delete(:user_auth_id)
-      redirect_to root_path, notice: 'プロフィールの登録が完了しました'
+      redirect_to root_path, notice: 'プロフィールが作成されました。'
     else
       render :new, status: :unprocessable_entity
     end
   end
 
+  def edit
+  end
+
+  def update
+    if @user.update(user_params)
+      redirect_to mypage_path, notice: 'プロフィールが更新されました。'
+    else
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
   private
+
+  def set_user
+    @user = current_user
+    redirect_to root_path unless @user
+  end
 
   def user_params
     params.require(:user).permit(:name, :generation, :gender, :birthday, :profile_image_url, :bio)
