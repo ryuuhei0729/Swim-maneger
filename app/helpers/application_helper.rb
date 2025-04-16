@@ -1,12 +1,16 @@
 module ApplicationHelper
   def ordinal_suffix(number)
-    return 'th' if [11, 12, 13].include?(number % 100)
+    return "" if number.nil?
     
-    case number % 10
-    when 1 then 'st'
-    when 2 then 'nd'
-    when 3 then 'rd'
-    else 'th'
+    if (11..13).include?(number % 100)
+      "th"
+    else
+      case number % 10
+      when 1 then "st"
+      when 2 then "nd"
+      when 3 then "rd"
+      else "th"
+      end
     end
   end
-end
+end 
