@@ -92,4 +92,54 @@ ja:
       not_locked: "はロックされていませんでした"
       not_saved:
         one: "1件のエラーが発生したため、%{resource}は保存されませんでした："
-        other: "%{count}件のエラーが発生したため、%{resource}は保存されませんでした：" 
+        other: "%{count}件のエラーが発生したため、%{resource}は保存されませんでした："
+  activerecord:
+    errors:
+      messages:
+        record_invalid: "バリデーションエラーが発生しました: %{errors}"
+        restrict_dependent_destroy:
+          has_one: "他の%{record}が依存しているため、削除できません"
+          has_many: "他の%{record}が依存しているため、削除できません"
+        taken: "はすでに存在します"
+        inclusion: "は一覧にありません"
+    models:
+      user: ユーザー
+      user_auth: ユーザー認証
+      best_time_table: ベストタイム
+    attributes:
+      user:
+        name: 名前
+        generation: 期生
+        gender: 性別
+        birthday: 生年月日
+        user_type: ユーザータイプ
+        bio: 自己紹介
+        profile_image_url: プロフィール画像
+      user_auth:
+        email: メールアドレス
+        password: パスワード
+        password_confirmation: パスワード（確認）
+      best_time_table:
+        50m_fr: 50m自由形
+        100m_fr: 100m自由形
+        200m_fr: 200m自由形
+        400m_fr: 400m自由形
+        800m_fr: 800m自由形
+        50m_br: 50m平泳ぎ
+        100m_br: 100m平泳ぎ
+        200m_br: 200m平泳ぎ
+        50m_ba: 50m背泳ぎ
+        100m_ba: 100m背泳ぎ
+        200m_ba: 200m背泳ぎ
+        50m_fly: 50mバタフライ
+        100m_fly: 100mバタフライ
+        200m_fly: 200mバタフライ
+        100m_im: 100m個人メドレー
+        200m_im: 200m個人メドレー
+        400m_im: 400m個人メドレー
+    enums:
+      user:
+        user_type:
+          player: 選手
+          coach: コーチ
+          director: 顧問、外部指導員

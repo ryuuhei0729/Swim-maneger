@@ -12,13 +12,13 @@ class User < ApplicationRecord
 
   # ユーザータイプの定数
   USER_TYPES = {
-    member: 'member',
+    player: 'player',
     coach: 'coach',
-    supervisor: 'supervisor'
+    director: 'director'
   }.freeze
 
   # 管理者権限を持つユーザータイプ
-  ADMIN_TYPES = [USER_TYPES[:coach], USER_TYPES[:supervisor]].freeze
+  ADMIN_TYPES = [USER_TYPES[:coach], USER_TYPES[:director]].freeze
 
   # ユーザーが管理者かどうかを判定するメソッド
   def admin?

@@ -1,0 +1,245 @@
+<% content_for :title, 'メンバー一覧' %>
+
+<div class="bg-white shadow rounded-lg p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold text-gray-900">メンバー一覧</h2>
+    <div class="flex space-x-4">
+      <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" data-action="click->group#toggle" data-group-target="default">
+        デフォルト
+      </button>
+      <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" data-action="click->group#toggle" data-group-target="generation">
+        期数別
+      </button>
+      <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" data-action="click->group#toggle" data-group-target="type">
+        種別別
+      </button>
+    </div>
+  </div>
+  
+  <div class="overflow-x-auto">
+    <!-- デフォルト表示 -->
+    <div id="default-view" data-group-view="default">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">プロフィール</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名前</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">期数</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">種別</th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">生年月日</th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <% @users.each do |user| %>
+            <tr class="hover:bg-gray-50 cursor-pointer" data-action="click->modal#open" data-modal-target="user-modal-<%= user.id %>">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex-shrink-0">
+                  <% if user.profile_image_url.present? %>
+                    <img src="<%= user.profile_image_url %>" alt="<%= user.name %>のプロフィール画像" class="w-10 h-10 rounded-full">
+                  <% else %>
+                    <div class="w-10 h-10 rounded-full bg-blue-800 flex items-center justify-center">
+                      <span class="text-white text-sm"><%= user.name[0] %></span>
+                    </div>
+                  <% end %>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <span class="text-blue-800 font-medium"><%= user.name %></span>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-gray-600">
+                <%= user.generation %><%= ordinal_suffix(user.generation) %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                <%= user.user_type %>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                <%= user.birthday.strftime('%Y年%m月%d日') %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 期数別表示 -->
+    <div id="generation-view" class="hidden" data-group-view="generation">
+      <% @grouped_by_generation.each do |generation, users| %>
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            <%= generation %><%= ordinal_suffix(generation) %>
+          </h3>
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">プロフィール</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名前</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">種別</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">生年月日</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <% users.each do |user| %>
+                <tr class="hover:bg-gray-50 cursor-pointer" data-action="click->modal#open" data-modal-target="user-modal-<%= user.id %>">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex-shrink-0">
+                      <% if user.profile_image_url.present? %>
+                        <img src="<%= user.profile_image_url %>" alt="<%= user.name %>のプロフィール画像" class="w-10 h-10 rounded-full">
+                      <% else %>
+                        <div class="w-10 h-10 rounded-full bg-blue-800 flex items-center justify-center">
+                          <span class="text-white text-sm"><%= user.name[0] %></span>
+                        </div>
+                      <% end %>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-blue-800 font-medium"><%= user.name %></span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                    <%= user.user_type %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                    <%= user.birthday.strftime('%Y年%m月%d日') %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- 種別別表示 -->
+    <div id="type-view" class="hidden" data-group-view="type">
+      <% @grouped_by_type.each do |user_type, users| %>
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">
+            <%= user_type %>
+          </h3>
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">プロフィール</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名前</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">期数</th>
+                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">生年月日</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <% users.each do |user| %>
+                <tr class="hover:bg-gray-50 cursor-pointer" data-action="click->modal#open" data-modal-target="user-modal-<%= user.id %>">
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex-shrink-0">
+                      <% if user.profile_image_url.present? %>
+                        <img src="<%= user.profile_image_url %>" alt="<%= user.name %>のプロフィール画像" class="w-10 h-10 rounded-full">
+                      <% else %>
+                        <div class="w-10 h-10 rounded-full bg-blue-800 flex items-center justify-center">
+                          <span class="text-white text-sm"><%= user.name[0] %></span>
+                        </div>
+                      <% end %>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-blue-800 font-medium"><%= user.name %></span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-gray-600">
+                    <%= user.generation %><%= ordinal_suffix(user.generation) %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                    <%= user.birthday.strftime('%Y年%m月%d日') %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+          </table>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<!-- ユーザー詳細モーダル -->
+<% @users.each do |user| %>
+  <div id="user-modal-<%= user.id %>" class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden" data-modal-target="modal">
+    <div class="flex items-center justify-center min-h-screen p-4">
+      <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full">
+        <div class="p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-2xl font-bold text-gray-900"><%= user.name %>の詳細情報</h3>
+            <button type="button" class="text-gray-400 hover:text-gray-500" data-action="click->modal#close">
+              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          <div class="space-y-4">
+            <div class="flex items-center space-x-4">
+              <div class="flex-shrink-0">
+                <% if user.profile_image_url.present? %>
+                  <img src="<%= user.profile_image_url %>" alt="<%= user.name %>のプロフィール画像" class="w-24 h-24 rounded-full">
+                <% else %>
+                  <div class="w-24 h-24 rounded-full bg-blue-800 flex items-center justify-center">
+                    <span class="text-white text-3xl"><%= user.name[0] %></span>
+                  </div>
+                <% end %>
+              </div>
+              <div>
+                <p class="text-gray-600"><%= user.generation %><%= ordinal_suffix(user.generation) %></p>
+                <p class="text-gray-500"><%= user.user_type %></p>
+                <p class="text-gray-500"><%= user.birthday.strftime('%Y年%m月%d日') %></p>
+              </div>
+            </div>
+
+            <% if user.bio.present? %>
+              <div class="mt-4">
+                <h4 class="text-lg font-semibold text-gray-900 mb-2">自己紹介</h4>
+                <p class="text-gray-700 whitespace-pre-wrap"><%= user.bio %></p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<% end %>
+
+<!-- モーダル用のJavaScript -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const modalController = {
+      open(event) {
+        const modalId = event.currentTarget.dataset.modalTarget;
+        const modal = document.getElementById(modalId);
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      },
+      close(event) {
+        const modal = event.currentTarget.closest('[data-modal-target="modal"]');
+        modal.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    };
+
+    const groupController = {
+      toggle(event) {
+        const target = event.currentTarget.dataset.groupTarget;
+        document.querySelectorAll('[data-group-view]').forEach(view => {
+          view.classList.add('hidden');
+        });
+        document.getElementById(`${target}-view`).classList.remove('hidden');
+      }
+    };
+
+    document.querySelectorAll('[data-action="click->modal#open"]').forEach(button => {
+      button.addEventListener('click', modalController.open);
+    });
+
+    document.querySelectorAll('[data-action="click->modal#close"]').forEach(button => {
+      button.addEventListener('click', modalController.close);
+    });
+
+    document.querySelectorAll('[data-action="click->group#toggle"]').forEach(button => {
+      button.addEventListener('click', groupController.toggle);
+    });
+  });
+</script> 

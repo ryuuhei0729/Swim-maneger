@@ -4,5 +4,6 @@ class MypageController < ApplicationController
   def index
     @user = current_user_auth.user
     @best_time_table = @user.best_time_table || @user.create_best_time_table
+    @users = User.all
   end
 end

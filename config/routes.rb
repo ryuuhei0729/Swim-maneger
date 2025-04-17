@@ -9,7 +9,5 @@ Rails.application.routes.draw do
   get 'home', to: 'home#index', as: :home
   get 'mypage', to: 'mypage#index', as: :mypage
   
-  devise_for :users
-
-
+  get 'member', to: 'member#index', as: :member
 end
