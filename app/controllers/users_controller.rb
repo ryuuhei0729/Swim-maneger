@@ -11,10 +11,6 @@ class UsersController < ApplicationController
   end
 
   def create
-    @user = User.new
-  end
-
-  def update
     @user = User.new(user_params)
     @user.user_type = 'member' # デフォルトでmemberを設定
     @user.user_auth = current_user_auth
@@ -44,7 +40,7 @@ class UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:name, :generation, :gender, :birthday, :profile_image_url, :bio)
+    params.require(:user).permit(:name, :generation, :gender, :birthday, :profile_image_url, :bio, :user_type)
   end
 
   def resource_name
