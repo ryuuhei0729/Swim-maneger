@@ -1,4 +1,4 @@
-<% content_for :title, 'メンバー一覧' %>
+<% content_for :title, 'Member' %>
 
 <div class="bg-white shadow rounded-lg p-6">
   <div class="flex items-center justify-between mb-6">
@@ -50,7 +50,7 @@
                 <%= user.generation %><%= ordinal_suffix(user.generation) %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-gray-500">
-                <%= user.user_type %>
+                <%= user.user_type == 'director' ? '監督/顧問' : (user.user_type == 'coach' ? 'コーチ' : '選手') %>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-gray-500">
                 <%= user.birthday.strftime('%Y年%m月%d日') %>
@@ -95,7 +95,7 @@
                     <span class="text-blue-800 font-medium"><%= user.name %></span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-gray-500">
-                    <%= user.user_type %>
+                    <%= user.user_type == 'director' ? '監督/顧問' : (user.user_type == 'coach' ? 'コーチ' : '選手') %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-gray-500">
                     <%= user.birthday.strftime('%Y年%m月%d日') %>
@@ -113,7 +113,7 @@
       <% @grouped_by_type.each do |user_type, users| %>
         <div class="mb-8">
           <h3 class="text-lg font-semibold text-gray-900 mb-4">
-            <%= user_type %>
+            <%= user_type == 'director' ? '監督/顧問' : (user_type == 'coach' ? 'コーチ' : '選手') %>
           </h3>
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -143,6 +143,9 @@
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-gray-600">
                     <%= user.generation %><%= ordinal_suffix(user.generation) %>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                    <%= user.user_type == 'director' ? '監督/顧問' : (user.user_type == 'coach' ? 'コーチ' : '選手') %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-gray-500">
                     <%= user.birthday.strftime('%Y年%m月%d日') %>

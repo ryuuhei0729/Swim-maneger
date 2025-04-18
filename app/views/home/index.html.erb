@@ -12,53 +12,35 @@
 
     <div class="p-6">
       <div class="space-y-6">
-        <!-- お知らせアイテム1 -->
-        <div class="border-l-4 border-blue-500 pl-4 py-2">
-          <div class="flex items-start">
-            <div class="flex-shrink-0 mt-1">
-              <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+        <% if @announcements.any? %>
+          <% @announcements.each do |announcement| %>
+            <div class="border-l-4 border-blue-500 pl-4 py-2">
+              <div class="flex items-start">
+                <div class="flex-shrink-0 mt-1">
+                  <svg class="h-5 w-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div class="ml-3">
+                  <h3 class="text-lg font-medium text-gray-900 flex items-center">
+                    <%= announcement.title %>
+                    <% if announcement.published_at >= 3.days.ago %>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 ml-2">
+                        New!!
+                      </span>
+                    <% end %>
+                  </h3>
+                  <p class="mt-1 text-gray-600"><%= announcement.content %></p>
+                  <p class="mt-1 text-sm text-gray-500"><%= announcement.published_at.strftime("%Y/%m/%d (#{%w(日 月 火 水 木 金 土)[announcement.published_at.wday]}) %H:%M") %> 更新</p>
+                </div>
+              </div>
             </div>
-            <div class="ml-3">
-              <h3 class="text-lg font-medium text-gray-900">新機能のお知らせ</h3>
-              <p class="mt-1 text-gray-600">自己紹介文の編集機能が追加されました。マイページから編集できます。</p>
-              <p class="mt-1 text-sm text-gray-500">2023年6月15日</p>
-            </div>
+          <% end %>
+        <% else %>
+          <div class="text-center py-4">
+            <p class="text-gray-500">現在、お知らせはありません。</p>
           </div>
-        </div>
-
-        <!-- お知らせアイテム2 -->
-        <div class="border-l-4 border-green-500 pl-4 py-2">
-          <div class="flex items-start">
-            <div class="flex-shrink-0 mt-1">
-              <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div class="ml-3">
-              <h3 class="text-lg font-medium text-gray-900">夏合宿のお知らせ</h3>
-              <p class="mt-1 text-gray-600">8月15日〜17日に夏合宿を予定しています。詳細は後日お知らせします。</p>
-              <p class="mt-1 text-sm text-gray-500">2023年6月10日</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- お知らせアイテム3 -->
-        <div class="border-l-4 border-yellow-500 pl-4 py-2">
-          <div class="flex items-start">
-            <div class="flex-shrink-0 mt-1">
-              <svg class="h-5 w-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <div class="ml-3">
-              <h3 class="text-lg font-medium text-gray-900">システムメンテナンスのお知らせ</h3>
-              <p class="mt-1 text-gray-600">6月20日 22:00〜23:00にシステムメンテナンスを実施します。ご不便をおかけしますが、ご理解ください。</p>
-              <p class="mt-1 text-sm text-gray-500">2023年6月5日</p>
-            </div>
-          </div>
-        </div>
+        <% end %>
       </div>
     </div>
   </div>

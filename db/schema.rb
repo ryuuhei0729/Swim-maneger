@@ -10,9 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_16_110910) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_18_110626) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "announcements", force: :cascade do |t|
+    t.string "title", null: false
+    t.text "content", null: false
+    t.boolean "is_active", default: true, null: false
+    t.datetime "published_at", default: -> { "CURRENT_TIMESTAMP" }, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["is_active"], name: "index_announcements_on_is_active"
+    t.index ["published_at"], name: "index_announcements_on_published_at"
+  end
 
   create_table "best_time_tables", force: :cascade do |t|
     t.bigint "user_id", null: false

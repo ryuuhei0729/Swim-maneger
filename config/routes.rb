@@ -15,4 +15,11 @@ Rails.application.routes.draw do
   get 'admin', to: 'admin#index', as: :admin
   get 'admin/create_user', to: 'admin#create_user', as: 'admin_create_user'
   post 'admin/users', to: 'admin#create_user', as: 'admin_users'
+  patch 'admin/users', to: 'admin#create_user'
+  
+  # お知らせ管理機能のルーティング
+  get 'admin/announcement', to: 'admin#announcement', as: 'admin_announcement'
+  post 'admin/announcement', to: 'admin#create_announcement'
+  patch 'admin/announcement/:id', to: 'admin#update_announcement', as: 'admin_update_announcement'
+  delete 'admin/announcement/:id', to: 'admin#destroy_announcement', as: 'admin_destroy_announcement'
 end

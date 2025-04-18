@@ -93,6 +93,48 @@ ja:
       not_saved:
         one: "1件のエラーが発生したため、%{resource}は保存されませんでした："
         other: "%{count}件のエラーが発生したため、%{resource}は保存されませんでした："
+      blank: "を入力してください"
+      taken: "はすでに存在します"
+      invalid: "は正しい形式で入力してください"
+      too_short: "は%{count}文字以上で入力してください"
+      too_long: "は%{count}文字以下で入力してください"
+      not_a_number: "は数値で入力してください"
+      confirmation: "は%{attribute}と一致しません"
+      inclusion: "は無効な値です"
+    models:
+      user:
+        attributes:
+          name:
+            blank: 名前を入力してください
+          email:
+            blank: メールアドレスを入力してください
+            taken: このメールアドレスはすでに使用されています
+            invalid: 正しいメールアドレスを入力してください
+          password:
+            blank: パスワードを入力してください
+            too_short: パスワードは%{count}文字以上で入力してください
+            confirmation: パスワード（確認）はパスワードと一致しません
+          user_type:
+            blank: ユーザータイプを選択してください
+            inclusion: 無効なユーザータイプです
+          generation:
+            blank: 期数を入力してください
+            not_a_number: 期数は数値で入力してください
+          gender:
+            blank: 性別を選択してください
+            inclusion: 無効な性別です
+          birthday:
+            blank: 生年月日を入力してください
+      user_auth:
+        attributes:
+          email:
+            blank: メールアドレスを入力してください
+            taken: このメールアドレスはすでに使用されています
+            invalid: 正しいメールアドレスを入力してください
+          password:
+            blank: パスワードを入力してください
+            too_short: パスワードは%{count}文字以上で入力してください
+            confirmation: パスワード（確認）はパスワードと一致しません
   activerecord:
     errors:
       messages:
@@ -102,6 +144,12 @@ ja:
           has_many: "他の%{record}が依存しているため、削除できません"
         taken: "はすでに存在します"
         inclusion: "は一覧にありません"
+        blank: "を入力してください"
+        invalid: "は正しい形式で入力してください"
+        too_short: "は%{count}文字以上で入力してください"
+        too_long: "は%{count}文字以下で入力してください"
+        not_a_number: "は数値で入力してください"
+        confirmation: "は%{attribute}と一致しません"
     models:
       user: ユーザー
       user_auth: ユーザー認証
@@ -109,10 +157,13 @@ ja:
     attributes:
       user:
         name: 名前
-        generation: 期生
+        email: メールアドレス
+        password: パスワード
+        password_confirmation: パスワード（確認）
+        user_type: ユーザータイプ
+        generation: 期数
         gender: 性別
         birthday: 生年月日
-        user_type: ユーザータイプ
         bio: 自己紹介
         profile_image_url: プロフィール画像
       user_auth:
