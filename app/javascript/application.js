@@ -3,11 +3,15 @@ import "@hotwired/turbo-rails"
 import { Application } from "@hotwired/stimulus"
 
 // Stimulusアプリケーションの設定
+import CalendarController from "./controllers/calendar_controller"
 const application = Application.start()
-application.debug = false
-window.Stimulus = application
+application.register("calendar", CalendarController)
+application.debug = true
+
+// コントローラーの読み込み
+import "./controllers"
 
 export { application }
 
-// コントローラーの読み込み
-import "./index"
+
+

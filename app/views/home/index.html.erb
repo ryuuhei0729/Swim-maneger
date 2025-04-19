@@ -46,20 +46,10 @@
   </div>
 
   <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-    <div class="flex items-center justify-between p-6 bg-gradient-to-r bg-blue-800">
-      <h2 class="text-2xl font-bold text-white">練習カレンダー</h2>
-    </div>
+      <h2 class="text-2xl font-bold ">練習カレンダー</h2>
 
-    <div class="p-0">
-      <div class="w-full">
-        <iframe 
-          src="https://calendar.google.com/calendar/embed?height=600&wkst=1&ctz=Asia%2FTokyo&showPrint=0&showTz=0&showCalendars=0&showTabs=0&showTitle=0&src=a29pc2hpa2F3YS5zd2ltbWluZy50ZWFtQGdtYWlsLmNvbQ&src=amEuamFwYW5lc2UjaG9saWRheUBncm91cC52LmNhbGVuZGFyLmdvb2dsZS5jb20&color=%23039BE5&color=%230B8043" 
-          class="w-full" 
-          height="600" 
-          frameborder="0" 
-          scrolling="no">
-        </iframe>
-      </div>
-    </div>
+    <% @current_month = Date.current %>
+    <% @events_by_date = AttendanceEvent.all.order(date: :asc).group_by { |event| event.date } %>
+    <%= render 'shared/calendar' %>
   </div>
 </div>

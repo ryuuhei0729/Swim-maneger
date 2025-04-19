@@ -33,6 +33,8 @@ UserAuth.destroy_all
 User.destroy_all
 BestTimeTable.destroy_all
 Announcement.destroy_all
+AttendanceEvent.destroy_all
+Attendance.destroy_all
 
 # ユーザー作成
 puts "Creating users..."
@@ -158,3 +160,81 @@ end
 puts "テストデータの作成が完了しました。"
 puts "作成されたユーザー数: #{User.count}"
 puts "作成されたベストタイム数: #{BestTimeTable.count}"
+
+# ユーザーが既に存在することを前提とします
+
+# 出席イベントの作成
+puts "出席イベントを作成中..."
+
+# 今月と来月の日付を生成
+current_month_dates = (Date.current.beginning_of_month..Date.current.end_of_month).to_a
+next_month_dates = (Date.current.next_month.beginning_of_month..Date.current.next_month.end_of_month).to_a
+
+# タイトル
+title = ["朝練", "午前練", "午後練", "大会"]
+
+
+# 今月のイベント作成
+current_month_dates.each do |date|
+  # 平日は朝練と夕練
+  if (1..5).include?(date.wday)
+    # 午前練
+    event = AttendanceEvent.create!(
+      title: "午前練",
+      date: date,
+      note: "午前の練習です。全体練習を行います。"
+    )
+    
+    # 午後練
+    event = AttendanceEvent.create!(
+      title: "午後練",
+      date: date,
+      note: "午後の練習です。種目別練習を行います。"
+    )
+  end
+
+  # 土曜日は休日練習
+  if date.saturday?
+    event = AttendanceEvent.create!(
+      title: "休日練習",
+      date: date,
+      note: "休日の特別練習です。"
+    )
+  end
+end
+
+# 大会を2つ作成
+[current_month_dates[10], next_month_dates[5]].each do |date|
+  event = AttendanceEvent.create!(
+    title: "県大会",
+    date: date,
+    note: "県大会です。全員参加必須です。"
+  )
+end
+
+puts "出席イベントの作成が完了しました"
+
+# 出席データの作成
+puts "出席データを作成中..."
+
+# プレイヤーユーザーを取得
+players = User.where(user_type: 'player')
+
+AttendanceEvent.all.each do |event|
+  # ランダムな数のプレイヤーを選択（50%〜90%が出席）
+  attending_players = players.sample(rand((players.count * 0.5)..(players.count * 0.9)))
+  
+  attending_players.each do |player|
+    # 出席ステータスをランダムに設定
+    status = ["present", "absent", "late"].sample
+    
+    Attendance.create!(
+      user: player,
+      attendance_event: event,
+      status: status,
+      comment: status == "absent" ? "欠席" : nil
+    )
+  end
+end
+
+puts "出席データの作成が完了しました"

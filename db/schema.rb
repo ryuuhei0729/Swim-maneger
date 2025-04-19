@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_04_19_051608) do
+ActiveRecord::Schema[8.0].define(version: 2025_04_19_110027) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -51,6 +51,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_19_051608) do
     t.datetime "updated_at", null: false
     t.index ["is_active"], name: "index_announcements_on_is_active"
     t.index ["published_at"], name: "index_announcements_on_published_at"
+  end
+
+  create_table "attendance_events", force: :cascade do |t|
+    t.string "title"
+    t.date "date"
+    t.text "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "attendances", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "attendance_event_id", null: false
+    t.string "status"
+    t.text "comment"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["attendance_event_id"], name: "index_attendances_on_attendance_event_id"
+    t.index ["user_id"], name: "index_attendances_on_user_id"
   end
 
   create_table "best_time_tables", force: :cascade do |t|
@@ -121,6 +140,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_19_051608) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "attendances", "attendance_events"
+  add_foreign_key "attendances", "users"
   add_foreign_key "best_time_tables", "users"
   add_foreign_key "user_auths", "users"
 end

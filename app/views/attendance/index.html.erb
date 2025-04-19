@@ -8,14 +8,14 @@
   <div class="overflow-x-auto">
     <!-- カレンダー表示部分 -->
     <div class="mb-8">
-      <div class="bg-white rounded-lg shadow p-4">
+      <div class="bg-white rounded-lg shadow p-4" data-controller="calendar">
         <div class="flex justify-between items-center mb-4">
           <h3 class="text-lg font-semibold text-gray-900"><%= Time.current.strftime('%Y年%m月') %></h3>
           <div class="flex space-x-2">
-            <button type="button" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+            <button type="button" data-action="calendar#prevMonth" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
               前月
             </button>
-            <button type="button" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
+            <button type="button" data-action="calendar#nextMonth" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
               次月
             </button>
           </div>

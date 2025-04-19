@@ -49,4 +49,6 @@ Rails.application.routes.draw do
 
   # 存在しないURLへのアクセスを404ページにリダイレクト
   match '*path', to: 'errors#not_found', via: :all
+
+  post 'calendar/update', to: 'calendar#update'
 end
