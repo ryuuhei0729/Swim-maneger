@@ -63,25 +63,3 @@
     </div>
   </div>
 </div>
-
-<script>
-const userMenuButton = document.getElementById('userMenuButton');
-const userMenu = document.getElementById('userMenu');
-
-if (userMenuButton && userMenu) {
-  let isMenuOpen = false;
-
-  userMenuButton.addEventListener('click', () => {
-    isMenuOpen = !isMenuOpen;
-    userMenu.classList.toggle('hidden');
-  });
-
-  // メニュー外クリックで閉じる
-  document.addEventListener('click', (event) => {
-    if (!userMenuButton.contains(event.target) && !userMenu.contains(event.target)) {
-      isMenuOpen = false;
-      userMenu.classList.add('hidden');
-    }
-  });
-}
-</script>
