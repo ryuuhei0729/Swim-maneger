@@ -12,6 +12,7 @@ class AdminController < ApplicationController
       
       User.transaction do
         if @user.save && @user_auth.save
+          @user_auth.update(user: @user)
           redirect_to admin_path, notice: 'ユーザーを作成しました。'
         else
           if @user_auth.errors.any?
@@ -83,7 +84,12 @@ class AdminController < ApplicationController
   end
 
   def user_auth_params
-    params.require(:user_auth).permit(:email, :password, :password_confirmation)
+    if params[:user_auth].present?
+      params.require(:user_auth).permit(:email, :password, :password_confirmation)
+    else
+      # フォームからuser_authパラメータが送信されていない場合、userパラメータから取得
+      params.require(:user).permit(:email, :password, :password_confirmation)
+    end
   end
 
   def announcement_params

@@ -29,4 +29,12 @@ Rails.application.routes.draw do
   patch 'admin/announcement/:id', to: 'admin#update_announcement', as: 'admin_update_announcement'
   get 'admin/announcement', to: 'admin#announcement', as: 'admin_announcement'
   post 'admin/announcement', to: 'admin#create_announcement'
+
+  # エラーページ
+  match '/404', to: 'errors#not_found', via: :all
+  match '/500', to: 'errors#internal_server_error', via: :all
+  match '/422', to: 'errors#unprocessable_entity', via: :all
+
+  # 存在しないURLへのアクセスを404ページにリダイレクト
+  match '*path', to: 'errors#not_found', via: :all
 end

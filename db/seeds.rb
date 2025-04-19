@@ -32,6 +32,7 @@ puts "データベースをクリアしています..."
 UserAuth.destroy_all
 User.destroy_all
 BestTimeTable.destroy_all
+Announcement.destroy_all
 
 # ユーザー作成
 puts "Creating users..."
@@ -45,7 +46,6 @@ puts "Creating users..."
     birthday: Date.today - rand(30..50).years,
     user_type: 'director',
     bio: "ディレクター#{i+1}の自己紹介文です。",
-    profile_image_url: "https://ui-avatars.com/api/?name=ディレクター#{i+1}&background=0D8ABC&color=fff"
   )
   
   # UserAuthの作成と紐付け
@@ -68,7 +68,6 @@ end
     birthday: Date.today - rand(25..45).years,
     user_type: 'coach',
     bio: "コーチ#{i+1}の自己紹介文です。",
-    profile_image_url: "https://ui-avatars.com/api/?name=コーチ#{i+1}&background=0D8ABC&color=fff"
   )
   
   # UserAuthの作成と紐付け
@@ -91,7 +90,6 @@ end
     birthday: Date.today - rand(18..30).years,
     user_type: 'player',
     bio: "プレイヤー#{i+1}の自己紹介文です。",
-    profile_image_url: "https://ui-avatars.com/api/?name=プレイヤー#{i+1}&background=0D8ABC&color=fff"
   )
   
   # UserAuthの作成と紐付け

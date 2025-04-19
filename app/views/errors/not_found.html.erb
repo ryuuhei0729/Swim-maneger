@@ -1,0 +1,14 @@
+<% content_for :title, 'ページが見つかりません' %>
+
+<div class="min-h-screen bg-gray-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+  <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+    <div class="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+      <div class="text-center">
+        <h1 class="text-4xl font-bold text-gray-900 mb-4">404</h1>
+        <p class="text-xl text-gray-600 mb-8">ページが見つかりませんでした</p>
+        <p class="text-gray-500 mb-8">お探しのページは存在しないか、移動した可能性があります。</p>
+        <%= link_to "ホームに戻る", root_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+      </div>
+    </div>
+  </div>
+</div> 
