@@ -20,7 +20,7 @@ class Announcement < ApplicationRecord
   end
   
   def published_at_must_be_future
-    if published_at.present? && published_at < Time.current
+    if published_at.present? && published_at.beginning_of_minute < Time.current.beginning_of_minute
       errors.add(:published_at, "は現在日時以降を指定してください")
     end
   end
