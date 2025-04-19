@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   get 'mypage', to: 'mypage#index', as: :mypage
   patch 'mypage', to: 'mypage#update'
   get 'member', to: 'member#index', as: :member
+  get 'attendance', to: 'attendance#index', as: :attendance
 
   # 管理者のみのページ
   get 'admin', to: 'admin#index', as: :admin
