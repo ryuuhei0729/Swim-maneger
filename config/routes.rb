@@ -9,6 +9,17 @@ Rails.application.routes.draw do
     sessions: 'user_auths/sessions'
   }
 
+  # Active Storageのルート
+  scope '/rails/active_storage' do
+    get '/blobs/redirect/:signed_id/*filename' => 'active_storage/blobs/redirect#show'
+    get '/representations/redirect/:signed_blob_id/:variation_key/*filename' => 'active_storage/representations/redirect#show'
+    get '/blobs/proxy/:signed_id/*filename' => 'active_storage/blobs/proxy#show'
+    get '/representations/proxy/:signed_blob_id/:variation_key/*filename' => 'active_storage/representations/proxy#show'
+    get '/blobs/:signed_id/*filename' => 'active_storage/blobs/redirect#show'
+    get '/representations/:signed_blob_id/:variation_key/*filename' => 'active_storage/representations/redirect#show'
+    get '/disk/:encoded_key/*filename' => 'active_storage/disk#show'
+  end
+
   # 全員見れるページ
   get 'home', to: 'home#index', as: :home
   get 'mypage', to: 'mypage#index', as: :mypage

@@ -34,10 +34,10 @@
             <tr class="hover:bg-gray-50 cursor-pointer" data-action="click->modal#open" data-modal-target="user-modal-<%= user.id %>">
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="flex-shrink-0">
-                  <% if user.profile_image_url.present? %>
-                    <img src="<%= user.profile_image_url %>" alt="<%= user.name %>のプロフィール画像" class="w-10 h-10 rounded-full">
+                  <% if user.avatar.attached? %>
+                    <%= image_tag url_for(user.avatar), alt: "#{user.name}のプロフィール画像", class: "w-16 h-16 rounded-full" %>
                   <% else %>
-                    <div class="w-10 h-10 rounded-full bg-blue-800 flex items-center justify-center">
+                    <div class="w-16 h-16 rounded-full bg-blue-800 flex items-center justify-center">
                       <span class="text-white text-sm"><%= user.name[0] %></span>
                     </div>
                   <% end %>
@@ -82,10 +82,10 @@
                 <tr class="hover:bg-gray-50 cursor-pointer" data-action="click->modal#open" data-modal-target="user-modal-<%= user.id %>">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex-shrink-0">
-                      <% if user.profile_image_url.present? %>
-                        <img src="<%= user.profile_image_url %>" alt="<%= user.name %>のプロフィール画像" class="w-10 h-10 rounded-full">
+                      <% if user.avatar.attached? %>
+                        <%= image_tag url_for(user.avatar), alt: "#{user.name}のプロフィール画像", class: "w-16 h-16 rounded-full" %>
                       <% else %>
-                        <div class="w-10 h-10 rounded-full bg-blue-800 flex items-center justify-center">
+                        <div class="w-16 h-16 rounded-full bg-blue-800 flex items-center justify-center">
                           <span class="text-white text-sm"><%= user.name[0] %></span>
                         </div>
                       <% end %>
@@ -129,10 +129,10 @@
                 <tr class="hover:bg-gray-50 cursor-pointer" data-action="click->modal#open" data-modal-target="user-modal-<%= user.id %>">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex-shrink-0">
-                      <% if user.profile_image_url.present? %>
-                        <img src="<%= user.profile_image_url %>" alt="<%= user.name %>のプロフィール画像" class="w-10 h-10 rounded-full">
+                      <% if user.avatar.attached? %>
+                        <%= image_tag url_for(user.avatar), alt: "#{user.name}のプロフィール画像", class: "w-16 h-16 rounded-full" %>
                       <% else %>
-                        <div class="w-10 h-10 rounded-full bg-blue-800 flex items-center justify-center">
+                        <div class="w-16 h-16 rounded-full bg-blue-800 flex items-center justify-center">
                           <span class="text-white text-sm"><%= user.name[0] %></span>
                         </div>
                       <% end %>
@@ -177,8 +177,8 @@
           
           <div class="flex items-center space-x-6 mb-6">
             <div class="flex-shrink-0">
-              <% if user.profile_image_url.present? %>
-                <img src="<%= user.profile_image_url %>" alt="<%= user.name %>のプロフィール画像" class="w-24 h-24 rounded-full">
+              <% if user.avatar.attached? %>
+                <%= image_tag url_for(user.avatar), alt: "#{user.name}のプロフィール画像", class: "w-24 h-24 rounded-full" %>
               <% else %>
                 <div class="w-24 h-24 rounded-full bg-blue-800 flex items-center justify-center">
                   <span class="text-white text-3xl"><%= user.name[0] %></span>

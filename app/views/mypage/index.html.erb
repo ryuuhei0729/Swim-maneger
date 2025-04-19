@@ -4,8 +4,8 @@
   <% if @user.present? %>
     <div class="flex items-center space-x-6 mb-4">
       <div class="flex-shrink-0">
-        <% if @user.profile_image_url.present? %>
-          <img src="<%= @user.profile_image_url %>" alt="プロフィール画像" class="w-24 h-24 rounded-full">
+        <% if @user.avatar.attached? %>
+          <%= image_tag @user.avatar, alt: "プロフィール画像", class: "w-24 h-24 rounded-full" %>
         <% else %>
           <div class="w-24 h-24 rounded-full bg-blue-800 flex items-center justify-center">
             <span class="text-white text-3xl"><%= @user.name[0] %></span>
