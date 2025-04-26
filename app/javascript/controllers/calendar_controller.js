@@ -48,7 +48,8 @@ export default class extends Controller {
   updateCalendar(date) {
     console.log("updateCalendar called with date:", date)
     this.currentMonthTarget.value = date.toISOString().split('T')[0]
-    this.headerTarget.textContent = `${date.getFullYear()}年${date.getMonth() + 1}月`
+    const month = date.getMonth() + 1
+    this.headerTarget.textContent = `${date.getFullYear()}年${month}月`
     
     // AJAXリクエストを送信
     fetch(`/attendance?month=${date.toISOString().split('T')[0]}`, {
@@ -68,7 +69,8 @@ export default class extends Controller {
         this.element.innerHTML = newCalendar.innerHTML
         // 新しい日付を設定
         this.currentMonthTarget.value = date.toISOString().split('T')[0]
-        this.headerTarget.textContent = `${date.getFullYear()}年${date.getMonth() + 1}月`
+        const month = date.getMonth() + 1
+        this.headerTarget.textContent = `${date.getFullYear()}年${month}月`
         // Stimulusコントローラーを再初期化
         this.application.connect()
       }
