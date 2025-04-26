@@ -64,7 +64,13 @@ export default class extends Controller {
       const doc = parser.parseFromString(html, 'text/html')
       const newCalendar = doc.querySelector('#calendar')
       if (newCalendar) {
-        this.element.replaceWith(newCalendar)
+        // 新しいカレンダーを挿入
+        this.element.innerHTML = newCalendar.innerHTML
+        // 新しい日付を設定
+        this.currentMonthTarget.value = date.toISOString().split('T')[0]
+        this.headerTarget.textContent = `${date.getFullYear()}年${date.getMonth() + 1}月`
+        // Stimulusコントローラーを再初期化
+        this.application.connect()
       }
     })
     .catch(error => {

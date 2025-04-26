@@ -29,12 +29,12 @@ GENDERS = ['male', 'female']
 
 # データベースをクリア
 puts "データベースをクリアしています..."
-UserAuth.destroy_all
-User.destroy_all
+Attendance.destroy_all
+AttendanceEvent.destroy_all
 BestTimeTable.destroy_all
 Announcement.destroy_all
-AttendanceEvent.destroy_all
-Attendance.destroy_all
+User.destroy_all
+UserAuth.destroy_all
 
 # ユーザー作成
 puts "Creating users..."

@@ -19,7 +19,7 @@
           <h3 class="ml-4 text-xl font-semibold text-gray-900">ユーザー新規登録</h3>
         </div>
         <p class="text-gray-600 mb-4">ユーザーの追加を行うことができます</p>
-        <%= link_to admin_create_user_path, class: "w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-300 inline-block text-center" do %>
+        <%= link_to admin_create_user_path, class: "w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-300 inline-block text-center", data: { turbo: false } do %>
           新規登録画面へ
         <% end %>
       </div>
@@ -37,9 +37,9 @@
           <h3 class="ml-4 text-xl font-semibold text-gray-900">練習記録管理 (WIP)</h3>
         </div>
         <p class="text-gray-600 mb-4">練習記録の追加、編集、削除などの管理機能（WIP）</p>
-        <button class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors duration-300">
+        <%= link_to "#", class: "w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors duration-300 inline-block text-center", data: { turbo: false } do %>
           管理画面へ
-        </button>
+        <% end %>
       </div>
     </div>
 
@@ -55,9 +55,9 @@
           <h3 class="ml-4 text-xl font-semibold text-gray-900">大会管理 (WIP)</h3>
         </div>
         <p class="text-gray-600 mb-4">大会情報の追加、編集、削除などの管理機能（WIP）</p>
-        <button class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors duration-300">
+        <%= link_to "#", class: "w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 transition-colors duration-300 inline-block text-center", data: { turbo: false } do %>
           管理画面へ
-        </button>
+        <% end %>
       </div>
     </div>
 
@@ -73,7 +73,7 @@
           <h3 class="ml-4 text-xl font-semibold text-gray-900">お知らせ管理</h3>
         </div>
         <p class="text-gray-600 mb-4">お知らせの追加、編集、削除などの管理機能</p>
-        <%= link_to "お知らせ管理画面へ", admin_announcement_path, class: "w-full bg-yellow-600 text-white py-2 px-4 rounded-md hover:bg-yellow-700 transition-colors duration-300 inline-block text-center" %>
+        <%= link_to "お知らせ管理画面へ", admin_announcement_path, class: "w-full bg-yellow-600 text-white py-2 px-4 rounded-md hover:bg-yellow-700 transition-colors duration-300 inline-block text-center", data: { turbo: false } %>
       </div>
     </div>
 
@@ -90,9 +90,9 @@
           <h3 class="ml-4 text-xl font-semibold text-gray-900">システム設定 (WIP)</h3>
         </div>
         <p class="text-gray-600 mb-4">システムの各種設定やパラメータの管理（WIP）</p>
-        <button class="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors duration-300">
+        <%= link_to "#", class: "w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 transition-colors duration-300 inline-block text-center", data: { turbo: false } do %>
           設定画面へ
-        </button>
+        <% end %>
       </div>
     </div>
 
@@ -108,9 +108,9 @@
           <h3 class="ml-4 text-xl font-semibold text-gray-900">統計情報 (WIP)</h3>
         </div>
         <p class="text-gray-600 mb-4">ユーザー活動や練習記録の統計情報の確認（WIP）</p>
-        <button class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300">
+        <%= link_to "#", class: "w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 inline-block text-center", data: { turbo: false } do %>
           統計画面へ
-        </button>
+        <% end %>
       </div>
     </div>
   </div>
