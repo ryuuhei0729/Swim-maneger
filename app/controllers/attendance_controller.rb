@@ -15,7 +15,12 @@ class AttendanceController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.js
+      format.js { 
+        render partial: 'shared/calendar', locals: { 
+          current_month: @current_month,
+          events_by_date: @events_by_date
+        }
+      }
     end
   end
 end 

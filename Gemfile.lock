@@ -127,6 +127,7 @@ GEM
       raabro (~> 1.4)
     globalid (1.2.1)
       activesupport (>= 6.1)
+    holiday_jp (0.8.1)
     i18n (1.14.7)
       concurrent-ruby (~> 1.0)
     importmap-rails (2.1.0)
@@ -309,8 +310,6 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 3.0)
       websocket (~> 1.0)
-    simple_calendar (3.1.0)
-      rails (>= 6.1)
     solid_cable (3.0.7)
       actioncable (>= 7.2)
       activejob (>= 7.2)
@@ -400,6 +399,7 @@ DEPENDENCIES
   capybara
   debug
   devise
+  holiday_jp
   importmap-rails
   jbuilder
   kamal
@@ -409,7 +409,6 @@ DEPENDENCIES
   rails (~> 8.0.2)
   rubocop-rails-omakase
   selenium-webdriver
-  simple_calendar
   solid_cable
   solid_cache
   solid_queue
