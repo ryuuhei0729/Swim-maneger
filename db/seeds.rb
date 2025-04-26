@@ -171,44 +171,71 @@ current_month_dates = (Date.current.beginning_of_month..Date.current.end_of_mont
 next_month_dates = (Date.current.next_month.beginning_of_month..Date.current.next_month.end_of_month).to_a
 
 # タイトル
-title = ["朝練", "午前練", "午後練", "大会"]
-
+titles = ["陸トレ", "水泳練", "MTG", "大会"]
 
 # 今月のイベント作成
 current_month_dates.each do |date|
-  # 平日は朝練と夕練
-  if (1..5).include?(date.wday)
-    # 午前練
-    event = AttendanceEvent.create!(
-      title: "午前練",
-      date: date,
-      note: "午前の練習です。全体練習を行います。"
-    )
-    
-    # 午後練
-    event = AttendanceEvent.create!(
-      title: "午後練",
-      date: date,
-      note: "午後の練習です。種目別練習を行います。"
-    )
-  end
-
-  # 土曜日は休日練習
-  if date.saturday?
-    event = AttendanceEvent.create!(
-      title: "休日練習",
-      date: date,
-      note: "休日の特別練習です。"
-    )
+  case date.wday
+  when 1 # 月曜日
+    if rand < 0.8 # 80%の確率で
+      AttendanceEvent.create!(
+        title: "陸トレ",
+        date: date,
+        note: "陸上の練習です。基礎体力向上を目指します。"
+      )
+    end
+  when 2 # 火曜日
+    if rand < 0.9 # 90%の確率で
+      AttendanceEvent.create!(
+        title: "水泳練",
+        date: date,
+        note: "水泳の練習です。フォーム改善に重点を置きます。"
+      )
+    end
+  when 3 # 水曜日
+    if rand < 0.7 # 70%の確率で
+      AttendanceEvent.create!(
+        title: "全体MTG",
+        date: date,
+        note: "今週の予定と目標の確認を行います。"
+      )
+    end
+  when 4 # 木曜日
+    if rand < 0.85 # 85%の確率で
+      AttendanceEvent.create!(
+        title: "水泳練",
+        date: date,
+        note: "水泳の練習です。スピード練習を行います。"
+      )
+    end
+  when 5 # 金曜日
+    if rand < 0.75 # 75%の確率で
+      AttendanceEvent.create!(
+        title: "陸トレ",
+        date: date,
+        note: "陸上の練習です。筋力トレーニングを行います。"
+      )
+    end
+  when 6 # 土曜日
+    if rand < 0.6 # 60%の確率で
+      AttendanceEvent.create!(
+        title: ["水泳練", "合同練習"].sample,
+        date: date,
+        note: "週末練習です。実践的な練習を行います。"
+      )
+    end
   end
 end
 
-# 大会を2つ作成
-[current_month_dates[10], next_month_dates[5]].each do |date|
-  event = AttendanceEvent.create!(
-    title: "県大会",
+# 大会を2つ作成（土日に設定）
+current_month_weekends = current_month_dates.select { |d| [6, 0].include?(d.wday) }
+next_month_weekends = next_month_dates.select { |d| [6, 0].include?(d.wday) }
+
+[current_month_weekends.sample, next_month_weekends.sample].each do |date|
+  AttendanceEvent.create!(
+    title: "大会",
     date: date,
-    note: "県大会です。全員参加必須です。"
+    note: "大会です。全員参加必須です。応援も含めてチーム一丸となって頑張りましょう。"
   )
 end
 

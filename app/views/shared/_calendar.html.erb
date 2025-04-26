@@ -44,27 +44,61 @@
         <% is_today = date == Date.current %>
         <% is_current_month = date.month == @current_month.month %>
         <% is_holiday = holidays[date].present? %>
+        <% is_sunday = date.sunday? %>
+        <% is_saturday = date.saturday? %>
         <% events = @events_by_date&.dig(date) || [] %>
-        <div class="relative min-h-[80px] p-2 border rounded-lg <%= is_current_month ? 'bg-white' : 'bg-gray-200' %> <%= is_today ? 'ring-2 ring-blue-500' : '' %> <%= is_holiday ? 'bg-red-50' : '' %> hover:shadow-md transition-shadow duration-200">
+        
+        <%# 背景色の決定（優先順位: 祝日 > 日曜 > 土曜） %>
+        <% bg_color = if is_current_month
+          if is_holiday
+            'bg-red-100'
+          elsif is_sunday
+            'bg-red-50'
+          elsif is_saturday
+            'bg-blue-50'
+          else
+            'bg-white'
+          end
+        else
+          'bg-gray-200'
+        end %>
+        
+        <%# 文字色の決定（優先順位: 祝日 > 日曜 > 土曜） %>
+        <% text_color = if is_holiday
+          'text-red-600'
+        elsif is_sunday
+          'text-red-600'
+        elsif is_saturday
+          'text-blue-600'
+        else
+          is_current_month ? 'text-gray-900' : 'text-gray-400'
+        end %>
+        
+        <div class="relative min-h-[100px] p-2 border rounded-lg <%= bg_color %> <%= is_today ? 'ring-2 ring-blue-500' : '' %> hover:shadow-md transition-shadow duration-200">
           <div class="flex justify-between items-start">
-            <div class="text-sm font-medium <%= is_current_month ? 'text-gray-900' : 'text-gray-400' %> <%= is_today ? 'bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center' : '' %> <%= is_holiday ? 'text-red-600' : '' %>">
+            <div class="text-sm font-medium <%= text_color %> <%= is_today ? 'bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center' : '' %>">
               <%= date.day %>
             </div>
             <% if is_today %>
               <span class="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded-full">今日</span>
             <% end %>
-            <% if is_holiday %>
+            <% if is_holiday && is_current_month %>
               <span class="text-xs bg-red-100 text-red-800 px-1.5 py-0.5 rounded-full"><%= holidays[date].name %></span>
             <% end %>
           </div>
           
           <% if events.any? %>
-            <div class="mt-1 space-y-1">
+            <div class="mt-2 space-y-2">
               <% events.each do |event| %>
-                <div class="text-xs bg-blue-50 text-blue-700 p-1 rounded cursor-pointer hover:bg-blue-100 transition-colors duration-200">
-                  <%= event.title %>
-                  <div class="text-gray-500 text-[10px]">
-                    出席: <%= event.attendances.count %>人
+                <div class="group relative">
+                  <div class="absolute inset-0 bg-white/80 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  <div class="relative p-2 rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
+                    <div class="flex flex-col space-y-1">
+                      <span class="text-xs font-medium text-gray-900"><%= event.title %></span>
+                      <span class="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full self-start">
+                        出席: <%= event.attendances.count %>人
+                      </span>
+                    </div>
                   </div>
                 </div>
               <% end %>
