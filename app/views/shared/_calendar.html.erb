@@ -3,7 +3,7 @@
   <%= hidden_field_tag :current_month, @current_month.strftime("%Y-%m-%d"), data: { calendar_target: "currentMonth" } %>
   
   <%# カレンダーヘッダー %>
-  <div class="bg-gradient-to-r from-blue-600 to-blue-800 p-4">
+  <div class="bg-blue-800 p-4">
     <div class="flex items-center justify-between">
       <h3 class="text-xl font-bold text-white" data-calendar-target="header"><%= @current_month.strftime("%Y年%m月") %></h3>
       <div class="flex space-x-2">
