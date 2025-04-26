@@ -14,7 +14,6 @@ export default class extends Controller {
   }
 
   prevMonth(event) {
-    console.log("prevMonth called")
     event.preventDefault()
     const currentDate = new Date(this.currentMonthTarget.value)
     currentDate.setMonth(currentDate.getMonth() - 1)
@@ -22,7 +21,6 @@ export default class extends Controller {
   }
 
   nextMonth(event) {
-    console.log("nextMonth called")
     event.preventDefault()
     const currentDate = new Date(this.currentMonthTarget.value)
     currentDate.setMonth(currentDate.getMonth() + 1)
@@ -30,7 +28,6 @@ export default class extends Controller {
   }
 
   today(event) {
-    console.log("today called")
     event.preventDefault()
     this.updateCalendar(new Date())
   }
@@ -47,36 +44,55 @@ export default class extends Controller {
 
   updateCalendar(date) {
     console.log("updateCalendar called with date:", date)
-    this.currentMonthTarget.value = date.toISOString().split('T')[0]
     const month = date.getMonth() + 1
-    this.headerTarget.textContent = `${date.getFullYear()}年${month}月`
     
-    // AJAXリクエストを送信
+    // リクエスト先を修正
     fetch(`/attendance?month=${date.toISOString().split('T')[0]}`, {
+      method: 'GET',
       headers: {
         'Accept': 'text/javascript',
         'X-Requested-With': 'XMLHttpRequest'
       }
     })
-    .then(response => response.text())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok')
+      }
+      return response.text()
+    })
     .then(html => {
       console.log("Received response")
       const parser = new DOMParser()
       const doc = parser.parseFromString(html, 'text/html')
       const newCalendar = doc.querySelector('#calendar')
+      
       if (newCalendar) {
-        // 新しいカレンダーを挿入
-        this.element.innerHTML = newCalendar.innerHTML
-        // 新しい日付を設定
+        // 現在のカレンダーを新しいカレンダーで完全に置き換え
+        const newCalendarContent = newCalendar.innerHTML
+        this.element.innerHTML = newCalendarContent
+        
+        // ターゲットを再取得
+        this.currentMonthTarget = this.element.querySelector('[data-calendar-target="currentMonth"]')
+        this.headerTarget = this.element.querySelector('[data-calendar-target="header"]')
+        
+        // 日付を更新
         this.currentMonthTarget.value = date.toISOString().split('T')[0]
-        const month = date.getMonth() + 1
         this.headerTarget.textContent = `${date.getFullYear()}年${month}月`
-        // Stimulusコントローラーを再初期化
+        
+        // Stimulusコントローラーを再接続
         this.application.connect()
+        
+        // デバッグ用：カレンダーの状態を確認
+        console.log('Current month value:', this.currentMonthTarget.value)
+        console.log('Header text:', this.headerTarget.textContent)
+        console.log('Calendar content updated')
+      } else {
+        throw new Error('Calendar element not found in response')
       }
     })
     .catch(error => {
-      console.error("Error updating calendar:", error)
+      console.error('Error updating calendar:', error)
+      alert('カレンダーの更新に失敗しました。ページをリロードしてください。')
     })
   }
 } 
