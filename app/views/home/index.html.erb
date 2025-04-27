@@ -48,7 +48,11 @@
   
   <div data-controller="modal">
     <%= button_tag "モーダルを開く", type: "button", data: { action: "modal#open" }, class: "btn btn-primary" %>
-    <%= render 'shared/modal' %>
+    <%= render 'shared/modal' do %>
+      <h2 class="text-xl font-bold mb-4">ホーム画面のモーダル</h2>
+      <p>ここにホーム画面固有のモーダル内容を記述します。</p>
+
+    <% end %>
   </div>
 
   <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
