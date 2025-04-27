@@ -46,8 +46,8 @@
     </div>
   </div>
   
-  <%= button_tag "モーダルを開く", type: "button", data: { action: "modal#open" }, class: "btn btn-primary" %>
   <div data-controller="modal">
+    <%= button_tag "モーダルを開く", type: "button", data: { action: "modal#open" }, class: "btn btn-primary" %>
     <%= render 'shared/modal' %>
   </div>
 
