@@ -12,17 +12,27 @@ export default class extends Controller {
         this.close();
       }
     });
+    document.addEventListener('keydown', this.handleKeydown.bind(this));
   }
 
-  open() {
-    console.log("Opening modal");
-    this.modalTarget.classList.remove("hidden");
-    document.body.style.overflow = "hidden";
+  disconnect() {
+    document.removeEventListener('keydown', this.handleKeydown.bind(this));
   }
 
-  close() {
-    console.log("Closing modal");
-    this.modalTarget.classList.add("hidden");
-    document.body.style.overflow = "";
+  open(event) {
+    const modalId = event.currentTarget.dataset.modalTarget;
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.classList.remove("hidden");
+      document.body.style.overflow = "hidden";
+    }
+  }
+
+  close(event) {
+    const modal = event.currentTarget.closest('[data-modal-target="modal"]');
+    if (modal) {
+      modal.classList.add('hidden');
+      document.body.style.overflow = '';
+    }
   }
 }
