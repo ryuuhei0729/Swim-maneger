@@ -43,10 +43,8 @@ export default class extends Controller {
   }
 
   updateCalendar(date) {
-    console.log("updateCalendar called with date:", date)
     const month = date.getMonth() + 1
     
-    // リクエスト先を修正
     fetch(`/attendance?month=${date.toISOString().split('T')[0]}`, {
       method: 'GET',
       headers: {
@@ -61,31 +59,22 @@ export default class extends Controller {
       return response.text()
     })
     .then(html => {
-      console.log("Received response")
       const parser = new DOMParser()
       const doc = parser.parseFromString(html, 'text/html')
-      const newCalendar = doc.querySelector('#calendar')
+      const newCalendar = doc.querySelector('[data-controller="calendar"]')
       
       if (newCalendar) {
-        // 現在のカレンダーを新しいカレンダーで完全に置き換え
-        const newCalendarContent = newCalendar.innerHTML
-        this.element.innerHTML = newCalendarContent
+        this.element.innerHTML = newCalendar.innerHTML
         
-        // ターゲットを再取得
-        this.currentMonthTarget = this.element.querySelector('[data-calendar-target="currentMonth"]')
-        this.headerTarget = this.element.querySelector('[data-calendar-target="header"]')
+        const currentMonthInput = this.element.querySelector('[data-calendar-target="currentMonth"]')
+        const headerElement = this.element.querySelector('[data-calendar-target="header"]')
         
-        // 日付を更新
-        this.currentMonthTarget.value = date.toISOString().split('T')[0]
-        this.headerTarget.textContent = `${date.getFullYear()}年${month}月`
-        
-        // Stimulusコントローラーを再接続
-        this.application.connect()
-        
-        // デバッグ用：カレンダーの状態を確認
-        console.log('Current month value:', this.currentMonthTarget.value)
-        console.log('Header text:', this.headerTarget.textContent)
-        console.log('Calendar content updated')
+        if (currentMonthInput) {
+          currentMonthInput.value = date.toISOString().split('T')[0]
+        }
+        if (headerElement) {
+          headerElement.textContent = `${date.getFullYear()}年${month}月`
+        }
       } else {
         throw new Error('Calendar element not found in response')
       }
