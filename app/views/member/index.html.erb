@@ -145,9 +145,6 @@
                     <%= user.generation %><%= ordinal_suffix(user.generation) %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-gray-500">
-                    <%= user.user_type == 'director' ? '監督/顧問' : (user.user_type == 'coach' ? 'コーチ' : '選手') %>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-gray-500">
                     <%= user.birthday.strftime('%Y年%m月%d日') %>
                   </td>
                 </tr>
@@ -162,128 +159,31 @@
 
 <!-- ユーザー詳細モーダル -->
 <% @users.each do |user| %>
-  <div id="user-modal-<%= user.id %>" class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden" data-modal-target="modal">
-    <div class="flex items-center justify-center min-h-screen p-4" data-action="click->modal#closeBackground">
-      <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full" data-action="click->modal#stopPropagation">
-        <div class="p-8">
-          <div class="flex justify-between items-start mb-6">
-             <h3 class="text-2xl font-bold text-gray-900"><%= user.name %>の詳細情報</h3>
-            <button type="button" class="text-gray-400 hover:text-gray-500 cursor-pointer" data-action="click->modal#close">
-              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+  <%= render "shared/modal", modal_id: "user-modal-#{user.id}", title: "#{user.name}の詳細情報" do %>
+    <div class="flex items-center space-x-6 mb-6">
+      <div class="flex-shrink-0">
+        <% if user.avatar.attached? %>
+          <%= image_tag url_for(user.avatar), alt: "#{user.name}のプロフィール画像", class: "w-24 h-24 rounded-full" %>
+        <% else %>
+          <div class="w-24 h-24 rounded-full bg-blue-800 flex items-center justify-center">
+            <span class="text-white text-3xl"><%= user.name[0] %></span>
           </div>
-          
-          <div class="flex items-center space-x-6 mb-6">
-            <div class="flex-shrink-0">
-              <% if user.avatar.attached? %>
-                <%= image_tag url_for(user.avatar), alt: "#{user.name}のプロフィール画像", class: "w-24 h-24 rounded-full" %>
-              <% else %>
-                <div class="w-24 h-24 rounded-full bg-blue-800 flex items-center justify-center">
-                  <span class="text-white text-3xl"><%= user.name[0] %></span>
-                </div>
-              <% end %>
-            </div>
-            <div class="flex-1">
-              <h2 class="text-2xl font-bold text-gray-900"><%= user.name %></h2>
-              <p class="text-gray-500"><%= user.generation %><%= ordinal_suffix(user.generation) %></p>
-              <p class="text-gray-500"><%= user.birthday.strftime('%Y年%m月%d日') %></p>
-            </div>
-          </div>
-          
-          <div class="mt-4 border-t border-gray-200 pt-4">
-            <h3 class="text-lg font-semibold text-gray-900 mb-2">自己紹介</h3>
-            <% if user.bio.present? %>
-              <p class="text-gray-700 whitespace-pre-wrap"><%= user.bio %></p>
-            <% else %>
-              <p class="text-gray-500 italic">自己紹介が設定されていません</p>
-            <% end %>
-          </div>
-          
-          <div class="mt-6 sm:mt-5 sm:flex sm:flex-row-reverse">
-            <button type="button" data-action="click->modal#close" class="inline-flex w-full justify-center rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto cursor-pointer">
-              閉じる
-            </button>
-          </div>
-        </div>
+        <% end %>
+      </div>
+      <div class="flex-1">
+        <h2 class="text-2xl font-bold text-gray-900"><%= user.name %></h2>
+        <p class="text-gray-500"><%= user.generation %><%= ordinal_suffix(user.generation) %></p>
+        <p class="text-gray-500"><%= user.birthday.strftime('%Y年%m月%d日') %></p>
       </div>
     </div>
-  </div>
-<% end %>
-
-<!-- モーダル用のJavaScript -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const modalController = {
-      open(event) {
-        const modalId = event.currentTarget.dataset.modalTarget;
-        const modal = document.getElementById(modalId);
-        modal.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
-      },
-      close(event) {
-        const modal = event.currentTarget.closest('[data-modal-target="modal"]');
-        modal.classList.add('hidden');
-        document.body.style.overflow = '';
-      },
-      closeBackground(event) {
-        // モーダルの背景部分がクリックされた場合のみ閉じる
-        if (event.target === event.currentTarget) {
-          const modal = event.currentTarget.closest('[data-modal-target="modal"]');
-          modal.classList.add('hidden');
-          document.body.style.overflow = '';
-        }
-      },
-      stopPropagation(event) {
-        // モーダル内のクリックイベントが親要素に伝播しないようにする
-        event.stopPropagation();
-      }
-    };
-
-    const groupController = {
-      toggle(event) {
-        const target = event.currentTarget.dataset.groupTarget;
-        document.querySelectorAll('[data-group-view]').forEach(view => {
-          view.classList.add('hidden');
-        });
-        document.getElementById(`${target}-view`).classList.remove('hidden');
-      }
-    };
-
-    // モーダルを開くボタンにイベントリスナーを追加
-    document.querySelectorAll('[data-action="click->modal#open"]').forEach(button => {
-      button.addEventListener('click', modalController.open);
-    });
-
-    // モーダルを閉じるボタンにイベントリスナーを追加
-    document.querySelectorAll('[data-action="click->modal#close"]').forEach(button => {
-      button.addEventListener('click', modalController.close);
-    });
-
-    // モーダルの背景部分にイベントリスナーを追加
-    document.querySelectorAll('[data-action="click->modal#closeBackground"]').forEach(background => {
-      background.addEventListener('click', modalController.closeBackground);
-    });
-
-    // モーダル内のクリックイベントが親要素に伝播しないようにする
-    document.querySelectorAll('[data-action="click->modal#stopPropagation"]').forEach(content => {
-      content.addEventListener('click', modalController.stopPropagation);
-    });
-
-    // ESCキーでモーダルを閉じる
-    document.addEventListener('keydown', function(event) {
-      if (event.key === 'Escape') {
-        const visibleModal = document.querySelector('[data-modal-target="modal"]:not(.hidden)');
-        if (visibleModal) {
-          visibleModal.classList.add('hidden');
-          document.body.style.overflow = '';
-        }
-      }
-    });
-
-    document.querySelectorAll('[data-action="click->group#toggle"]').forEach(button => {
-      button.addEventListener('click', groupController.toggle);
-    });
-  });
-</script> 
+    
+    <div class="mt-4 border-t border-gray-200 pt-4">
+      <h3 class="text-lg font-semibold text-gray-900 mb-2">自己紹介</h3>
+      <% if user.bio.present? %>
+        <p class="text-gray-700 whitespace-pre-wrap"><%= user.bio %></p>
+      <% else %>
+        <p class="text-gray-500 italic">自己紹介が設定されていません</p>
+      <% end %>
+    </div>
+  <% end %>
+<% end %> 
