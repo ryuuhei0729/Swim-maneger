@@ -185,5 +185,33 @@
         <p class="text-gray-500 italic">自己紹介が設定されていません</p>
       <% end %>
     </div>
-  <% end %>
+  <% end %> 
 <% end %> 
+
+
+<!-- ここにモーダルのjavascriptのコードを記載 -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // モーダルを開く処理
+    document.querySelectorAll('[data-action="click->modal#open"]').forEach(button => {
+      button.addEventListener('click', function() {
+        const modalId = this.dataset.modalTarget;
+        const modal = document.getElementById(modalId);
+        if (modal) {
+          modal.classList.remove('hidden');
+        }
+      });
+    });
+
+    // モーダルを閉じる処理
+    document.querySelectorAll('[data-action="click->modal#close"]').forEach(button => {
+      button.addEventListener('click', function() {
+        const modal = this.closest('[data-modal-target="modal"]');
+        if (modal) {
+          modal.classList.add('hidden');
+        }
+      });
+    });
+
+  });
+</script> 
