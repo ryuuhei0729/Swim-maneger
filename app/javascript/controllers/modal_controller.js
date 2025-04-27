@@ -1,20 +1,28 @@
-import { Controller } from "@hotwired/stimulus"
+// app/javascript/controllers/modal_controller.js
+import { Controller } from "@hotwired/stimulus";
 
-// Connects to data-controller="modal"
 export default class extends Controller {
-  static targets = ["background", "content"]
+  static targets = ["modal"];
 
   connect() {
-    console.log("モーダルコントローラー接続成功！")
+    console.log("Modal controller connected");
+    this.modalTarget.classList.add("hidden");
+    this.modalTarget.addEventListener("click", (e) => {
+      if (e.target === this.modalTarget) {
+        this.close();
+      }
+    });
   }
 
   open() {
-    this.backgroundTarget.classList.remove('hidden')
-    this.backgroundTarget.classList.add('flex')
+    console.log("Opening modal");
+    this.modalTarget.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
   }
 
   close() {
-    this.backgroundTarget.classList.remove('flex')
-    this.backgroundTarget.classList.add('hidden')
+    console.log("Closing modal");
+    this.modalTarget.classList.add("hidden");
+    document.body.style.overflow = "";
   }
 }
