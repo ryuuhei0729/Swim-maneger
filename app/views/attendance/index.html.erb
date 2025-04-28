@@ -1,5 +1,11 @@
 <% content_for :title, 'Attendance' %>
 
+<%# 曜日の日本語変換用ヘルパー %>
+<% def japanese_weekday(date) %>
+  <% weekdays = { 'Sun' => '日', 'Mon' => '月', 'Tue' => '火', 'Wed' => '水', 'Thu' => '木', 'Fri' => '金', 'Sat' => '土' } %>
+  <% weekdays[date.strftime('%a')] %>
+<% end %>
+
 <div class="bg-white shadow rounded-lg p-6">
   <div class="flex items-center justify-between mb-6">
     <h2 class="text-2xl font-bold text-gray-900">出席管理</h2>
@@ -18,8 +24,10 @@
 
         <% @this_month_events.each do |event| %>
           <div class="bg-white rounded-lg shadow p-6">
-            <h4 class="text-lg font-semibold mb-2"><%= event.title %></h4>
-            <p class="text-gray-600 mb-4">日付: <%= event.date.strftime("%Y年%m月%d日") %></p>
+            <div class="flex items-center gap-2 mb-4">
+              <h4 class="text-lg font-semibold"><%= event.title %></h4>
+              <p class="text-gray-900">@<%= event.date.strftime("%Y年%m月%d日") %>(<%= japanese_weekday(event.date) %>)</p>
+            </div>
 
             <% attendance = @attendance.find_by(attendance_event: event) %>
             <div class="flex items-center space-x-20">
@@ -63,8 +71,10 @@
       <%= form_with(url: update_attendance_path, method: :post, class: "space-y-6") do |f| %>
         <% @next_month_events.each do |event| %>
           <div class="bg-white rounded-lg shadow p-6">
-            <h4 class="text-lg font-semibold mb-2"><%= event.title %></h4>
-            <p class="text-gray-600 mb-4">日付: <%= event.date.strftime("%Y年%m月%d日") %></p>
+            <div class="flex items-center gap-2 mb-4">
+              <h4 class="text-lg font-semibold"><%= event.title %></h4>
+              <p class="text-gray-900">@<%= event.date.strftime("%Y年%m月%d日") %>(<%= japanese_weekday(event.date) %>)</p>
+            </div>
 
             <% attendance = @attendance.find_by(attendance_event: event) %>
             <div class="flex items-center space-x-20">
