@@ -9,9 +9,11 @@
   <div class="bg-white shadow rounded-lg p-6">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-2xl font-bold text-gray-900">スケジュール一覧</h2>
-      <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300">
-        新規スケジュール追加
-      </button>
+      <div data-controller="modal">
+        <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300" data-action="click->modal#open" data-modal-id="schedule-modal">
+          新規スケジュール登録
+        </button>
+      </div>
     </div>
 
     <div class="overflow-x-auto">
@@ -28,10 +30,17 @@
         <tbody class="bg-white divide-y divide-gray-200">
           <% @events.each do |event| %>
             <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-gray-500"><%= event.date.strftime('%Y/%m/%d') %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+                <%= event.date.strftime('%Y/%m/%d') %>
+                <span class="text-gray-900">(<%= %w[日 月 火 水 木 金 土][event.date.wday] %>)</span>
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-gray-900"><%= event.title %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-gray-500"><%= event.place %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-gray-500"><%= event.note %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-gray-900"><%= event.place %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-gray-900">
+                <% if event.note.present? %>
+                  <%= event.note.length > 20 ? "#{event.note[0..19]}..." : event.note %>
+                <% end %>
+              </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                 <button class="text-blue-600 hover:text-blue-900 mr-3">編集</button>
                 <button class="text-red-600 hover:text-red-900">削除</button>
@@ -42,4 +51,56 @@
       </table>
     </div>
   </div>
-</div> 
+</div>
+
+<div data-controller="modal">
+  <%= render 'shared/modal', modal_id: "schedule-modal", title: "新規スケジュール登録" do %>
+    <%= form_with(model: @event || AttendanceEvent.new, url: admin_schedule_path, local: true, class: "space-y-6") do |f| %>
+      <div class="grid grid-cols-1 gap-6">
+        <div>
+          <%= f.label :title, "タイトル", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.text_field :title, 
+              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-3",
+              placeholder: "練習や大会のタイトルを入力",
+              required: true %>
+        </div>
+
+        <div>
+          <%= f.label :date, "日付", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.date_field :date, 
+              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-3",
+              value: Date.current,
+              required: true %>
+        </div>
+
+        <div>
+          <%= f.label :place, "場所", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.text_field :place, 
+              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-3",
+              placeholder: "練習や大会の場所を入力",
+              required: true %>
+        </div>
+
+        <div>
+          <%= f.label :note, "備考", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.text_area :note, 
+              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-3",
+              rows: 4,
+              placeholder: "備考や注意事項を入力" %>
+        </div>
+      </div>
+
+      <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+        <button type="button" 
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" 
+                data-action="click->modal#close">
+          キャンセル
+        </button>
+        <%= f.submit "登録", 
+            class: "px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+
+

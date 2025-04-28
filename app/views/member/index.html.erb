@@ -59,7 +59,7 @@
 <!-- ユーザー詳細モーダル -->
 <% @users.each do |user| %>
   <%= render "shared/modal", modal_id: "user-modal-#{user.id}", title: "#{user.name}の詳細情報" do %>
-    <div class="flex items-center space-x-6 mb-6">
+    <div class="flex items-center space-x-6 mb-6" >
       <div class="flex-shrink-0">
         <% if user.avatar.attached? %>
           <%= image_tag url_for(user.avatar), alt: "#{user.name}のプロフィール画像", class: "w-24 h-24 rounded-full" %>

@@ -1,4 +1,4 @@
-<div id="<%= modal_id %>" class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-40" data-modal-target="modal">
+<div id="<%= modal_id %>" class="fixed inset-0 bg-gray-500 bg-opacity-50 hidden z-30" data-controller="modal">
   <div class="flex items-center justify-center min-h-screen p-4">
     <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full">
       <div class="p-8">
@@ -14,7 +14,7 @@
         <%= yield %>
         
         <div class="mt-6 sm:mt-5 sm:flex sm:flex-row-reverse">
-          <button type="button" data-action="click->modal#close" class="inline-flex w-full justify-center rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto cursor-pointer">
+          <button type="button" class="inline-flex w-full justify-center rounded-md bg-blue-800 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 sm:ml-3 sm:w-auto cursor-pointer" data-action="click->modal#close">
             閉じる
           </button>
         </div>
