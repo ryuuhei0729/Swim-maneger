@@ -2,6 +2,8 @@ class User < ApplicationRecord
   has_one :user_auth, dependent: :destroy
   has_one :best_time_table, dependent: :destroy
   has_one_attached :avatar
+  has_many :attendances, dependent: :destroy
+  has_many :attendance_events, through: :attendances
 
   validates :generation, presence: true
   validates :name, presence: true
