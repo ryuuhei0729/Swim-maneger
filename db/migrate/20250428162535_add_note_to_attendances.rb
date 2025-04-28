@@ -1,5 +1,5 @@
-class AddNoteToAttendances < ActiveRecord::Migration[8.0]
+class AddNoteToattendance < ActiveRecord::Migration[8.0]
   def change
-    add_column :attendances, :note, :text
+    add_column :attendance, :note, :text
   end
 end

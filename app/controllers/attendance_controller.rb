@@ -15,13 +15,13 @@ class AttendanceController < ApplicationController
       .order(date: :asc)
 
     # 現在のユーザーの出席情報を取得
-    answered_event_ids = current_user_auth.user.attendances
+    answered_event_ids = current_user_auth.user.attendance
       .where(attendance_event: next_month_events)
       .pluck(:attendance_event_id)
 
     # 未回答のイベントのみを取得
     @next_month_events = next_month_events.where.not(id: answered_event_ids)
-    @attendances = current_user_auth.user.attendances.where(attendance_event: @next_month_events)
+    @attendance = current_user_auth.user.attendance.where(attendance_event: @next_month_events)
 
     # カレンダー表示用のデータ
     @events_by_date = AttendanceEvent
@@ -43,9 +43,9 @@ class AttendanceController < ApplicationController
   def update_attendance
     begin
       ActiveRecord::Base.transaction do
-        params[:attendances].each do |event_id, attendance_params|
+        params[:attendance].each do |event_id, attendance_params|
           event = AttendanceEvent.find(event_id)
-          attendance = current_user_auth.user.attendances.find_or_initialize_by(attendance_event: event)
+          attendance = current_user_auth.user.attendance.find_or_initialize_by(attendance_event: event)
           attendance.update!(attendance_params.permit(:status, :note))
         end
       end
@@ -56,9 +56,17 @@ class AttendanceController < ApplicationController
     end
   end
 
+  def event_status
+    @event = AttendanceEvent.find(params[:event_id])
+    @attendance = @event.attendance.includes(:user)
+    render partial: 'shared/event_attendance_status', locals: { event: @event, attendance: @attendance }
+  end
+
   private
 
   def attendance_params
-    params.require(:attendances).permit!
+    params.require(:attendance).permit!
   end
+
+  
 end 

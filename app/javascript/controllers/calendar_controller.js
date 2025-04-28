@@ -84,4 +84,22 @@ export default class extends Controller {
       alert('カレンダーの更新に失敗しました。ページをリロードしてください。')
     })
   }
+
+  showEventModal(event) {
+    const eventId = event.currentTarget.dataset.eventId;
+    console.log('イベントID:', eventId);
+  
+    // モーダルを開く
+    const modal = document.getElementById('event-attendance-modal');
+    if (modal) {
+      modal.classList.remove('hidden');
+    }
+  
+    // Ajaxで出席状況を取得
+    fetch(`/attendance/event_status/${eventId}`)
+    .then(response => response.text())
+    .then(html => {
+      document.getElementById('event-attendance-modal-content').innerHTML = html;
+    });
+  }
 } 
