@@ -21,5 +21,16 @@ module.exports = {
     require('@tailwindcss/typography'),
     require('@tailwindcss/container-queries'),
     require('tw-elements/dist/plugin.cjs')
+  ],
+
+  corePlugins: {
+    preflight: false,
+  },
+
+  safelist: [
+    {
+      pattern: /cursor-pointer/,
+      variants: ['hover', 'focus'],
+    }
   ]
 } 
