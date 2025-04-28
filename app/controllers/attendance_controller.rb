@@ -8,20 +8,20 @@ class AttendanceController < ApplicationController
       Date.current
     end
 
-    # 来月のイベントを取得
+    # 今月・来月のイベントを取得
+    this_month = @current_month
     next_month = @current_month.next_month
-    next_month_events = AttendanceEvent
-      .where(date: next_month.beginning_of_month..next_month.end_of_month)
-      .order(date: :asc)
+
+    this_month_events = AttendanceEvent.where(date: this_month.beginning_of_month..this_month.end_of_month).order(date: :asc)
+    next_month_events = AttendanceEvent.where(date: next_month.beginning_of_month..next_month.end_of_month).order(date: :asc)
 
     # 現在のユーザーの出席情報を取得
-    answered_event_ids = current_user_auth.user.attendance
-      .where(attendance_event: next_month_events)
-      .pluck(:attendance_event_id)
+    answered_event_ids = current_user_auth.user.attendance.where(attendance_event: this_month_events + next_month_events).pluck(:attendance_event_id)
 
     # 未回答のイベントのみを取得
+    @this_month_events = this_month_events.where.not(id: answered_event_ids)
     @next_month_events = next_month_events.where.not(id: answered_event_ids)
-    @attendance = current_user_auth.user.attendance.where(attendance_event: @next_month_events)
+    @attendance = current_user_auth.user.attendance.where(attendance_event: @this_month_events + @next_month_events)
 
     # カレンダー表示用のデータ
     @events_by_date = AttendanceEvent
