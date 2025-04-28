@@ -1,8 +1,17 @@
-<% status_order = { 'present' => 0, '出席' => 0, 'late' => 1, '遅刻' => 1, 'absent' => 2, '欠席' => 2 } %>
+<% status_order = { 
+  'present' => 0, '出席' => 0, 
+  'late' => 1, '遅刻' => 1, 
+  'absent' => 2, '欠席' => 2,
+  '' => 3, nil => 3
+} %>
 <% players = attendance.select { |a| a.user.user_type == 'player' } %>
 <% coaches = attendance.select { |a| ['coach', 'director', 'manager', 'supervisor'].include?(a.user.user_type) } %>
 <% sorted_players = players.sort_by { |a| [status_order[a.status] || 99, a.user.generation || 0] } %>
 <% sorted_coaches = coaches.sort_by { |a| [status_order[a.status] || 99, a.user.generation || 0] } %>
+
+<!-- 未回答ユーザーの取得 -->
+<% answered_user_ids = attendance.map(&:user_id) %>
+<% unanswered_users = User.where.not(id: answered_user_ids).order(generation: :desc) %>
 
 <h4 class="text-lg font-bold mb-4"><%= event.title %>（<%= event.date.strftime('%Y/%m/%d') %>）</h4>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -41,6 +50,8 @@
       </table>
     </div>
   </div>
+
+  
   <!-- 右：コーチ・監督/顧問 -->
   <div>
     <h5 class="text-base font-semibold mb-2">コーチ・監督/顧問</h5>
@@ -77,3 +88,42 @@
     </div>
   </div>
 </div>
+
+<% if unanswered_users.any? %>
+<div class="mt-6">
+  <h5 class="text-base font-semibold mb-2 text-red-600">※未回答リスト※</h5>
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 text-sm">
+      <thead>
+        <tr>
+          <th class="px-4 py-2 bg-gray-100 text-left font-semibold text-gray-700">名前</th>
+          <th class="px-4 py-2 bg-gray-100 text-left font-semibold text-gray-700">役職</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100">
+        <% unanswered_users.each_with_index do |user, i| %>
+          <tr class="<%= i.even? ? 'bg-white' : 'bg-gray-50' %> hover:bg-red-50 transition">
+            <td class="px-4 py-2"><%= user.name %></td>
+            <td class="px-4 py-2">
+              <% case user.user_type %>
+              <% when 'player' %>
+                選手
+              <% when 'coach' %>
+                コーチ
+              <% when 'director' %>
+                監督
+              <% when 'manager' %>
+                マネージャー
+              <% when 'supervisor' %>
+                顧問
+              <% else %>
+                <%= user.user_type %>
+              <% end %>
+            </td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<% end %>
