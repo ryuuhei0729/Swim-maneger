@@ -181,6 +181,7 @@ current_month_dates.each do |date|
       AttendanceEvent.create!(
         title: "陸トレ",
         date: date,
+        place: '小石川5階',
         note: "陸上の練習です。基礎体力向上を目指します。"
       )
     end
@@ -189,6 +190,7 @@ current_month_dates.each do |date|
       AttendanceEvent.create!(
         title: "水泳練",
         date: date,
+        place: 'コズミック',
         note: "水泳の練習です。フォーム改善に重点を置きます。"
       )
     end
@@ -197,6 +199,7 @@ current_month_dates.each do |date|
       AttendanceEvent.create!(
         title: "全体MTG",
         date: date,
+        place: 'オンライン',
         note: "今週の予定と目標の確認を行います。"
       )
     end
@@ -205,6 +208,7 @@ current_month_dates.each do |date|
       AttendanceEvent.create!(
         title: "水泳練",
         date: date,
+        place: 'コズミック',
         note: "水泳の練習です。スピード練習を行います。"
       )
     end
@@ -213,6 +217,7 @@ current_month_dates.each do |date|
       AttendanceEvent.create!(
         title: "陸トレ",
         date: date,
+        place: '小石川5階',
         note: "陸上の練習です。筋力トレーニングを行います。"
       )
     end
@@ -221,6 +226,7 @@ current_month_dates.each do |date|
       AttendanceEvent.create!(
         title: ["水泳練", "合同練習"].sample,
         date: date,
+        place: 'Bumb',
         note: "週末練習です。実践的な練習を行います。"
       )
     end
@@ -235,6 +241,7 @@ next_month_weekends = next_month_dates.select { |d| [6, 0].include?(d.wday) }
   AttendanceEvent.create!(
     title: "大会",
     date: date,
+    place: 'アクアティクスセンター',
     note: "大会です。全員参加必須です。応援も含めてチーム一丸となって頑張りましょう。"
   )
 end

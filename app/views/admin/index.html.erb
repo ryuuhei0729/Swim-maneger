@@ -25,19 +25,19 @@
       </div>
     </div>
 
-    <!-- 練習記録管理カード -->
+    <!-- スケジュール管理カード -->
     <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
       <div class="p-6">
         <div class="flex items-center mb-4">
           <div class="rounded-full bg-green-100 p-3">
             <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <h3 class="ml-4 text-xl font-semibold text-gray-900">練習記録管理 (WIP)</h3>
+          <h3 class="ml-4 text-xl font-semibold text-gray-900">スケジュール管理</h3>
         </div>
-        <p class="text-gray-600 mb-4">練習記録の追加、編集、削除などの管理機能（WIP）</p>
-        <%= link_to "#", class: "w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors duration-300 inline-block text-center", data: { turbo: false } do %>
+        <p class="text-gray-600 mb-4">練習や大会などのスケジュール管理機能</p>
+        <%= link_to admin_schedule_path, class: "w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 transition-colors duration-300 inline-block text-center", data: { turbo: false } do %>
           管理画面へ
         <% end %>
       </div>
