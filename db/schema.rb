@@ -62,7 +62,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_28_162535) do
     t.string "place"
   end
 
-  create_table "attendances", force: :cascade do |t|
+  create_table "attendance", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "attendance_event_id", null: false
     t.string "status"
@@ -70,8 +70,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_28_162535) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "note"
-    t.index ["attendance_event_id"], name: "index_attendances_on_attendance_event_id"
-    t.index ["user_id"], name: "index_attendances_on_user_id"
+    t.index ["attendance_event_id"], name: "index_attendance_on_attendance_event_id"
+    t.index ["user_id"], name: "index_attendance_on_user_id"
   end
 
   create_table "best_time_tables", force: :cascade do |t|
@@ -142,8 +142,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_28_162535) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "attendances", "attendance_events"
-  add_foreign_key "attendances", "users"
+  add_foreign_key "attendance", "attendance_events"
+  add_foreign_key "attendance", "users"
   add_foreign_key "best_time_tables", "users"
   add_foreign_key "user_auths", "users"
 end

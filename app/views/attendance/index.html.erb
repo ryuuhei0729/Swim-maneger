@@ -21,33 +21,33 @@
             <h4 class="text-lg font-semibold mb-2"><%= event.title %></h4>
             <p class="text-gray-600 mb-4">日付: <%= event.date.strftime("%Y年%m月%d日") %></p>
 
-            <% attendance = @attendances.find_by(attendance_event: event) %>
+            <% attendance = @attendance.find_by(attendance_event: event) %>
             <div class="flex items-center space-x-20">
               <div class="flex items-center space-x-1">
-                <%= f.radio_button "attendances[#{event.id}][status]", "出席", checked: attendance&.status == "出席", class: "form-radio cursor-pointer", data: { requires_note: false } %>
-                <%= f.label "attendances[#{event.id}][status]", "出席", value: "出席", class: "ml-1 cursor-pointer" %>
+                <%= f.radio_button "attendance[#{event.id}][status]", "出席", checked: attendance&.status == "出席", class: "form-radio cursor-pointer", data: { requires_note: false } %>
+                <%= f.label "attendance[#{event.id}][status]", "出席", value: "出席", class: "ml-1 cursor-pointer" %>
               </div>
 
               <div class="flex items-center space-x-1">
-                <%= f.radio_button "attendances[#{event.id}][status]", "欠席", checked: attendance&.status == "欠席", class: "form-radio cursor-pointer", data: { requires_note: true } %>
-                <%= f.label "attendances[#{event.id}][status]", "欠席", value: "欠席", class: "ml-1 cursor-pointer" %>
+                <%= f.radio_button "attendance[#{event.id}][status]", "欠席", checked: attendance&.status == "欠席", class: "form-radio cursor-pointer", data: { requires_note: true } %>
+                <%= f.label "attendance[#{event.id}][status]", "欠席", value: "欠席", class: "ml-1 cursor-pointer" %>
               </div>
 
               <div class="flex items-center space-x-1">
-                <%= f.radio_button "attendances[#{event.id}][status]", "遅刻", checked: attendance&.status == "遅刻", class: "form-radio cursor-pointer", data: { requires_note: true } %>
-                <%= f.label "attendances[#{event.id}][status]", "遅刻", value: "遅刻", class: "ml-1 cursor-pointer" %>
+                <%= f.radio_button "attendance[#{event.id}][status]", "遅刻", checked: attendance&.status == "遅刻", class: "form-radio cursor-pointer", data: { requires_note: true } %>
+                <%= f.label "attendance[#{event.id}][status]", "遅刻", value: "遅刻", class: "ml-1 cursor-pointer" %>
               </div>
             </div>
 
             <div class="mt-4">
-              <%= f.label "attendances[#{event.id}][note]", "備考", class: "block text-sm font-medium text-gray-700" %>
-              <%= f.text_area "attendances[#{event.id}][note]", value: attendance&.note, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-2 py-3", rows: 1, required: false %>
+              <%= f.label "attendance[#{event.id}][note]", "備考", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.text_area "attendance[#{event.id}][note]", value: attendance&.note, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-2 py-3", rows: 1, required: false %>
               <p class="mt-1 text-sm text-red-500">※欠席・遅刻の場合は必ず備考を入力してください</p>
             </div>
           </div>
         <% end %>
 
-        <div class="mt-6">
+        <div class="mt-6 cursor-pointer">
           <%= f.submit "すべての回答を保存", class: "bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700" %>
         </div>
       <% end %>

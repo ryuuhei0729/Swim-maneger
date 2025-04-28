@@ -92,11 +92,15 @@
               <% events.each do |event| %>
                 <div class="group">
                   <div class="bg-white/80 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
-                  <div class="p-2 rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer">
+                  <div
+                    class="p-2 rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                    data-action="click->calendar#showEventModal"
+                    data-event-id="<%= event.id %>"
+                  >
                     <div class="flex flex-col space-y-1">
                       <span class="text-xs font-medium text-gray-900"><%= event.title %></span>
                       <span class="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full self-start">
-                        出席: <%= event.attendances.count %>人
+                        出席: <%= event.attendance.count %>人
                       </span>
                     </div>
                   </div>
@@ -109,3 +113,12 @@
     </div>
   </div>
 </div> 
+
+
+<%= render 'shared/modal', modal_id: 'event-attendance-modal', title: '出席状況' do %>
+  <div id="event-attendance-modal-content">
+    <!-- ここに出席状況をAjaxで流し込む -->
+  </div>
+<% end %>
+
+

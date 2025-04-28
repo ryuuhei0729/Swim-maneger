@@ -1,6 +1,6 @@
 class AttendanceEvent < ApplicationRecord
-  has_many :attendances, dependent: :destroy
-  has_many :users, through: :attendances
+  has_many :attendance, dependent: :destroy
+  has_many :users, through: :attendance
 
   validates :title, presence: true
   validates :date, presence: true
