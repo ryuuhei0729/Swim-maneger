@@ -9,6 +9,10 @@
  * Consider organizing styles into separate files for maintainability.
  */
 
+/* ボタンのデフォルトスタイル */
+button {
+  cursor: pointer;
+}
 
 /* app/assets/stylesheets/application.css */
 
