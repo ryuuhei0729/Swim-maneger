@@ -1,24 +1,18 @@
-// app/javascript/controllers/modal_controller.js
 import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
-  static targets = ["modal"];
-
-  //一旦「モーダル外クリック閉じる」は諦めるか
-  // connect() {
-  //   this.modalTarget.classList.add("hidden");
-  //   this.modalTarget.addEventListener("click", (e) => {
-  //     if (e.target === this.modalTarget) {
-  //       this.close();
-  //     }
-  //   });
-  // }
-
-  open() {
-    this.modalTarget.classList.remove("hidden");
+  open(event) {
+    const modalId = event.currentTarget.dataset.modalId; // ボタンからdata-modal-id取得
+    const modal = document.getElementById(modalId); // idでモーダルを探す
+    if (modal) {
+      modal.classList.remove("hidden");
+    }
   }
 
-  close() {
-    this.modalTarget.classList.add("hidden");
+  close(event) {
+    const modal = event.currentTarget.closest(".fixed"); // 一番近いモーダルを探す
+    if (modal) {
+      modal.classList.add("hidden");
+    }
   }
 }
