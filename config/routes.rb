@@ -25,7 +25,10 @@ Rails.application.routes.draw do
   get 'mypage', to: 'mypage#index', as: :mypage
   patch 'mypage', to: 'mypage#update'
   get 'member', to: 'member#index', as: :member
+  
+  # 出席管理
   get 'attendance', to: 'attendance#index', as: :attendance
+  post 'attendance/update', to: 'attendance#update_attendance', as: :update_attendance
 
   # 管理者のみのページ
   get 'admin', to: 'admin#index', as: :admin
@@ -44,6 +47,7 @@ Rails.application.routes.draw do
 
   # [管理者]スケジュール管理
   get 'admin/schedule', to: 'admin#schedule', as: 'admin_schedule'
+  post 'admin/schedule', to: 'admin#create_schedule', as: 'admin_create_schedule'
   delete 'admin/schedule/:id', to: 'admin#destroy_schedule', as: 'admin_destroy_schedule'
 
   # エラーページ
