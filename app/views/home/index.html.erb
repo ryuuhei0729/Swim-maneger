@@ -46,13 +46,6 @@
     </div>
   </div>
   
-  <div data-controller="modal">
-    <%= button_tag "モーダルを開く", type: "button", data: { action: "modal#open", modal_id: "home-modal" }, class: "btn btn-primary" %>
-    <%= render 'shared/modal', modal_id: "home-modal", title: "ホーム画面のモーダル" do %>
-      <p>ここにホーム画面固有のモーダル内容を記述します。</p>
-    <% end %>
-  </div>
-
   <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
       <h2 class="text-2xl font-bold ">練習カレンダー</h2>
 
