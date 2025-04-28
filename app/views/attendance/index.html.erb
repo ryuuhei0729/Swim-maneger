@@ -7,66 +7,12 @@
   
   <div class="overflow-x-auto">
     <!-- カレンダー表示部分 -->
-    <div class="mb-8">
-      <div class="bg-white rounded-lg shadow p-4" data-controller="calendar">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold text-gray-900"><%= Time.current.strftime('%Y年%m月') %></h3>
-          <div class="flex space-x-2">
-            <button type="button" data-action="calendar#prevMonth" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
-              前月
-            </button>
-            <button type="button" data-action="calendar#nextMonth" class="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer">
-              次月
-            </button>
-          </div>
-        </div>
-        
-        <!-- カレンダーグリッド -->
-        <div class="grid grid-cols-7 gap-1">
-          <!-- 曜日ヘッダー -->
-          <div class="text-center font-medium text-gray-500 py-2">日</div>
-          <div class="text-center font-medium text-gray-500 py-2">月</div>
-          <div class="text-center font-medium text-gray-500 py-2">火</div>
-          <div class="text-center font-medium text-gray-500 py-2">水</div>
-          <div class="text-center font-medium text-gray-500 py-2">木</div>
-          <div class="text-center font-medium text-gray-500 py-2">金</div>
-          <div class="text-center font-medium text-gray-500 py-2">土</div>
-          
-          <!-- カレンダーの日付部分（仮のデータ） -->
-          <% 35.times do |i| %>
-            <div class="aspect-square border border-gray-200 p-2 hover:bg-gray-50 cursor-pointer">
-              <div class="text-sm text-gray-600"><%= i + 1 %></div>
-              <div class="text-xs text-gray-400 mt-1">出席: 0人</div>
-            </div>
-          <% end %>
-        </div>
-      </div>
-    </div>
-    
-    <!-- 出席状況一覧 -->
-    <div class="mb-8">
-      <h3 class="text-lg font-semibold text-gray-900 mb-4">出席状況一覧</h3>
-      <table class="min-w-full divide-y divide-gray-200">
-        <thead class="bg-gray-50">
-          <tr>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日付</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">出席者数</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">欠席者数</th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
-          </tr>
-        </thead>
-        <tbody class="bg-white divide-y divide-gray-200">
-          <!-- 仮のデータ -->
-          <tr>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">2025年4月19日</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15人</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">5人</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-              <button type="button" class="text-blue-600 hover:text-blue-900 cursor-pointer">詳細</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+      <h2 class="text-2xl font-bold ">練習カレンダー</h2>
+
+    <% @current_month = Date.current %>
+    <% @events_by_date = AttendanceEvent.all.order(date: :asc).group_by { |event| event.date } %>
+    <%= render 'shared/calendar' %>
+  </div>
   </div>
 </div> 
