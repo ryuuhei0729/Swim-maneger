@@ -4,7 +4,7 @@ class Createattendance < ActiveRecord::Migration[8.0]
       t.references :user, null: false, foreign_key: true
       t.references :attendance_event, null: false, foreign_key: true
       t.string :status
-      t.text :comment
+      t.text :note
 
       t.timestamps
     end

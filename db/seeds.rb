@@ -61,8 +61,8 @@ puts "Creating users..."
   puts "Created director: #{user.name}"
 end
 
-# コーチ8人作成
-8.times do |i|
+# コーチ6人作成
+6.times do |i|
   user = User.create!(
     generation: rand(73..77),
     name: "コーチ#{i+1}",
@@ -83,8 +83,8 @@ end
   puts "Created coach: #{user.name}"
 end
 
-# プレイヤー38人作成
-38.times do |i|
+# プレイヤー30人作成
+30.times do |i|
   user = User.create!(
     generation: rand(78..84),
     name: "プレイヤー#{i+1}",
@@ -251,22 +251,29 @@ puts "出席イベントの作成が完了しました"
 # 出席データの作成
 puts "出席データを作成中..."
 
-# プレイヤーユーザーを取得
-players = User.where(user_type: 'player')
+reasons_absent = ["体調不良", "家庭の事情", "学業の都合", "用事があるため", "怪我のため"]
+reasons_late = ["電車遅延", "寝坊", "授業が長引いた", "バスが遅れた", "準備に時間がかかった"]
 
 AttendanceEvent.all.each do |event|
-  # ランダムな数のプレイヤーを選択（50%〜90%が出席）
-  attending_players = players.sample(rand((players.count * 0.5)..(players.count * 0.9)))
-  
-  attending_players.each do |player|
-    # 出席ステータスをランダムに設定
+  User.all.each do |user|
+    # 50%〜90%の確率で出席データを作成
+    next unless rand < rand(0.5..0.9)
     status = ["present", "absent", "late"].sample
-    
+    note =
+      case status
+      when "absent"
+        reasons_absent.sample
+      when "late"
+        reasons_late.sample
+      else
+        nil
+      end
+
     Attendance.create!(
-      user: player,
+      user: user,
       attendance_event: event,
       status: status,
-      comment: status == "absent" ? "欠席" : nil
+      note: note
     )
   end
 end
