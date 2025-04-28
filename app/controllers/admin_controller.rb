@@ -86,6 +86,12 @@ class AdminController < ApplicationController
     end
   end
 
+  def destroy_schedule
+    @event = AttendanceEvent.find(params[:id])
+    @event.destroy
+    redirect_to admin_schedule_path, notice: 'スケジュールを削除しました。'
+  end
+
   private
 
   def check_admin_access
