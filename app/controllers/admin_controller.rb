@@ -71,6 +71,10 @@ class AdminController < ApplicationController
     redirect_to admin_announcement_path, notice: 'お知らせを削除しました。'
   end
 
+  def schedule
+    @events = AttendanceEvent.order(date: :asc)
+  end
+
   private
 
   def check_admin_access
