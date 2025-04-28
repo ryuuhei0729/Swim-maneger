@@ -71,6 +71,27 @@ class AdminController < ApplicationController
     redirect_to admin_announcement_path, notice: 'お知らせを削除しました。'
   end
 
+  def schedule
+    @events = AttendanceEvent.order(date: :asc)
+    @event = AttendanceEvent.new
+  end
+
+  def create_schedule
+    @event = AttendanceEvent.new(schedule_params)
+    if @event.save
+      redirect_to admin_schedule_path, notice: 'スケジュールを登録しました。'
+    else
+      @events = AttendanceEvent.order(date: :asc)
+      render :schedule
+    end
+  end
+
+  def destroy_schedule
+    @event = AttendanceEvent.find(params[:id])
+    @event.destroy
+    redirect_to admin_schedule_path, notice: 'スケジュールを削除しました。'
+  end
+
   private
 
   def check_admin_access
@@ -94,5 +115,9 @@ class AdminController < ApplicationController
 
   def announcement_params
     params.require(:announcement).permit(:title, :content, :is_active, :published_at)
+  end
+
+  def schedule_params
+    params.require(:attendance_event).permit(:title, :date, :place, :note)
   end
 end

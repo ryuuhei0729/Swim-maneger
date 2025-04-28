@@ -113,3 +113,8 @@ cropperjs@^2.0.0:
   dependencies:
     "@cropper/elements" "^2.0.0"
     "@cropper/utils" "^2.0.0"
+
+tw-elements@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/tw-elements/-/tw-elements-2.0.0.tgz"
+  integrity sha512-aiitkqzmCZIZ9zJr3V6ErVzU/CrKoAkptpv94t0pEKnVn2Ah4jOplXOO/v6Fo9jr3PoTA5dxvlyS4w8rnW/iag==

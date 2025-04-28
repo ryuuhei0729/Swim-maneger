@@ -42,6 +42,10 @@ Rails.application.routes.draw do
   get 'admin/announcement', to: 'admin#announcement', as: 'admin_announcement'
   post 'admin/announcement', to: 'admin#create_announcement'
 
+  # [管理者]スケジュール管理
+  get 'admin/schedule', to: 'admin#schedule', as: 'admin_schedule'
+  delete 'admin/schedule/:id', to: 'admin#destroy_schedule', as: 'admin_destroy_schedule'
+
   # エラーページ
   match '/404', to: 'errors#not_found', via: :all
   match '/500', to: 'errors#internal_server_error', via: :all
