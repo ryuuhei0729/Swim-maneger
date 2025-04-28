@@ -66,7 +66,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_04_28_162535) do
     t.bigint "user_id", null: false
     t.bigint "attendance_event_id", null: false
     t.string "status"
-    t.text "comment"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "note"
