@@ -6,17 +6,22 @@
   </div>
 
   <div class="mb-4 border-b border-gray-200">
-    <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="genderTabs" role="tablist">
-      <li class="mr-2" role="presentation">
-        <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'all' ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="all-tab" data-tabs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="<%= @default_tab == 'all' %>">全体</button>
-      </li>
-      <li class="mr-2" role="presentation">
-        <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'male' ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="male-tab" data-tabs-target="#male" type="button" role="tab" aria-controls="male" aria-selected="<%= @default_tab == 'male' %>">男子</button>
-      </li>
-      <li class="mr-2" role="presentation">
-        <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'female' ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="female-tab" data-tabs-target="#female" type="button" role="tab" aria-controls="female" aria-selected="<%= @default_tab == 'female' %>">女子</button>
-      </li>
-    </ul>
+    <div class="flex items-center justify-between">
+      <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="genderTabs" role="tablist">
+        <li class="mr-2" role="presentation">
+          <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'all' ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="all-tab" data-tabs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="<%= @default_tab == 'all' %>">全体</button>
+        </li>
+        <li class="mr-2" role="presentation">
+          <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'male' ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="male-tab" data-tabs-target="#male" type="button" role="tab" aria-controls="male" aria-selected="<%= @default_tab == 'male' %>">男子</button>
+        </li>
+        <li class="mr-2" role="presentation">
+          <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'female' ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="female-tab" data-tabs-target="#female" type="button" role="tab" aria-controls="female" aria-selected="<%= @default_tab == 'female' %>">女子</button>
+        </li>
+      </ul>
+      <div class="text-sm text-red-600">
+        <p>※種目をクリックすると、タイム順（昇順）に並び替えられます</p>
+      </div>
+    </div>
   </div>
 
   <div id="genderTabContent">
@@ -43,7 +48,7 @@
             </tr>
             <tr>
               <% @events.each do |event| %>
-                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider"
+                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider cursor-pointer hover:bg-gray-200"
                     style="background-color: <%= case event[:style]
                       when '自由形' then '#fde047'  # yellow-200
                       when '平泳ぎ' then '#86efac'  # green-200
@@ -51,21 +56,26 @@
                       when 'バタフライ' then '#93c5fd'  # blue-200
                       when '個人メドレー' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
-                    end %>">
+                    end %>"
+                    data-sort-by="<%= event[:id] %>"
+                    data-sort-direction="<%= @sort_direction %>">
                   <%= event[:title].match(/\d+m/)[0] %>
+                  <% if @sort_by == event[:id] %>
+                    <span class="ml-1">
+                      <%= @sort_direction == 'asc' ? '↑' : '↓' %>
+                    </span>
+                  <% end %>
                 </th>
               <% end %>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <% @players_by_generation.each do |generation, players| %>
-              <% players.each_with_index do |player, index| %>
+            <% if @sort_by.present? %>
+              <% @players.each do |player| %>
                 <tr class="hover:bg-gray-50">
-                  <% if index == 0 %>
-                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10" rowspan="<%= players.size %>">
-                      <%= generation %>期
-                    </td>
-                  <% end %>
+                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                    <%= player.generation %>期
+                  </td>
                   <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
                     <%= player.name %>
                   </td>
@@ -88,6 +98,37 @@
                     </td>
                   <% end %>
                 </tr>
+              <% end %>
+            <% else %>
+              <% @players_by_generation.each do |generation, players| %>
+                <% players.each do |player| %>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                      <%= generation %>期
+                    </td>
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                      <%= player.name %>
+                    </td>
+                    <% @events.each do |event| %>
+                      <td class="px-2 py-2 whitespace-nowrap text-center"
+                          style="background-color: <%= case event[:style]
+                            when '自由形' then '#fefce8'  # yellow-50
+                            when '平泳ぎ' then '#f0fdf4'  # green-50
+                            when '背泳ぎ' then '#fef2f2'  # red-50
+                            when 'バタフライ' then '#eff6ff'  # blue-50
+                            when '個人メドレー' then '#faf5ff'  # purple-50
+                            else '#f3f4f6'  # gray-100
+                          end %>">
+                        <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
+                        <% if best_time %>
+                          <%= best_time.send(event[:id]) %>
+                        <% else %>
+                          -
+                        <% end %>
+                      </td>
+                    <% end %>
+                  </tr>
+                <% end %>
               <% end %>
             <% end %>
           </tbody>
@@ -118,7 +159,7 @@
             </tr>
             <tr>
               <% @events.each do |event| %>
-                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider"
+                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider cursor-pointer hover:bg-gray-200"
                     style="background-color: <%= case event[:style]
                       when '自由形' then '#fde047'  # yellow-200
                       when '平泳ぎ' then '#86efac'  # green-200
@@ -126,22 +167,26 @@
                       when 'バタフライ' then '#93c5fd'  # blue-200
                       when '個人メドレー' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
-                    end %>">
+                    end %>"
+                    data-sort-by="<%= event[:id] %>"
+                    data-sort-direction="<%= @sort_direction %>">
                   <%= event[:title].match(/\d+m/)[0] %>
+                  <% if @sort_by == event[:id] %>
+                    <span class="ml-1">
+                      <%= @sort_direction == 'asc' ? '↑' : '↓' %>
+                    </span>
+                  <% end %>
                 </th>
               <% end %>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <% @players_by_generation.each do |generation, players| %>
-              <% male_players = players.select { |p| p.gender == 'male' } %>
-              <% male_players.each_with_index do |player, index| %>
+            <% if @sort_by.present? %>
+              <% @male_players.each do |player| %>
                 <tr class="hover:bg-gray-50">
-                  <% if index == 0 %>
-                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10" rowspan="<%= male_players.size %>">
-                      <%= generation %>期
-                    </td>
-                  <% end %>
+                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                    <%= player.generation %>期
+                  </td>
                   <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
                     <%= player.name %>
                   </td>
@@ -164,6 +209,37 @@
                     </td>
                   <% end %>
                 </tr>
+              <% end %>
+            <% else %>
+              <% @male_players_by_generation.each do |generation, players| %>
+                <% players.each do |player| %>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                      <%= generation %>期
+                    </td>
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                      <%= player.name %>
+                    </td>
+                    <% @events.each do |event| %>
+                      <td class="px-2 py-2 whitespace-nowrap text-center"
+                          style="background-color: <%= case event[:style]
+                            when '自由形' then '#fefce8'  # yellow-50
+                            when '平泳ぎ' then '#f0fdf4'  # green-50
+                            when '背泳ぎ' then '#fef2f2'  # red-50
+                            when 'バタフライ' then '#eff6ff'  # blue-50
+                            when '個人メドレー' then '#faf5ff'  # purple-50
+                            else '#f3f4f6'  # gray-100
+                          end %>">
+                        <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
+                        <% if best_time %>
+                          <%= best_time.send(event[:id]) %>
+                        <% else %>
+                          -
+                        <% end %>
+                      </td>
+                    <% end %>
+                  </tr>
+                <% end %>
               <% end %>
             <% end %>
           </tbody>
@@ -194,7 +270,7 @@
             </tr>
             <tr>
               <% @events.each do |event| %>
-                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider"
+                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider cursor-pointer hover:bg-gray-200"
                     style="background-color: <%= case event[:style]
                       when '自由形' then '#fde047'  # yellow-200
                       when '平泳ぎ' then '#86efac'  # green-200
@@ -202,22 +278,26 @@
                       when 'バタフライ' then '#93c5fd'  # blue-200
                       when '個人メドレー' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
-                    end %>">
+                    end %>"
+                    data-sort-by="<%= event[:id] %>"
+                    data-sort-direction="<%= @sort_direction %>">
                   <%= event[:title].match(/\d+m/)[0] %>
+                  <% if @sort_by == event[:id] %>
+                    <span class="ml-1">
+                      <%= @sort_direction == 'asc' ? '↑' : '↓' %>
+                    </span>
+                  <% end %>
                 </th>
               <% end %>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <% @players_by_generation.each do |generation, players| %>
-              <% female_players = players.select { |p| p.gender == 'female' } %>
-              <% female_players.each_with_index do |player, index| %>
+            <% if @sort_by.present? %>
+              <% @female_players.each do |player| %>
                 <tr class="hover:bg-gray-50">
-                  <% if index == 0 %>
-                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10" rowspan="<%= female_players.size %>">
-                      <%= generation %>期
-                    </td>
-                  <% end %>
+                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                    <%= player.generation %>期
+                  </td>
                   <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
                     <%= player.name %>
                   </td>
@@ -241,6 +321,37 @@
                   <% end %>
                 </tr>
               <% end %>
+            <% else %>
+              <% @female_players_by_generation.each do |generation, players| %>
+                <% players.each do |player| %>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                      <%= generation %>期
+                    </td>
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                      <%= player.name %>
+                    </td>
+                    <% @events.each do |event| %>
+                      <td class="px-2 py-2 whitespace-nowrap text-center"
+                          style="background-color: <%= case event[:style]
+                            when '自由形' then '#fefce8'  # yellow-50
+                            when '平泳ぎ' then '#f0fdf4'  # green-50
+                            when '背泳ぎ' then '#fef2f2'  # red-50
+                            when 'バタフライ' then '#eff6ff'  # blue-50
+                            when '個人メドレー' then '#faf5ff'  # purple-50
+                            else '#f3f4f6'  # gray-100
+                          end %>">
+                        <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
+                        <% if best_time %>
+                          <%= best_time.send(event[:id]) %>
+                        <% else %>
+                          -
+                        <% end %>
+                      </td>
+                    <% end %>
+                  </tr>
+                <% end %>
+              <% end %>
             <% end %>
           </tbody>
         </table>
@@ -253,10 +364,13 @@
   document.addEventListener('DOMContentLoaded', function() {
     const tabs = document.querySelectorAll('[data-tabs-target]');
     const tabContents = document.querySelectorAll('[role="tabpanel"]');
+    const sortHeaders = document.querySelectorAll('th[data-sort-by]');
 
+    // タブ切り替え
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
         const target = document.querySelector(tab.dataset.tabsTarget);
+        const tabId = tab.id.replace('-tab', '');
         
         // Hide all tab contents
         tabContents.forEach(content => {
@@ -274,6 +388,38 @@
         
         tab.classList.remove('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
         tab.classList.add('border-blue-600', 'text-blue-600', 'bg-blue-50');
+
+        // URLパラメータを更新
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tabId);
+        window.history.pushState({}, '', url);
+      });
+    });
+
+    // 並び替え
+    sortHeaders.forEach(header => {
+      header.addEventListener('click', () => {
+        const sortBy = header.dataset.sortBy;
+        const currentSortBy = new URLSearchParams(window.location.search).get('sort_by');
+        const currentTab = new URLSearchParams(window.location.search).get('tab') || '<%= @default_tab %>';
+        
+        // URLパラメータを更新
+        const url = new URL(window.location.href);
+        
+        if (currentSortBy === sortBy) {
+          // 同じヘッダーを再度クリックした場合は並び替えを解除
+          url.searchParams.delete('sort_by');
+          url.searchParams.delete('sort_direction');
+        } else {
+          // 新しいヘッダーをクリックした場合は並び替えを適用
+          url.searchParams.set('sort_by', sortBy);
+          url.searchParams.set('sort_direction', 'asc');
+        }
+
+        // 現在のタブを保持
+        url.searchParams.set('tab', currentTab);
+        
+        window.location.href = url.toString();
       });
     });
   });
