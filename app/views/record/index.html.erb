@@ -25,16 +25,16 @@
         <table class="min-w-full divide-y divide-gray-200 text-xs">
           <thead>
             <tr>
-              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10" rowspan="2">世代</th>
-              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10" rowspan="2">選手名</th>
+              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-900 uppercase tracking-wider sticky left-0 z-10" rowspan="2">世代</th>
+              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-900 uppercase tracking-wider sticky left-0 z-10" rowspan="2">選手名</th>
               <% @events.group_by { |e| e[:style] }.each do |style, events| %>
-                <th class="px-2 py-2 text-center font-medium text-gray-500 uppercase tracking-wider" colspan="<%= events.size %>"
+                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider" colspan="<%= events.size %>"
                     style="background-color: <%= case style
-                      when '自由形' then '#facc15'  # yellow-400
-                      when '平泳ぎ' then '#4ade80'  # green-400
-                      when '背泳ぎ' then '#f87171'  # red-400
-                      when 'バタフライ' then '#60a5fa'  # blue-400
-                      when '個人メドレー' then '#c084fc'  # purple-400
+                      when '自由形' then '#fde047'  # yellow-200
+                      when '平泳ぎ' then '#86efac'  # green-200
+                      when '背泳ぎ' then '#fca5a5'  # red-200
+                      when 'バタフライ' then '#93c5fd'  # blue-200
+                      when '個人メドレー' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>">
                   <%= style %>
@@ -43,13 +43,13 @@
             </tr>
             <tr>
               <% @events.each do |event| %>
-                <th class="px-2 py-2 text-center font-medium text-gray-500 uppercase tracking-wider"
+                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider"
                     style="background-color: <%= case event[:style]
-                      when '自由形' then '#facc15'  # yellow-400
-                      when '平泳ぎ' then '#4ade80'  # green-400
-                      when '背泳ぎ' then '#f87171'  # red-400
-                      when 'バタフライ' then '#60a5fa'  # blue-400
-                      when '個人メドレー' then '#c084fc'  # purple-400
+                      when '自由形' then '#fde047'  # yellow-200
+                      when '平泳ぎ' then '#86efac'  # green-200
+                      when '背泳ぎ' then '#fca5a5'  # red-200
+                      when 'バタフライ' then '#93c5fd'  # blue-200
+                      when '個人メドレー' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>">
                   <%= event[:title].match(/\d+m/)[0] %>
@@ -100,16 +100,16 @@
         <table class="min-w-full divide-y divide-gray-200 text-xs">
           <thead>
             <tr>
-              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10" rowspan="2">世代</th>
-              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10" rowspan="2">選手名</th>
+              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-900 uppercase tracking-wider sticky left-0 z-10" rowspan="2">世代</th>
+              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-900 uppercase tracking-wider sticky left-0 z-10" rowspan="2">選手名</th>
               <% @events.group_by { |e| e[:style] }.each do |style, events| %>
-                <th class="px-2 py-2 text-center font-medium text-gray-500 uppercase tracking-wider" colspan="<%= events.size %>"
+                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider" colspan="<%= events.size %>"
                     style="background-color: <%= case style
-                      when '自由形' then '#facc15'  # yellow-400
-                      when '平泳ぎ' then '#4ade80'  # green-400
-                      when '背泳ぎ' then '#f87171'  # red-400
-                      when 'バタフライ' then '#60a5fa'  # blue-400
-                      when '個人メドレー' then '#c084fc'  # purple-400
+                      when '自由形' then '#fde047'  # yellow-200
+                      when '平泳ぎ' then '#86efac'  # green-200
+                      when '背泳ぎ' then '#fca5a5'  # red-200
+                      when 'バタフライ' then '#93c5fd'  # blue-200
+                      when '個人メドレー' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>">
                   <%= style %>
@@ -118,13 +118,13 @@
             </tr>
             <tr>
               <% @events.each do |event| %>
-                <th class="px-2 py-2 text-center font-medium text-gray-500 uppercase tracking-wider"
+                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider"
                     style="background-color: <%= case event[:style]
-                      when '自由形' then '#facc15'  # yellow-400
-                      when '平泳ぎ' then '#4ade80'  # green-400
-                      when '背泳ぎ' then '#f87171'  # red-400
-                      when 'バタフライ' then '#60a5fa'  # blue-400
-                      when '個人メドレー' then '#c084fc'  # purple-400
+                      when '自由形' then '#fde047'  # yellow-200
+                      when '平泳ぎ' then '#86efac'  # green-200
+                      when '背泳ぎ' then '#fca5a5'  # red-200
+                      when 'バタフライ' then '#93c5fd'  # blue-200
+                      when '個人メドレー' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>">
                   <%= event[:title].match(/\d+m/)[0] %>
@@ -176,16 +176,16 @@
         <table class="min-w-full divide-y divide-gray-200 text-xs">
           <thead>
             <tr>
-              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10" rowspan="2">世代</th>
-              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10" rowspan="2">選手名</th>
+              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-900 uppercase tracking-wider sticky left-0 z-10" rowspan="2">世代</th>
+              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-900 uppercase tracking-wider sticky left-0 z-10" rowspan="2">選手名</th>
               <% @events.group_by { |e| e[:style] }.each do |style, events| %>
-                <th class="px-2 py-2 text-center font-medium text-gray-500 uppercase tracking-wider" colspan="<%= events.size %>"
+                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider" colspan="<%= events.size %>"
                     style="background-color: <%= case style
-                      when '自由形' then '#facc15'  # yellow-400
-                      when '平泳ぎ' then '#4ade80'  # green-400
-                      when '背泳ぎ' then '#f87171'  # red-400
-                      when 'バタフライ' then '#60a5fa'  # blue-400
-                      when '個人メドレー' then '#c084fc'  # purple-400
+                      when '自由形' then '#fde047'  # yellow-200
+                      when '平泳ぎ' then '#86efac'  # green-200
+                      when '背泳ぎ' then '#fca5a5'  # red-200
+                      when 'バタフライ' then '#93c5fd'  # blue-200
+                      when '個人メドレー' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>">
                   <%= style %>
@@ -194,13 +194,13 @@
             </tr>
             <tr>
               <% @events.each do |event| %>
-                <th class="px-2 py-2 text-center font-medium text-gray-500 uppercase tracking-wider"
+                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider"
                     style="background-color: <%= case event[:style]
-                      when '自由形' then '#facc15'  # yellow-400
-                      when '平泳ぎ' then '#4ade80'  # green-400
-                      when '背泳ぎ' then '#f87171'  # red-400
-                      when 'バタフライ' then '#60a5fa'  # blue-400
-                      when '個人メドレー' then '#c084fc'  # purple-400
+                      when '自由形' then '#fde047'  # yellow-200
+                      when '平泳ぎ' then '#86efac'  # green-200
+                      when '背泳ぎ' then '#fca5a5'  # red-200
+                      when 'バタフライ' then '#93c5fd'  # blue-200
+                      when '個人メドレー' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>">
                   <%= event[:title].match(/\d+m/)[0] %>
