@@ -5,52 +5,276 @@
     <h2 class="text-2xl font-bold text-gray-900">ベストタイム</h2>
   </div>
 
-  <div class="overflow-x-auto">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead>
-        <tr>
-          <th class="px-4 py-3 bg-gray-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10" rowspan="2">世代</th>
-          <th class="px-4 py-3 bg-gray-100 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10" rowspan="2">選手名</th>
-          <% @events.group_by { |e| e[:style] }.each do |style, events| %>
-            <th class="px-4 py-3 bg-gray-100 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" colspan="<%= events.size %>">
-              <%= style %>
-            </th>
-          <% end %>
-        </tr>
-        <tr>
-          <% @events.each do |event| %>
-            <th class="px-4 py-3 bg-gray-100 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-              <%= event[:title].match(/\d+m/)[0] %>
-            </th>
-          <% end %>
-        </tr>
-      </thead>
-      <tbody class="bg-white divide-y divide-gray-200">
-        <% @players_by_generation.each do |generation, players| %>
-          <% players.each_with_index do |player, index| %>
-            <tr class="hover:bg-gray-50">
-              <% if index == 0 %>
-                <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10" rowspan="<%= players.size %>">
-                  <%= generation %>期
-                </td>
-              <% end %>
-              <td class="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900 sticky left-0 bg-white z-10">
-                <%= player.name %>
-              </td>
-              <% @events.each do |event| %>
-                <td class="px-4 py-3 whitespace-nowrap text-sm text-center">
-                  <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
-                  <% if best_time %>
-                    <%= best_time.send(event[:id]) %>
-                  <% else %>
-                    -
-                  <% end %>
-                </td>
+  <div class="mb-4 border-b border-gray-200">
+    <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="genderTabs" role="tablist">
+      <li class="mr-2" role="presentation">
+        <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'all' ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="all-tab" data-tabs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="<%= @default_tab == 'all' %>">全体</button>
+      </li>
+      <li class="mr-2" role="presentation">
+        <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'male' ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="male-tab" data-tabs-target="#male" type="button" role="tab" aria-controls="male" aria-selected="<%= @default_tab == 'male' %>">男子</button>
+      </li>
+      <li class="mr-2" role="presentation">
+        <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'female' ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="female-tab" data-tabs-target="#female" type="button" role="tab" aria-controls="female" aria-selected="<%= @default_tab == 'female' %>">女子</button>
+      </li>
+    </ul>
+  </div>
+
+  <div id="genderTabContent">
+    <div class="<%= @default_tab == 'all' ? '' : 'hidden' %> p-4 rounded-lg bg-gray-50" id="all" role="tabpanel" aria-labelledby="all-tab">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-xs">
+          <thead>
+            <tr>
+              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10" rowspan="2">世代</th>
+              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10" rowspan="2">選手名</th>
+              <% @events.group_by { |e| e[:style] }.each do |style, events| %>
+                <th class="px-2 py-2 text-center font-medium text-gray-500 uppercase tracking-wider" colspan="<%= events.size %>"
+                    style="background-color: <%= case style
+                      when '自由形' then '#facc15'  # yellow-400
+                      when '平泳ぎ' then '#4ade80'  # green-400
+                      when '背泳ぎ' then '#f87171'  # red-400
+                      when 'バタフライ' then '#60a5fa'  # blue-400
+                      when '個人メドレー' then '#c084fc'  # purple-400
+                      else '#f3f4f6'  # gray-100
+                    end %>">
+                  <%= style %>
+                </th>
               <% end %>
             </tr>
-          <% end %>
-        <% end %>
-      </tbody>
-    </table>
+            <tr>
+              <% @events.each do |event| %>
+                <th class="px-2 py-2 text-center font-medium text-gray-500 uppercase tracking-wider"
+                    style="background-color: <%= case event[:style]
+                      when '自由形' then '#facc15'  # yellow-400
+                      when '平泳ぎ' then '#4ade80'  # green-400
+                      when '背泳ぎ' then '#f87171'  # red-400
+                      when 'バタフライ' then '#60a5fa'  # blue-400
+                      when '個人メドレー' then '#c084fc'  # purple-400
+                      else '#f3f4f6'  # gray-100
+                    end %>">
+                  <%= event[:title].match(/\d+m/)[0] %>
+                </th>
+              <% end %>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @players_by_generation.each do |generation, players| %>
+              <% players.each_with_index do |player, index| %>
+                <tr class="hover:bg-gray-50">
+                  <% if index == 0 %>
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10" rowspan="<%= players.size %>">
+                      <%= generation %>期
+                    </td>
+                  <% end %>
+                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                    <%= player.name %>
+                  </td>
+                  <% @events.each do |event| %>
+                    <td class="px-2 py-2 whitespace-nowrap text-center"
+                        style="background-color: <%= case event[:style]
+                          when '自由形' then '#fefce8'  # yellow-50
+                          when '平泳ぎ' then '#f0fdf4'  # green-50
+                          when '背泳ぎ' then '#fef2f2'  # red-50
+                          when 'バタフライ' then '#eff6ff'  # blue-50
+                          when '個人メドレー' then '#faf5ff'  # purple-50
+                          else '#f3f4f6'  # gray-100
+                        end %>">
+                      <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
+                      <% if best_time %>
+                        <%= best_time.send(event[:id]) %>
+                      <% else %>
+                        -
+                      <% end %>
+                    </td>
+                  <% end %>
+                </tr>
+              <% end %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="<%= @default_tab == 'male' ? '' : 'hidden' %> p-4 rounded-lg bg-gray-50" id="male" role="tabpanel" aria-labelledby="male-tab">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-xs">
+          <thead>
+            <tr>
+              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10" rowspan="2">世代</th>
+              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10" rowspan="2">選手名</th>
+              <% @events.group_by { |e| e[:style] }.each do |style, events| %>
+                <th class="px-2 py-2 text-center font-medium text-gray-500 uppercase tracking-wider" colspan="<%= events.size %>"
+                    style="background-color: <%= case style
+                      when '自由形' then '#facc15'  # yellow-400
+                      when '平泳ぎ' then '#4ade80'  # green-400
+                      when '背泳ぎ' then '#f87171'  # red-400
+                      when 'バタフライ' then '#60a5fa'  # blue-400
+                      when '個人メドレー' then '#c084fc'  # purple-400
+                      else '#f3f4f6'  # gray-100
+                    end %>">
+                  <%= style %>
+                </th>
+              <% end %>
+            </tr>
+            <tr>
+              <% @events.each do |event| %>
+                <th class="px-2 py-2 text-center font-medium text-gray-500 uppercase tracking-wider"
+                    style="background-color: <%= case event[:style]
+                      when '自由形' then '#facc15'  # yellow-400
+                      when '平泳ぎ' then '#4ade80'  # green-400
+                      when '背泳ぎ' then '#f87171'  # red-400
+                      when 'バタフライ' then '#60a5fa'  # blue-400
+                      when '個人メドレー' then '#c084fc'  # purple-400
+                      else '#f3f4f6'  # gray-100
+                    end %>">
+                  <%= event[:title].match(/\d+m/)[0] %>
+                </th>
+              <% end %>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @players_by_generation.each do |generation, players| %>
+              <% male_players = players.select { |p| p.gender == 'male' } %>
+              <% male_players.each_with_index do |player, index| %>
+                <tr class="hover:bg-gray-50">
+                  <% if index == 0 %>
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10" rowspan="<%= male_players.size %>">
+                      <%= generation %>期
+                    </td>
+                  <% end %>
+                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                    <%= player.name %>
+                  </td>
+                  <% @events.each do |event| %>
+                    <td class="px-2 py-2 whitespace-nowrap text-center"
+                        style="background-color: <%= case event[:style]
+                          when '自由形' then '#fefce8'  # yellow-50
+                          when '平泳ぎ' then '#f0fdf4'  # green-50
+                          when '背泳ぎ' then '#fef2f2'  # red-50
+                          when 'バタフライ' then '#eff6ff'  # blue-50
+                          when '個人メドレー' then '#faf5ff'  # purple-50
+                          else '#f3f4f6'  # gray-100
+                        end %>">
+                      <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
+                      <% if best_time %>
+                        <%= best_time.send(event[:id]) %>
+                      <% else %>
+                        -
+                      <% end %>
+                    </td>
+                  <% end %>
+                </tr>
+              <% end %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="<%= @default_tab == 'female' ? '' : 'hidden' %> p-4 rounded-lg bg-gray-50" id="female" role="tabpanel" aria-labelledby="female-tab">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200 text-xs">
+          <thead>
+            <tr>
+              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10" rowspan="2">世代</th>
+              <th class="px-2 py-2 bg-gray-100 text-left font-medium text-gray-500 uppercase tracking-wider sticky left-0 z-10" rowspan="2">選手名</th>
+              <% @events.group_by { |e| e[:style] }.each do |style, events| %>
+                <th class="px-2 py-2 text-center font-medium text-gray-500 uppercase tracking-wider" colspan="<%= events.size %>"
+                    style="background-color: <%= case style
+                      when '自由形' then '#facc15'  # yellow-400
+                      when '平泳ぎ' then '#4ade80'  # green-400
+                      when '背泳ぎ' then '#f87171'  # red-400
+                      when 'バタフライ' then '#60a5fa'  # blue-400
+                      when '個人メドレー' then '#c084fc'  # purple-400
+                      else '#f3f4f6'  # gray-100
+                    end %>">
+                  <%= style %>
+                </th>
+              <% end %>
+            </tr>
+            <tr>
+              <% @events.each do |event| %>
+                <th class="px-2 py-2 text-center font-medium text-gray-500 uppercase tracking-wider"
+                    style="background-color: <%= case event[:style]
+                      when '自由形' then '#facc15'  # yellow-400
+                      when '平泳ぎ' then '#4ade80'  # green-400
+                      when '背泳ぎ' then '#f87171'  # red-400
+                      when 'バタフライ' then '#60a5fa'  # blue-400
+                      when '個人メドレー' then '#c084fc'  # purple-400
+                      else '#f3f4f6'  # gray-100
+                    end %>">
+                  <%= event[:title].match(/\d+m/)[0] %>
+                </th>
+              <% end %>
+            </tr>
+          </thead>
+          <tbody class="bg-white divide-y divide-gray-200">
+            <% @players_by_generation.each do |generation, players| %>
+              <% female_players = players.select { |p| p.gender == 'female' } %>
+              <% female_players.each_with_index do |player, index| %>
+                <tr class="hover:bg-gray-50">
+                  <% if index == 0 %>
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10" rowspan="<%= female_players.size %>">
+                      <%= generation %>期
+                    </td>
+                  <% end %>
+                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                    <%= player.name %>
+                  </td>
+                  <% @events.each do |event| %>
+                    <td class="px-2 py-2 whitespace-nowrap text-center"
+                        style="background-color: <%= case event[:style]
+                          when '自由形' then '#fefce8'  # yellow-50
+                          when '平泳ぎ' then '#f0fdf4'  # green-50
+                          when '背泳ぎ' then '#fef2f2'  # red-50
+                          when 'バタフライ' then '#eff6ff'  # blue-50
+                          when '個人メドレー' then '#faf5ff'  # purple-50
+                          else '#f3f4f6'  # gray-100
+                        end %>">
+                      <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
+                      <% if best_time %>
+                        <%= best_time.send(event[:id]) %>
+                      <% else %>
+                        -
+                      <% end %>
+                    </td>
+                  <% end %>
+                </tr>
+              <% end %>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
-</div> 
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const tabs = document.querySelectorAll('[data-tabs-target]');
+    const tabContents = document.querySelectorAll('[role="tabpanel"]');
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        const target = document.querySelector(tab.dataset.tabsTarget);
+        
+        // Hide all tab contents
+        tabContents.forEach(content => {
+          content.classList.add('hidden');
+        });
+        
+        // Show the selected tab content
+        target.classList.remove('hidden');
+        
+        // Update tab styles
+        tabs.forEach(t => {
+          t.classList.remove('border-blue-600', 'text-blue-600', 'bg-blue-50');
+          t.classList.add('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
+        });
+        
+        tab.classList.remove('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
+        tab.classList.add('border-blue-600', 'text-blue-600', 'bg-blue-50');
+      });
+    });
+  });
+</script> 
