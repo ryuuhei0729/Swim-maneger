@@ -32,6 +32,13 @@ Rails.application.routes.draw do
   post 'attendance/update', to: 'attendance#update_attendance', as: :update_attendance
   get 'attendance/event_status/:event_id', to: 'attendance#event_status', as: :event_status
 
+  # イベント管理
+  resources :events do
+    member do
+      patch :update_attendance
+    end
+  end
+
   # 管理者のみのページ
   get 'admin', to: 'admin#index', as: :admin
   get 'admin/index'

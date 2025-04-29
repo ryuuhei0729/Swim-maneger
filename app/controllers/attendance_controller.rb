@@ -41,18 +41,13 @@ class AttendanceController < ApplicationController
   end
 
   def update_attendance
-    begin
-      ActiveRecord::Base.transaction do
-        params[:attendance].each do |event_id, attendance_params|
-          event = AttendanceEvent.find(event_id)
-          attendance = current_user_auth.user.attendance.find_or_initialize_by(attendance_event: event)
-          attendance.update!(attendance_params.permit(:status, :note))
-        end
-      end
-      redirect_to attendance_path, notice: '出席情報を更新しました。'
-    rescue ActiveRecord::RecordInvalid => e
-      Rails.logger.error "Attendance update failed: #{e.message}"
-      redirect_to attendance_path, alert: "出席情報の更新に失敗しました: #{e.message}"
+    @event = AttendanceEvent.find(params[:id])
+    attendance = current_user_auth.user.attendance.find_or_initialize_by(attendance_event: @event)
+    
+    if attendance.update(attendance_params)
+      redirect_to event_status_attendance_path(@event), notice: '出席状況を更新しました。'
+    else
+      redirect_to event_status_attendance_path(@event), alert: '出席状況の更新に失敗しました。'
     end
   end
 
@@ -65,8 +60,6 @@ class AttendanceController < ApplicationController
   private
 
   def attendance_params
-    params.require(:attendance).permit!
+    params.require(:attendance).permit(:status, :note)
   end
-
-  
 end 
