@@ -25,6 +25,7 @@ Rails.application.routes.draw do
   get 'mypage', to: 'mypage#index', as: :mypage
   patch 'mypage', to: 'mypage#update'
   get 'member', to: 'member#index', as: :member
+  get 'record', to: 'record#index', as: :record
   
   # 出席管理
   get 'attendance', to: 'attendance#index', as: :attendance
@@ -60,4 +61,5 @@ Rails.application.routes.draw do
   match '*path', to: 'errors#not_found', via: :all
 
   post 'calendar/update', to: 'calendar#update'
+
 end
