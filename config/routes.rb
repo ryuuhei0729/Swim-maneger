@@ -1,8 +1,6 @@
 Rails.application.routes.draw do
   # ルートパス
-  devise_scope :user_auth do
-    root to: 'user_auths/sessions#new'
-  end
+  root to: 'landing#index'
 
   # 認証関連
   devise_for :user_auths, controllers: {
