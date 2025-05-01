@@ -1,33 +1,7 @@
 # README
-
-This README would normally document whatever steps are necessary to get the
-application up and running.
-
-Things you may want to cover:
-
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
-
-# Swim Manager
-
 ## 開発環境のセットアップ
 
-### Dockerを使用する場合（推奨）
+### Dockerを使用します
 
 1. DockerとDocker Composeをインストール
    - [Docker Desktop](https://www.docker.com/products/docker-desktop)をダウンロードしてインストール
@@ -35,21 +9,26 @@ Things you may want to cover:
 2. リポジトリをクローン
    ```bash
    git clone https://github.com/your-username/swim_manager.git
+   ```
+
+3. ディレクトリ内に移動
+   ```bash
    cd swim_manager
    ```
 
-3. Dockerコンテナを起動
+4. Dockerコンテナを起動
    ```bash
    docker-compose up --build
    ```
 
-4. データベースのセットアップ
+5. データベースのセットアップ（新規ウィンドウを開いて操作）
    ```bash
    docker-compose exec web rails db:create db:migrate
    ```
 
-5. ブラウザでアクセス
+6. ブラウザでアクセス
    - http://localhost:3000 にアクセス
+
 
 ### トラブルシューティング
 
