@@ -1,6 +1,10 @@
 class Attendance < ApplicationRecord
+  self.table_name = 'attendance'
+  
   belongs_to :user
   belongs_to :attendance_event
+
+  enum :status, { present: 'present', absent: 'absent', late: 'late' }
 
   validates :status, presence: true
   validates :user_id, uniqueness: { scope: :attendance_event_id }
@@ -9,8 +13,8 @@ class Attendance < ApplicationRecord
   private
 
   def note_required_for_absence_or_late
-    if (status == "欠席" || status == "遅刻") && note.blank?
-      errors.add(:note, "を入力してください")
+    if (absent? || late?) && note.blank?
+      errors.add(:note, :required_for_absence_or_late)
     end
   end
 end
