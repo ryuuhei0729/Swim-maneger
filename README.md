@@ -1,7 +1,5 @@
 # README
-## 開発環境のセットアップ
-
-### Dockerを使用します
+## Dockerを使用した開発環境のセットアップ
 
 1. DockerとDocker Composeをインストール
    - [Docker Desktop](https://www.docker.com/products/docker-desktop)をダウンロードしてインストール
