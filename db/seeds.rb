@@ -29,12 +29,12 @@ GENDERS = ['male', 'female']
 
 # データベースをクリア
 puts "データベースをクリアしています..."
-Attendance.destroy_all
-AttendanceEvent.destroy_all
-BestTimeTable.destroy_all
-Announcement.destroy_all
-User.destroy_all
-UserAuth.destroy_all
+# Attendance.destroy_all
+# AttendanceEvent.destroy_all
+# BestTimeTable.destroy_all
+# Announcement.destroy_all
+# User.destroy_all
+# UserAuth.destroy_all
 
 # ユーザー作成
 puts "Creating users..."
@@ -258,12 +258,12 @@ AttendanceEvent.all.each do |event|
   User.all.each do |user|
     # 50%〜90%の確率で出席データを作成
     next unless rand < rand(0.5..0.9)
-    status = ["present", "absent", "late"].sample
+    status = [:present, :absent, :late].sample
     note =
       case status
-      when "absent"
+      when :absent
         reasons_absent.sample
-      when "late"
+      when :late
         reasons_late.sample
       else
         nil
