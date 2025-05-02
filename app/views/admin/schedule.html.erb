@@ -30,7 +30,7 @@
         <div class="flex justify-between items-center mb-6">
           <h3 class="text-lg font-medium text-gray-900">スケジュール一覧</h3>
           <div data-controller="modal">
-            <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300" data-action="click->modal#open" data-modal-id="schedule-modal">
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300" data-action="click->modal#open" data-modal-id="new_schedule_modal">
               新規スケジュール登録
             </button>
           </div>
@@ -71,7 +71,13 @@
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     <div class="flex items-center space-x-3">
-                      <button class="text-blue-600 hover:text-blue-900" data-action="click->modal#open" data-modal-id="edit-schedule-modal-<%= event.id %>">編集</button>
+                      <button class="text-blue-600 hover:text-blue-900" 
+                              data-action="click->modal#open" 
+                              data-modal-id="edit_schedule_modal"
+                              data-event-id="<%= event.id %>"
+                              onclick="openEditModal(this)">
+                        編集
+                      </button>
                       <%= button_to "削除", 
                           admin_destroy_schedule_path(event), 
                           method: :delete,
@@ -89,136 +95,150 @@
   </div>
 </div>
 
-<!-- 新規スケジュール登録モーダル -->
-<div data-controller="modal">
-  <%= render 'shared/modal', modal_id: "schedule-modal", title: "新規スケジュール登録" do %>
-    <%= form_with(model: @event || AttendanceEvent.new, url: admin_schedule_path, local: true, class: "space-y-6") do |f| %>
-      <div class="grid grid-cols-1 gap-6">
-        <div>
-          <%= f.label :title, "タイトル", class: "block text-sm font-medium text-gray-700" %>
-          <%= f.text_field :title, 
-              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-3",
-              placeholder: "練習や大会のタイトルを入力",
-              required: true %>
-        </div>
+<!-- 新規登録モーダル -->
+<%= render 'shared/modal', modal_id: 'new_schedule_modal', title: '新規スケジュール登録' do %>
+  <%= form_with(model: @event, url: admin_schedule_path, class: "space-y-4") do |f| %>
+    <div>
+      <%= f.label :title, "タイトル", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_field :title, 
+          class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2",
+          placeholder: "練習や大会のタイトルを入力",
+          required: true %>
+    </div>
+    <div class="flex items-center">
+      <%= f.check_box :competition, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+      <%= f.label :competition, "大会の場合はチェック", class: "ml-2 block text-sm text-gray-900" %>
+    </div>
 
-        <div class="flex items-center">
-          <%= f.check_box :competition, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
-          <%= f.label :competition, "大会の場合はチェック", class: "ml-2 block text-sm text-gray-900" %>
-        </div>
+    <div>
+      <%= f.label :date, "日付", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.date_field :date, 
+          class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2",
+          value: Date.current,
+          required: true %>
+    </div>
 
-        <div>
-          <%= f.label :date, "日付", class: "block text-sm font-medium text-gray-700" %>
-          <%= f.date_field :date, 
-              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-3",
-              value: Date.current,
-              required: true %>
-        </div>
+    
 
-        <div>
-          <%= f.label :place, "場所", class: "block text-sm font-medium text-gray-700" %>
-          <%= f.text_field :place, 
-              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-3",
-              placeholder: "練習や大会の場所を入力",
-              required: true %>
-        </div>
+    <div>
+      <%= f.label :note, "備考", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_area :note, 
+          class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2",
+          rows: 4,
+          placeholder: "備考や注意事項を入力" %>
+    </div>
 
-        <div>
-          <%= f.label :note, "備考", class: "block text-sm font-medium text-gray-700" %>
-          <%= f.text_area :note, 
-              class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-3",
-              rows: 4,
-              placeholder: "備考や注意事項を入力" %>
-        </div>
-      </div>
-
-      <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
-        <button type="button" 
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" 
-                data-action="click->modal#close">
-          キャンセル
-        </button>
-        <%= f.submit "登録", 
-            class: "px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
-      </div>
-    <% end %>
+    <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+      <button type="button" 
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" 
+              data-action="click->modal#close">
+        キャンセル
+      </button>
+      <%= f.submit "登録", 
+          class: "px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+    </div>
   <% end %>
-</div>
+<% end %>
 
-<!-- 編集用モーダル -->
-<% @events.each do |event| %>
-  <div data-controller="modal">
-    <%= render 'shared/modal', modal_id: "edit-schedule-modal-#{event.id}", title: "スケジュール編集" do %>
-      <%= form_with(model: event, url: admin_update_schedule_path(event), method: :patch, local: true, class: "space-y-6") do |f| %>
-        <div class="grid grid-cols-1 gap-6">
-          <div>
-            <%= f.label :title, "タイトル", class: "block text-sm font-medium text-gray-700" %>
-            <%= f.text_field :title, 
-                class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-3",
-                placeholder: "練習や大会のタイトルを入力",
-                required: true %>
-          </div>
+<!-- 編集モーダル -->
+<%= render 'shared/modal', modal_id: 'edit_schedule_modal', title: 'スケジュール編集' do %>
+  <%= form_with(url: '#', method: :patch, class: "space-y-4", id: 'edit_schedule_form') do |f| %>
+    <div>
+      <%= f.label :title, "タイトル", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_field :title, 
+          class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2",
+          placeholder: "練習や大会のタイトルを入力",
+          name: 'attendance_event[title]', 
+          id: 'attendance_event_title',
+          required: true %>
+    </div>
 
-          <div class="flex items-center">
-            <%= f.check_box :competition, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
-            <%= f.label :competition, "大会の場合はチェック", class: "ml-2 block text-sm text-gray-900" %>
-          </div>
+    <div class="flex items-center">
+      <%= f.check_box :competition, 
+          class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded", 
+          name: 'attendance_event[competition]', 
+          id: 'attendance_event_competition' %>
+      <%= f.label :competition, "大会の場合はチェック", class: "ml-2 block text-sm text-gray-900" %>
+    </div>
 
-          <div>
-            <%= f.label :date, "日付", class: "block text-sm font-medium text-gray-700" %>
-            <%= f.date_field :date, 
-                class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-3",
-                required: true %>
-          </div>
+    <div>
+      <%= f.label :date, "日付", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.date_field :date, 
+          class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2",
+          name: 'attendance_event[date]', 
+          id: 'attendance_event_date',
+          required: true %>
+    </div>
 
-          <div>
-            <%= f.label :place, "場所", class: "block text-sm font-medium text-gray-700" %>
-            <%= f.text_field :place, 
-                class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-3",
-                placeholder: "練習や大会の場所を入力",
-                required: true %>
-          </div>
 
-          <div>
-            <%= f.label :note, "備考", class: "block text-sm font-medium text-gray-700" %>
-            <%= f.text_area :note, 
-                class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-2 py-3",
-                rows: 4,
-                placeholder: "備考や注意事項を入力" %>
-          </div>
-        </div>
 
-        <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
-          <button type="button" 
-                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" 
-                  data-action="click->modal#close">
-            キャンセル
-          </button>
-          <%= f.submit "更新", 
-              class: "px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
-        </div>
-      <% end %>
-    <% end %>
-  </div>
+    <div>
+      <%= f.label :note, "備考", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_area :note, 
+          class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2",
+          name: 'attendance_event[note]', 
+          id: 'attendance_event_note', 
+          rows: 4,
+          placeholder: "備考や注意事項を入力" %>
+    </div>
+
+    <div class="flex justify-end space-x-4 pt-4 border-t border-gray-200">
+      <button type="button" 
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" 
+              data-action="click->modal#close">
+        キャンセル
+      </button>
+      <%= f.submit "更新", 
+          class: "px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+    </div>
+  <% end %>
 <% end %>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  const deleteButtons = document.querySelectorAll('[data-modal-id="delete-confirm-modal"]');
-  const deleteMessage = document.getElementById('delete-confirm-message');
-  const deleteSubmitButton = document.getElementById('delete-submit-button');
-
-  deleteButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      const eventId = this.dataset.eventId;
-      const eventTitle = this.dataset.eventTitle;
+function openEditModal(button) {
+  const eventId = button.dataset.eventId;
+  console.log('Edit button clicked for event:', eventId);
+  
+  const form = document.querySelector('#edit_schedule_form');
+  form.action = `/admin/schedule/${eventId}`;
+  
+  fetch(`/admin/schedule/${eventId}/edit`)
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Received data:', data);
+      form.querySelector('#attendance_event_title').value = data.title;
+      form.querySelector('#attendance_event_date').value = data.date;
+      form.querySelector('#attendance_event_competition').checked = data.competition;
+      form.querySelector('#attendance_event_note').value = data.note || '';
       
-      // 削除メッセージの更新
-      deleteMessage.textContent = `「${eventTitle}」を削除してもよろしいですか？`;
-      
-      // 削除ボタンのURLを更新
-      deleteSubmitButton.form.action = `/admin/schedule/${eventId}`;
+      // モーダルを表示
+      const modal = document.getElementById('edit_schedule_modal');
+      modal.classList.remove('hidden');
+    })
+    .catch(error => {
+      console.error('Error fetching event data:', error);
     });
+}
+
+// モーダルを閉じる処理
+document.addEventListener('click', function(event) {
+  const modal = document.getElementById('edit_schedule_modal');
+  if (event.target === modal) {
+    modal.classList.add('hidden');
+  }
+});
+
+// 閉じるボタンの処理
+const closeButtons = document.querySelectorAll('[data-action="click->modal#close"]');
+closeButtons.forEach(button => {
+  button.addEventListener('click', function() {
+    const modal = document.getElementById('edit_schedule_modal');
+    modal.classList.add('hidden');
   });
 });
 </script>

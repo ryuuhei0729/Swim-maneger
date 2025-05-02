@@ -86,12 +86,6 @@ class AdminController < ApplicationController
     end
   end
 
-  def destroy_schedule
-    @event = AttendanceEvent.find(params[:id])
-    @event.destroy
-    redirect_to admin_schedule_path, notice: 'スケジュールを削除しました。'
-  end
-
   def update_schedule
     @event = AttendanceEvent.find(params[:id])
     if @event.update(schedule_params)
@@ -99,6 +93,24 @@ class AdminController < ApplicationController
     else
       @events = AttendanceEvent.order(date: :asc)
       render :schedule
+    end
+  end
+
+  def destroy_schedule
+    @event = AttendanceEvent.find(params[:id])
+    @event.destroy
+    redirect_to admin_schedule_path, notice: 'スケジュールを削除しました。'
+  end
+
+  def edit_schedule
+    @event = AttendanceEvent.find(params[:id])
+    respond_to do |format|
+      format.json { render json: {
+        title: @event.title,
+        date: @event.date.strftime('%Y-%m-%d'),
+        competition: @event.competition,
+        note: @event.note
+      }}
     end
   end
 
@@ -128,6 +140,6 @@ class AdminController < ApplicationController
   end
 
   def schedule_params
-    params.require(:attendance_event).permit(:title, :date, :place, :note, :competition)
+    params.require(:attendance_event).permit(:title, :date, :competition, :note)
   end
 end
