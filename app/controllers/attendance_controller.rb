@@ -41,13 +41,39 @@ class AttendanceController < ApplicationController
   end
 
   def update_attendance
-    @event = AttendanceEvent.find(params[:id])
-    attendance = current_user_auth.user.attendance.find_or_initialize_by(attendance_event: @event)
-    
-    if attendance.update(attendance_params)
-      redirect_to event_status_attendance_path(@event), notice: '出席状況を更新しました。'
+    attendance_params = params.require(:attendance)
+    success = true
+    error_messages = []
+
+    attendance_params.each do |event_id, data|
+      event = AttendanceEvent.find(event_id)
+      attendance = current_user_auth.user.attendance.find_or_initialize_by(attendance_event: event)
+      
+      if data[:status].blank?
+        error_messages << "#{event.title}の出席状況を選択してください。"
+        success = false
+        next
+      end
+
+      if (data[:status] == "absent" || data[:status] == "late") && data[:note].blank?
+        error_messages << "#{event.title}の備考を入力してください。"
+        success = false
+        next
+      end
+
+      attendance.status = data[:status]
+      attendance.note = data[:note]
+
+      unless attendance.save
+        error_messages << "#{event.title}の更新に失敗しました。"
+        success = false
+      end
+    end
+
+    if success
+      redirect_to attendance_path, notice: '出席状況を更新しました。'
     else
-      redirect_to event_status_attendance_path(@event), alert: '出席状況の更新に失敗しました。'
+      redirect_to attendance_path, alert: error_messages.join("\n")
     end
   end
 
