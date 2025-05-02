@@ -92,6 +92,16 @@ class AdminController < ApplicationController
     redirect_to admin_schedule_path, notice: 'スケジュールを削除しました。'
   end
 
+  def update_schedule
+    @event = AttendanceEvent.find(params[:id])
+    if @event.update(schedule_params)
+      redirect_to admin_schedule_path, notice: 'スケジュールを更新しました。'
+    else
+      @events = AttendanceEvent.order(date: :asc)
+      render :schedule
+    end
+  end
+
   private
 
   def check_admin_access
@@ -118,6 +128,6 @@ class AdminController < ApplicationController
   end
 
   def schedule_params
-    params.require(:attendance_event).permit(:title, :date, :place, :note)
+    params.require(:attendance_event).permit(:title, :date, :place, :note, :competition)
   end
 end
