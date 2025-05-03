@@ -113,7 +113,7 @@ class CreateAllTables < ActiveRecord::Migration[8.0]
         t.date :date
         t.string :place
         t.text :note
-
+        t.boolean :competition, default: false, null: false
         t.timestamps
       end
     end

@@ -9,5 +9,9 @@ class HomeController < ApplicationController
       .group_by { |event| event.date }
     
     @announcements = Announcement.active.where("published_at <= ?", Time.current).order(published_at: :desc)
+    
+    # 今日が誕生日のユーザーを取得
+    today = Date.current
+    @birthday_users = User.where("EXTRACT(MONTH FROM birthday) = ? AND EXTRACT(DAY FROM birthday) = ?", today.month, today.day)
   end
 end
