@@ -91,7 +91,7 @@
                         end %>">
                       <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
                       <% if best_time %>
-                        <%= best_time.send(event[:id]) %>
+                        <%= best_time.format_time(event[:id]) %>
                       <% else %>
                         -
                       <% end %>
@@ -121,7 +121,7 @@
                           end %>">
                         <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
                         <% if best_time %>
-                          <%= best_time.send(event[:id]) %>
+                          <%= best_time.format_time(event[:id]) %>
                         <% else %>
                           -
                         <% end %>
@@ -202,7 +202,7 @@
                         end %>">
                       <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
                       <% if best_time %>
-                        <%= best_time.send(event[:id]) %>
+                        <%= best_time.format_time(event[:id]) %>
                       <% else %>
                         -
                       <% end %>
@@ -232,7 +232,7 @@
                           end %>">
                         <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
                         <% if best_time %>
-                          <%= best_time.send(event[:id]) %>
+                          <%= best_time.format_time(event[:id]) %>
                         <% else %>
                           -
                         <% end %>
@@ -313,7 +313,7 @@
                         end %>">
                       <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
                       <% if best_time %>
-                        <%= best_time.send(event[:id]) %>
+                        <%= best_time.format_time(event[:id]) %>
                       <% else %>
                         -
                       <% end %>
@@ -343,7 +343,7 @@
                           end %>">
                         <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
                         <% if best_time %>
-                          <%= best_time.send(event[:id]) %>
+                          <%= best_time.format_time(event[:id]) %>
                         <% else %>
                           -
                         <% end %>

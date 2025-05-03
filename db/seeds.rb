@@ -8,18 +8,47 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-# 時間フォーマット用のヘルパーメソッド
+# タイムを表示用の文字列にフォーマットする（83.45秒 → "1:23.45"）
 def format_time(seconds)
-  seconds = seconds.to_f  # 整数を浮動小数点数に変換
-  if seconds < 60
-    # 1分未満: 00.00形式
-    format("%02d.%02d", seconds / 1, (seconds % 1 * 100).round)
-  elsif seconds < 600
-    # 1分以上10分未満: 0:00.00形式
-    format("%d:%02d.%02d", seconds / 60, (seconds % 60) / 1, ((seconds % 1) * 100).round)
+  return "-" if seconds.nil? || seconds.zero?
+
+  minutes = (seconds / 60).floor
+  remaining_seconds = (seconds % 60).round(2)
+  
+  if minutes.zero?
+    format("%05.2f", remaining_seconds)
   else
-    # 10分以上: 00:00.00形式
-    format("%02d:%02d.%02d", seconds / 3600, (seconds % 3600) / 60, ((seconds % 60) / 1).round)
+    format("%d:%05.2f", minutes, remaining_seconds)
+  end
+end
+
+# 表示用文字列をDECIMAL型の秒数に変換する（"1:23.45" → 83.45）
+def parse_time(time_str)
+  return 0 if time_str.nil? || time_str == "-"
+
+  if time_str.include?(":")
+    minutes, seconds = time_str.split(":")
+    minutes.to_i * 60 + seconds.to_f
+  else
+    time_str.to_f
+  end
+end
+
+# ランダムなタイムを生成（種目に応じた適切な範囲で）
+def generate_random_time(event)
+  case event
+  when /50m/
+    rand(22.00..35.00).round(2)  # 50m: 22-35秒
+  when /100m/
+    rand(50.00..80.00).round(2)  # 100m: 50-80秒
+  when /200m/
+    rand(110.00..180.00).round(2) # 200m: 1:50-3:00
+  when /400m/
+    rand(240.00..360.00).round(2) # 400m: 4:00-6:00
+  when /800m/
+    rand(480.00..720.00).round(2) # 800m: 8:00-12:00
+  else
+    0
   end
 end
 
@@ -127,47 +156,47 @@ User.where(user_type: 'player').each do |user|
   best_time = BestTimeTable.create!(
     user: user,
     # フリースタイル
-    '50m_fr': format_time(rand(20..30) + rand(0..99).to_f / 100),
+    '50m_fr': generate_random_time("50m"),
     '50m_fr_note': rand < 0.3 ? "メモ: #{user.name}の50mフリースタイル記録" : nil,
-    '100m_fr': format_time(rand(45..65) + rand(0..99).to_f / 100),
+    '100m_fr': generate_random_time("100m"),
     '100m_fr_note': rand < 0.3 ? "メモ: #{user.name}の100mフリースタイル記録" : nil,
-    '200m_fr': format_time(rand(100..120) + rand(0..99).to_f / 100),
+    '200m_fr': generate_random_time("200m"),
     '200m_fr_note': rand < 0.3 ? "メモ: #{user.name}の200mフリースタイル記録" : nil,
-    '400m_fr': format_time(rand(240..300) + rand(0..99).to_f / 100),
+    '400m_fr': generate_random_time("400m"),
     '400m_fr_note': rand < 0.3 ? "メモ: #{user.name}の400mフリースタイル記録" : nil,
-    '800m_fr': format_time(rand(480..600) + rand(0..99).to_f / 100),
+    '800m_fr': generate_random_time("800m"),
     '800m_fr_note': rand < 0.3 ? "メモ: #{user.name}の800mフリースタイル記録" : nil,
 
     # バタフライ
-    '50m_fly': format_time(rand(25..35) + rand(0..99).to_f / 100),
+    '50m_fly': generate_random_time("50m"),
     '50m_fly_note': rand < 0.3 ? "メモ: #{user.name}の50mバタフライ記録" : nil,
-    '100m_fly': format_time(rand(55..75) + rand(0..99).to_f / 100),
+    '100m_fly': generate_random_time("100m"),
     '100m_fly_note': rand < 0.3 ? "メモ: #{user.name}の100mバタフライ記録" : nil,
-    '200m_fly': format_time(rand(120..150) + rand(0..99).to_f / 100),
+    '200m_fly': generate_random_time("200m"),
     '200m_fly_note': rand < 0.3 ? "メモ: #{user.name}の200mバタフライ記録" : nil,
 
     # 背泳ぎ
-    '50m_ba': format_time(rand(25..35) + rand(0..99).to_f / 100),
+    '50m_ba': generate_random_time("50m"),
     '50m_ba_note': rand < 0.3 ? "メモ: #{user.name}の50m背泳ぎ記録" : nil,
-    '100m_ba': format_time(rand(55..75) + rand(0..99).to_f / 100),
+    '100m_ba': generate_random_time("100m"),
     '100m_ba_note': rand < 0.3 ? "メモ: #{user.name}の100m背泳ぎ記録" : nil,
-    '200m_ba': format_time(rand(120..150) + rand(0..99).to_f / 100),
+    '200m_ba': generate_random_time("200m"),
     '200m_ba_note': rand < 0.3 ? "メモ: #{user.name}の200m背泳ぎ記録" : nil,
 
     # 平泳ぎ
-    '50m_br': format_time(rand(30..40) + rand(0..99).to_f / 100),
+    '50m_br': generate_random_time("50m"),
     '50m_br_note': rand < 0.3 ? "メモ: #{user.name}の50m平泳ぎ記録" : nil,
-    '100m_br': format_time(rand(65..85) + rand(0..99).to_f / 100),
+    '100m_br': generate_random_time("100m"),
     '100m_br_note': rand < 0.3 ? "メモ: #{user.name}の100m平泳ぎ記録" : nil,
-    '200m_br': format_time(rand(140..170) + rand(0..99).to_f / 100),
+    '200m_br': generate_random_time("200m"),
     '200m_br_note': rand < 0.3 ? "メモ: #{user.name}の200m平泳ぎ記録" : nil,
 
     # 個人メドレー
-    '100m_im': format_time(rand(60..80) + rand(0..99).to_f / 100),
+    '100m_im': generate_random_time("100m"),
     '100m_im_note': rand < 0.3 ? "メモ: #{user.name}の100m個人メドレー記録" : nil,
-    '200m_im': format_time(rand(130..150) + rand(0..99).to_f / 100),
+    '200m_im': generate_random_time("200m"),
     '200m_im_note': rand < 0.3 ? "メモ: #{user.name}の200m個人メドレー記録" : nil,
-    '400m_im': format_time(rand(280..320) + rand(0..99).to_f / 100),
+    '400m_im': generate_random_time("400m"),
     '400m_im_note': rand < 0.3 ? "メモ: #{user.name}の400m個人メドレー記録" : nil
   )
 end

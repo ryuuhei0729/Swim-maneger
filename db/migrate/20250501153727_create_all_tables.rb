@@ -42,53 +42,44 @@ class CreateAllTables < ActiveRecord::Migration[8.0]
       # BestTimeTable
       create_table :best_time_tables do |t|
         t.references :user, null: false, foreign_key: true
-
-        # フリースタイル
-        t.string :'50m_fr', default: "-"
-        t.text :'50m_fr_note'
-        t.string :'100m_fr', default: "-"
-        t.text :'100m_fr_note'
-        t.string :'200m_fr', default: "-"
-        t.text :'200m_fr_note'
-        t.string :'400m_fr', default: "-"
-        t.text :'400m_fr_note'
-        t.string :'800m_fr', default: "-"
-        t.text :'800m_fr_note'
-
-        # バタフライ
-        t.string :'50m_fly', default: "-"
-        t.text :'50m_fly_note'
-        t.string :'100m_fly', default: "-"
-        t.text :'100m_fly_note'
-        t.string :'200m_fly', default: "-"
-        t.text :'200m_fly_note'
-
-        # 背泳ぎ
-        t.string :'50m_ba', default: "-"
-        t.text :'50m_ba_note'
-        t.string :'100m_ba', default: "-"
-        t.text :'100m_ba_note'
-        t.string :'200m_ba', default: "-"
-        t.text :'200m_ba_note'
-
-        # 平泳ぎ
-        t.string :'50m_br', default: "-"
-        t.text :'50m_br_note'
-        t.string :'100m_br', default: "-"
-        t.text :'100m_br_note'
-        t.string :'200m_br', default: "-"
-        t.text :'200m_br_note'
-
-        # 個人メドレー
-        t.string :'100m_im', default: "-"
-        t.text :'100m_im_note'
-        t.string :'200m_im', default: "-"
-        t.text :'200m_im_note'
-        t.string :'400m_im', default: "-"
-        t.text :'400m_im_note'
-
+        t.decimal :"50m_fr", precision: 5, scale: 2, default: 0
+        t.text :"50m_fr_note"
+        t.decimal :"100m_fr", precision: 5, scale: 2, default: 0
+        t.text :"100m_fr_note"
+        t.decimal :"200m_fr", precision: 5, scale: 2, default: 0
+        t.text :"200m_fr_note"
+        t.decimal :"400m_fr", precision: 5, scale: 2, default: 0
+        t.text :"400m_fr_note"
+        t.decimal :"800m_fr", precision: 5, scale: 2, default: 0
+        t.text :"800m_fr_note"
+        t.decimal :"50m_fly", precision: 5, scale: 2, default: 0
+        t.text :"50m_fly_note"
+        t.decimal :"100m_fly", precision: 5, scale: 2, default: 0
+        t.text :"100m_fly_note"
+        t.decimal :"200m_fly", precision: 5, scale: 2, default: 0
+        t.text :"200m_fly_note"
+        t.decimal :"50m_ba", precision: 5, scale: 2, default: 0
+        t.text :"50m_ba_note"
+        t.decimal :"100m_ba", precision: 5, scale: 2, default: 0
+        t.text :"100m_ba_note"
+        t.decimal :"200m_ba", precision: 5, scale: 2, default: 0
+        t.text :"200m_ba_note"
+        t.decimal :"50m_br", precision: 5, scale: 2, default: 0
+        t.text :"50m_br_note"
+        t.decimal :"100m_br", precision: 5, scale: 2, default: 0
+        t.text :"100m_br_note"
+        t.decimal :"200m_br", precision: 5, scale: 2, default: 0
+        t.text :"200m_br_note"
+        t.decimal :"100m_im", precision: 5, scale: 2, default: 0
+        t.text :"100m_im_note"
+        t.decimal :"200m_im", precision: 5, scale: 2, default: 0
+        t.text :"200m_im_note"
+        t.decimal :"400m_im", precision: 5, scale: 2, default: 0
+        t.text :"400m_im_note"
         t.timestamps
       end
+
+      add_index :best_time_tables, :user_id
     end
 
     unless table_exists?(:announcements)

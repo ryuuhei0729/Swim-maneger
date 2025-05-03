@@ -244,7 +244,7 @@
               </dt>
               <dd class="flex items-baseline">
                 <div class="text-2xl font-semibold text-gray-900">
-                  <%= @best_time_table['50m_fr'].presence || '-' %>
+                  <%= @best_time_table.format_time('50m_fr') %>
                 </div>
                 <span class="ml-2 text-sm text-gray-500">秒</span>
               </dd>
@@ -295,7 +295,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['50m_fr'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['50m_fr'].presence || '-' %>
+                  <%= @best_time_table.format_time('50m_fr') %>
                 </span>
                 <% if @best_time_table['50m_fr_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -311,7 +311,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['100m_fr'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['100m_fr'].presence || '-' %>
+                  <%= @best_time_table.format_time('100m_fr') %>
                 </span>
                 <% if @best_time_table['100m_fr_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -327,7 +327,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['200m_fr'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['200m_fr'].presence || '-' %>
+                  <%= @best_time_table.format_time('200m_fr') %>
                 </span>
                 <% if @best_time_table['200m_fr_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -343,7 +343,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['400m_fr'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['400m_fr'].presence || '-' %>
+                  <%= @best_time_table.format_time('400m_fr') %>
                 </span>
                 <% if @best_time_table['400m_fr_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -359,7 +359,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['800m_fr'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['800m_fr'].presence || '-' %>
+                  <%= @best_time_table.format_time('800m_fr') %>
                 </span>
                 <% if @best_time_table['800m_fr_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -382,7 +382,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['50m_br'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['50m_br'].presence || '-' %>
+                  <%= @best_time_table.format_time('50m_br') %>
                 </span>
                 <% if @best_time_table['50m_br_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -398,7 +398,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['100m_br'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['100m_br'].presence || '-' %>
+                  <%= @best_time_table.format_time('100m_br') %>
                 </span>
                 <% if @best_time_table['100m_br_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -414,7 +414,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['200m_br'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['200m_br'].presence || '-' %>
+                  <%= @best_time_table.format_time('200m_br') %>
                 </span>
                 <% if @best_time_table['200m_br_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -437,7 +437,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['50m_ba'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['50m_ba'].presence || '-' %>
+                  <%= @best_time_table.format_time('50m_ba') %>
                 </span>
                 <% if @best_time_table['50m_ba_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -453,7 +453,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['100m_ba'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['100m_ba'].presence || '-' %>
+                  <%= @best_time_table.format_time('100m_ba') %>
                 </span>
                 <% if @best_time_table['100m_ba_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -469,7 +469,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['200m_ba'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['200m_ba'].presence || '-' %>
+                  <%= @best_time_table.format_time('200m_ba') %>
                 </span>
                 <% if @best_time_table['200m_ba_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -492,7 +492,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['50m_fly'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['50m_fly'].presence || '-' %>
+                  <%= @best_time_table.format_time('50m_fly') %>
                 </span>
                 <% if @best_time_table['50m_fly_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -508,7 +508,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['100m_fly'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['100m_fly'].presence || '-' %>
+                  <%= @best_time_table.format_time('100m_fly') %>
                 </span>
                 <% if @best_time_table['100m_fly_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -524,7 +524,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['200m_fly'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['200m_fly'].presence || '-' %>
+                  <%= @best_time_table.format_time('200m_fly') %>
                 </span>
                 <% if @best_time_table['200m_fly_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -547,7 +547,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['100m_im'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['100m_im'].presence || '-' %>
+                  <%= @best_time_table.format_time('100m_im') %>
                 </span>
                 <% if @best_time_table['100m_im_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -563,7 +563,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['200m_im'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['200m_im'].presence || '-' %>
+                  <%= @best_time_table.format_time('200m_im') %>
                 </span>
                 <% if @best_time_table['200m_im_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
@@ -579,7 +579,7 @@
             <td class="py-2.5 w-1/2 text-center">
               <div class="group relative">
                 <span class="<%= @best_time_table['400m_im'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table['400m_im'].presence || '-' %>
+                  <%= @best_time_table.format_time('400m_im') %>
                 </span>
                 <% if @best_time_table['400m_im_note'].present? %>
                   <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
