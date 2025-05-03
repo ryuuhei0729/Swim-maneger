@@ -41,11 +41,16 @@ puts "Creating users..."
 
 # ディレクター4人作成
 4.times do |i|
+  birthday = Date.new(
+    rand(1970..1998), # 年
+    rand(1..12),      # 月
+    rand(1..28)       # 日（28日までにしておくと安全）
+  )
   user = User.create!(
     generation: 0,
     name: "ディレクター#{i+1}",
     gender: GENDERS.sample,
-    birthday: Date.today - rand(30..50).years,
+    birthday: birthday,
     user_type: 'director',
     bio: "ディレクター#{i+1}の自己紹介文です。",
   )
@@ -63,11 +68,16 @@ end
 
 # コーチ6人作成
 6.times do |i|
+  birthday = Date.new(
+    rand(2002..2006),
+    rand(1..12),
+    rand(1..28)
+  )
   user = User.create!(
     generation: rand(73..77),
     name: "コーチ#{i+1}",
     gender: GENDERS.sample,
-    birthday: Date.today - rand(25..45).years,
+    birthday: birthday,
     user_type: 'coach',
     bio: "コーチ#{i+1}の自己紹介文です。",
   )
@@ -85,11 +95,16 @@ end
 
 # プレイヤー30人作成
 30.times do |i|
+  birthday = Date.new(
+    rand(2007..2012),
+    rand(1..12),
+    rand(1..28)
+  )
   user = User.create!(
     generation: rand(78..84),
     name: "プレイヤー#{i+1}",
     gender: GENDERS.sample,
-    birthday: Date.today - rand(18..30).years,
+    birthday: birthday,
     user_type: 'player',
     bio: "プレイヤー#{i+1}の自己紹介文です。",
   )
