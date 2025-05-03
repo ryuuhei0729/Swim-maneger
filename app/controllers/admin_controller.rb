@@ -109,7 +109,8 @@ class AdminController < ApplicationController
         title: @event.title,
         date: @event.date.strftime('%Y-%m-%d'),
         competition: @event.competition,
-        note: @event.note
+        note: @event.note,
+        place: @event.place
       }}
     end
   end
@@ -140,6 +141,6 @@ class AdminController < ApplicationController
   end
 
   def schedule_params
-    params.require(:attendance_event).permit(:title, :date, :competition, :note)
+    params.require(:attendance_event).permit(:title, :date, :competition, :note, :place)
   end
 end
