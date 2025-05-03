@@ -118,7 +118,12 @@
           required: true %>
     </div>
 
-    
+    <div>
+      <%= f.label :place, "場所", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_field :place, 
+          class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2",
+          placeholder: "練習や大会の場所を入力" %>
+    </div>
 
     <div>
       <%= f.label :note, "備考", class: "block text-sm font-medium text-gray-700" %>
@@ -170,7 +175,14 @@
           required: true %>
     </div>
 
-
+    <div>
+      <%= f.label :place, "場所", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_field :place, 
+          class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 px-3 py-2",
+          name: 'attendance_event[place]', 
+          id: 'attendance_event_place',
+          placeholder: "練習や大会の場所を入力" %>
+    </div>
 
     <div>
       <%= f.label :note, "備考", class: "block text-sm font-medium text-gray-700" %>
@@ -214,6 +226,7 @@ function openEditModal(button) {
       form.querySelector('#attendance_event_title').value = data.title;
       form.querySelector('#attendance_event_date').value = data.date;
       form.querySelector('#attendance_event_competition').checked = data.competition;
+      form.querySelector('#attendance_event_place').value = data.place || '';
       form.querySelector('#attendance_event_note').value = data.note || '';
       
       // モーダルを表示
