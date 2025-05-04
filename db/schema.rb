@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_04_093931) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_04_094943) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -63,6 +63,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_04_093931) do
     t.index ["attendance_event_id"], name: "index_attendance_on_attendance_event_id"
     t.index ["user_id", "attendance_event_id"], name: "index_attendance_on_user_id_and_attendance_event_id", unique: true
     t.index ["user_id"], name: "index_attendance_on_user_id"
+    t.check_constraint "status::text = ANY (ARRAY['present'::character varying, 'absent'::character varying, 'other'::character varying]::text[])", name: "check_status"
   end
 
   create_table "attendance_events", force: :cascade do |t|
