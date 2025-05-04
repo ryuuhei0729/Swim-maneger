@@ -42,15 +42,15 @@
               </div>
 
               <div class="flex items-center space-x-1">
-                <%= f.radio_button "attendance[#{event.id}][status]", "late", checked: attendance&.status == "late", class: "form-radio cursor-pointer", data: { requires_note: true } %>
-                <%= f.label "attendance[#{event.id}][status]", "遅刻", value: "late", class: "ml-1 cursor-pointer" %>
+                <%= f.radio_button "attendance[#{event.id}][status]", "other", checked: attendance&.status == "other", class: "form-radio cursor-pointer", data: { requires_note: true } %>
+                <%= f.label "attendance[#{event.id}][status]", "その他(遅刻, 早退)", value: "other", class: "ml-1 cursor-pointer" %>
               </div>
             </div>
 
             <div class="mt-4">
               <%= f.label "attendance[#{event.id}][note]", "備考", class: "block text-sm font-medium text-gray-700" %>
               <%= f.text_area "attendance[#{event.id}][note]", value: attendance&.note, class: "mt-1 block w-full rounded-md border border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2", rows: 1, required: false %>
-              <p class="mt-1 text-sm text-red-500">※欠席・遅刻の場合は必ず備考を入力してください</p>
+              <p class="mt-1 text-sm text-red-500">※欠席・その他の場合は必ず備考を入力してください。遅刻,早退の場合は時間も記載してください。</p>
             </div>
           </div>
         <% end %>
@@ -89,15 +89,15 @@
               </div>
 
               <div class="flex items-center space-x-1">
-                <%= f.radio_button "attendance[#{event.id}][status]", "late", checked: attendance&.status == "late", class: "form-radio cursor-pointer", data: { requires_note: true } %>
-                <%= f.label "attendance[#{event.id}][status]", "遅刻", value: "late", class: "ml-1 cursor-pointer" %>
+                <%= f.radio_button "attendance[#{event.id}][status]", "other", checked: attendance&.status == "other", class: "form-radio cursor-pointer", data: { requires_note: true } %>
+                <%= f.label "attendance[#{event.id}][status]", "その他(遅刻, 早退)", value: "other", class: "ml-1 cursor-pointer" %>
               </div>
             </div>
 
             <div class="mt-4">
               <%= f.label "attendance[#{event.id}][note]", "備考", class: "block text-sm font-medium text-gray-700" %>
               <%= f.text_area "attendance[#{event.id}][note]", value: attendance&.note, class: "mt-1 block w-full rounded-md border border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2", rows: 1, required: false %>
-              <p class="mt-1 text-sm text-red-500">※欠席・遅刻の場合は必ず備考を入力してください</p>
+              <p class="mt-1 text-sm text-red-500">※欠席・その他の場合は必ず備考を入力してください。遅刻,早退の場合は時間も記載してください。</p>
             </div>
           </div>
         <% end %>
