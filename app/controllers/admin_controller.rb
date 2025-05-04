@@ -108,7 +108,7 @@ class AdminController < ApplicationController
       format.json { render json: {
         title: @event.title,
         date: @event.date.strftime('%Y-%m-%d'),
-        competition: @event.competition,
+        is_competition: @event.is_competition,
         note: @event.note,
         place: @event.place
       }}
@@ -141,6 +141,6 @@ class AdminController < ApplicationController
   end
 
   def schedule_params
-    params.require(:attendance_event).permit(:title, :date, :competition, :note, :place)
+    params.require(:attendance_event).permit(:title, :date, :is_competition, :note, :place)
   end
 end
