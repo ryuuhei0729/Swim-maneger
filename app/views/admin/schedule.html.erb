@@ -63,7 +63,7 @@
                     <% end %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-gray-900">
-                    <% if event.competition %>
+                    <% if event.is_competition %>
                       <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                         大会
                       </span>
@@ -106,8 +106,8 @@
           required: true %>
     </div>
     <div class="flex items-center">
-      <%= f.check_box :competition, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
-      <%= f.label :competition, "大会の場合はチェック", class: "ml-2 block text-sm text-gray-900" %>
+      <%= f.check_box :is_competition, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+      <%= f.label :is_competition, "大会の場合はチェック", class: "ml-2 block text-sm text-gray-900" %>
     </div>
 
     <div>
@@ -159,11 +159,11 @@
     </div>
 
     <div class="flex items-center">
-      <%= f.check_box :competition, 
+      <%= f.check_box :is_competition, 
           class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded", 
-          name: 'attendance_event[competition]', 
-          id: 'attendance_event_competition' %>
-      <%= f.label :competition, "大会の場合はチェック", class: "ml-2 block text-sm text-gray-900" %>
+          name: 'attendance_event[is_competition]', 
+          id: 'attendance_event_is_competition' %>
+      <%= f.label :is_competition, "大会の場合はチェック", class: "ml-2 block text-sm text-gray-900" %>
     </div>
 
     <div>
@@ -225,7 +225,7 @@ function openEditModal(button) {
       console.log('Received data:', data);
       form.querySelector('#attendance_event_title').value = data.title;
       form.querySelector('#attendance_event_date').value = data.date;
-      form.querySelector('#attendance_event_competition').checked = data.competition;
+      form.querySelector('#attendance_event_is_competition').checked = data.is_competition;
       form.querySelector('#attendance_event_place').value = data.place || '';
       form.querySelector('#attendance_event_note').value = data.note || '';
       
