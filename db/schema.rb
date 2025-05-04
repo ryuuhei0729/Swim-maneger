@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_04_094943) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_04_103028) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -63,7 +63,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_04_094943) do
     t.index ["attendance_event_id"], name: "index_attendance_on_attendance_event_id"
     t.index ["user_id", "attendance_event_id"], name: "index_attendance_on_user_id_and_attendance_event_id", unique: true
     t.index ["user_id"], name: "index_attendance_on_user_id"
-    t.check_constraint "status::text = ANY (ARRAY['present'::character varying, 'absent'::character varying, 'other'::character varying]::text[])", name: "check_status"
+    t.check_constraint "status::text = ANY (ARRAY['present'::character varying::text, 'absent'::character varying::text, 'other'::character varying::text])", name: "check_status"
   end
 
   create_table "attendance_events", force: :cascade do |t|
@@ -76,45 +76,27 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_04_094943) do
     t.boolean "is_competition", default: false, null: false
   end
 
-  create_table "best_time_tables", force: :cascade do |t|
+  create_table "records", force: :cascade do |t|
     t.bigint "user_id", null: false
-    t.string "50m_fr", default: "-"
-    t.text "50m_fr_note"
-    t.string "100m_fr", default: "-"
-    t.text "100m_fr_note"
-    t.string "200m_fr", default: "-"
-    t.text "200m_fr_note"
-    t.string "400m_fr", default: "-"
-    t.text "400m_fr_note"
-    t.string "800m_fr", default: "-"
-    t.text "800m_fr_note"
-    t.string "50m_fly", default: "-"
-    t.text "50m_fly_note"
-    t.string "100m_fly", default: "-"
-    t.text "100m_fly_note"
-    t.string "200m_fly", default: "-"
-    t.text "200m_fly_note"
-    t.string "50m_ba", default: "-"
-    t.text "50m_ba_note"
-    t.string "100m_ba", default: "-"
-    t.text "100m_ba_note"
-    t.string "200m_ba", default: "-"
-    t.text "200m_ba_note"
-    t.string "50m_br", default: "-"
-    t.text "50m_br_note"
-    t.string "100m_br", default: "-"
-    t.text "100m_br_note"
-    t.string "200m_br", default: "-"
-    t.text "200m_br_note"
-    t.string "100m_im", default: "-"
-    t.text "100m_im_note"
-    t.string "200m_im", default: "-"
-    t.text "200m_im_note"
-    t.string "400m_im", default: "-"
-    t.text "400m_im_note"
+    t.bigint "attendance_event_id"
+    t.bigint "style_id", null: false
+    t.decimal "time", precision: 5, scale: 2
+    t.string "video_url"
+    t.text "note"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_id"], name: "index_best_time_tables_on_user_id"
+    t.index ["attendance_event_id"], name: "index_records_on_attendance_event_id"
+    t.index ["style_id"], name: "index_records_on_style_id"
+    t.index ["user_id"], name: "index_records_on_user_id"
+  end
+
+  create_table "styles", force: :cascade do |t|
+    t.string "name_jp", null: false
+    t.string "name", null: false
+    t.string "style", null: false
+    t.integer "distance", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "user_auths", force: :cascade do |t|
@@ -146,14 +128,16 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_04_094943) do
     t.text "bio", default: ""
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.check_constraint "gender::text = ANY (ARRAY['male'::character varying, 'female'::character varying]::text[])", name: "check_gender"
-    t.check_constraint "user_type::text = ANY (ARRAY['player'::character varying, 'coach'::character varying, 'director'::character varying, 'manager'::character varying]::text[])", name: "check_user_type"
+    t.check_constraint "gender::text = ANY (ARRAY['male'::character varying::text, 'female'::character varying::text])", name: "check_gender"
+    t.check_constraint "user_type::text = ANY (ARRAY['player'::character varying::text, 'coach'::character varying::text, 'director'::character varying::text, 'manager'::character varying::text])", name: "check_user_type"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "attendance", "attendance_events"
   add_foreign_key "attendance", "users"
-  add_foreign_key "best_time_tables", "users"
+  add_foreign_key "records", "attendance_events"
+  add_foreign_key "records", "styles"
+  add_foreign_key "records", "users"
   add_foreign_key "user_auths", "users"
 end

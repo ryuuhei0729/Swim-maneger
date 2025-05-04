@@ -35,14 +35,21 @@
               <% @events.group_by { |e| e[:style] }.each do |style, events| %>
                 <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider" colspan="<%= events.size %>"
                     style="background-color: <%= case style
-                      when '自由形' then '#fde047'  # yellow-200
-                      when '平泳ぎ' then '#86efac'  # green-200
-                      when '背泳ぎ' then '#fca5a5'  # red-200
-                      when 'バタフライ' then '#93c5fd'  # blue-200
-                      when '個人メドレー' then '#d8b4fe'  # purple-200
+                      when 'fr' then '#fde047'  # yellow-200
+                      when 'br' then '#86efac'  # green-200
+                      when 'ba' then '#fca5a5'  # red-200
+                      when 'fly' then '#93c5fd'  # blue-200
+                      when 'im' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>">
-                  <%= style %>
+                  <%= case style
+                    when 'fr' then '自由形'
+                    when 'br' then '平泳ぎ'
+                    when 'ba' then '背泳ぎ'
+                    when 'fly' then 'バタフライ'
+                    when 'im' then '個人メドレー'
+                    else style
+                  end %>
                 </th>
               <% end %>
             </tr>
@@ -50,11 +57,11 @@
               <% @events.each do |event| %>
                 <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider cursor-pointer hover:bg-gray-200"
                     style="background-color: <%= case event[:style]
-                      when '自由形' then '#fde047'  # yellow-200
-                      when '平泳ぎ' then '#86efac'  # green-200
-                      when '背泳ぎ' then '#fca5a5'  # red-200
-                      when 'バタフライ' then '#93c5fd'  # blue-200
-                      when '個人メドレー' then '#d8b4fe'  # purple-200
+                      when 'fr' then '#fde047'  # yellow-200
+                      when 'br' then '#86efac'  # green-200
+                      when 'ba' then '#fca5a5'  # red-200
+                      when 'fly' then '#93c5fd'  # blue-200
+                      when 'im' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>"
                     data-sort-by="<%= event[:id] %>"
@@ -82,16 +89,16 @@
                   <% @events.each do |event| %>
                     <td class="px-2 py-2 whitespace-nowrap text-center"
                         style="background-color: <%= case event[:style]
-                          when '自由形' then '#fefce8'  # yellow-50
-                          when '平泳ぎ' then '#f0fdf4'  # green-50
-                          when '背泳ぎ' then '#fef2f2'  # red-50
-                          when 'バタフライ' then '#eff6ff'  # blue-50
-                          when '個人メドレー' then '#faf5ff'  # purple-50
+                          when 'fr' then '#fefce8'  # yellow-50
+                          when 'br' then '#f0fdf4'  # green-50
+                          when 'ba' then '#fef2f2'  # red-50
+                          when 'fly' then '#eff6ff'  # blue-50
+                          when 'im' then '#faf5ff'  # purple-50
                           else '#f3f4f6'  # gray-100
                         end %>">
-                      <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
-                      <% if best_time %>
-                        <%= best_time.format_time(event[:id]) %>
+                      <% time = @best_times[player.id][event[:id]] %>
+                      <% if time %>
+                        <%= format_time(time) %>
                       <% else %>
                         -
                       <% end %>
@@ -112,16 +119,16 @@
                     <% @events.each do |event| %>
                       <td class="px-2 py-2 whitespace-nowrap text-center"
                           style="background-color: <%= case event[:style]
-                            when '自由形' then '#fefce8'  # yellow-50
-                            when '平泳ぎ' then '#f0fdf4'  # green-50
-                            when '背泳ぎ' then '#fef2f2'  # red-50
-                            when 'バタフライ' then '#eff6ff'  # blue-50
-                            when '個人メドレー' then '#faf5ff'  # purple-50
+                            when 'fr' then '#fefce8'  # yellow-50
+                            when 'br' then '#f0fdf4'  # green-50
+                            when 'ba' then '#fef2f2'  # red-50
+                            when 'fly' then '#eff6ff'  # blue-50
+                            when 'im' then '#faf5ff'  # purple-50
                             else '#f3f4f6'  # gray-100
                           end %>">
-                        <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
-                        <% if best_time %>
-                          <%= best_time.format_time(event[:id]) %>
+                        <% time = @best_times[player.id][event[:id]] %>
+                        <% if time %>
+                          <%= format_time(time) %>
                         <% else %>
                           -
                         <% end %>
@@ -146,14 +153,21 @@
               <% @events.group_by { |e| e[:style] }.each do |style, events| %>
                 <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider" colspan="<%= events.size %>"
                     style="background-color: <%= case style
-                      when '自由形' then '#fde047'  # yellow-200
-                      when '平泳ぎ' then '#86efac'  # green-200
-                      when '背泳ぎ' then '#fca5a5'  # red-200
-                      when 'バタフライ' then '#93c5fd'  # blue-200
-                      when '個人メドレー' then '#d8b4fe'  # purple-200
+                      when 'fr' then '#fde047'  # yellow-200
+                      when 'br' then '#86efac'  # green-200
+                      when 'ba' then '#fca5a5'  # red-200
+                      when 'fly' then '#93c5fd'  # blue-200
+                      when 'im' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>">
-                  <%= style %>
+                  <%= case style
+                    when 'fr' then '自由形'
+                    when 'br' then '平泳ぎ'
+                    when 'ba' then '背泳ぎ'
+                    when 'fly' then 'バタフライ'
+                    when 'im' then '個人メドレー'
+                    else style
+                  end %>
                 </th>
               <% end %>
             </tr>
@@ -161,11 +175,11 @@
               <% @events.each do |event| %>
                 <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider cursor-pointer hover:bg-gray-200"
                     style="background-color: <%= case event[:style]
-                      when '自由形' then '#fde047'  # yellow-200
-                      when '平泳ぎ' then '#86efac'  # green-200
-                      when '背泳ぎ' then '#fca5a5'  # red-200
-                      when 'バタフライ' then '#93c5fd'  # blue-200
-                      when '個人メドレー' then '#d8b4fe'  # purple-200
+                      when 'fr' then '#fde047'  # yellow-200
+                      when 'br' then '#86efac'  # green-200
+                      when 'ba' then '#fca5a5'  # red-200
+                      when 'fly' then '#93c5fd'  # blue-200
+                      when 'im' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>"
                     data-sort-by="<%= event[:id] %>"
@@ -193,16 +207,16 @@
                   <% @events.each do |event| %>
                     <td class="px-2 py-2 whitespace-nowrap text-center"
                         style="background-color: <%= case event[:style]
-                          when '自由形' then '#fefce8'  # yellow-50
-                          when '平泳ぎ' then '#f0fdf4'  # green-50
-                          when '背泳ぎ' then '#fef2f2'  # red-50
-                          when 'バタフライ' then '#eff6ff'  # blue-50
-                          when '個人メドレー' then '#faf5ff'  # purple-50
+                          when 'fr' then '#fefce8'  # yellow-50
+                          when 'br' then '#f0fdf4'  # green-50
+                          when 'ba' then '#fef2f2'  # red-50
+                          when 'fly' then '#eff6ff'  # blue-50
+                          when 'im' then '#faf5ff'  # purple-50
                           else '#f3f4f6'  # gray-100
                         end %>">
-                      <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
-                      <% if best_time %>
-                        <%= best_time.format_time(event[:id]) %>
+                      <% time = @best_times[player.id][event[:id]] %>
+                      <% if time %>
+                        <%= format_time(time) %>
                       <% else %>
                         -
                       <% end %>
@@ -223,16 +237,16 @@
                     <% @events.each do |event| %>
                       <td class="px-2 py-2 whitespace-nowrap text-center"
                           style="background-color: <%= case event[:style]
-                            when '自由形' then '#fefce8'  # yellow-50
-                            when '平泳ぎ' then '#f0fdf4'  # green-50
-                            when '背泳ぎ' then '#fef2f2'  # red-50
-                            when 'バタフライ' then '#eff6ff'  # blue-50
-                            when '個人メドレー' then '#faf5ff'  # purple-50
+                            when 'fr' then '#fefce8'  # yellow-50
+                            when 'br' then '#f0fdf4'  # green-50
+                            when 'ba' then '#fef2f2'  # red-50
+                            when 'fly' then '#eff6ff'  # blue-50
+                            when 'im' then '#faf5ff'  # purple-50
                             else '#f3f4f6'  # gray-100
                           end %>">
-                        <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
-                        <% if best_time %>
-                          <%= best_time.format_time(event[:id]) %>
+                        <% time = @best_times[player.id][event[:id]] %>
+                        <% if time %>
+                          <%= format_time(time) %>
                         <% else %>
                           -
                         <% end %>
@@ -257,14 +271,21 @@
               <% @events.group_by { |e| e[:style] }.each do |style, events| %>
                 <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider" colspan="<%= events.size %>"
                     style="background-color: <%= case style
-                      when '自由形' then '#fde047'  # yellow-200
-                      when '平泳ぎ' then '#86efac'  # green-200
-                      when '背泳ぎ' then '#fca5a5'  # red-200
-                      when 'バタフライ' then '#93c5fd'  # blue-200
-                      when '個人メドレー' then '#d8b4fe'  # purple-200
+                      when 'fr' then '#fde047'  # yellow-200
+                      when 'br' then '#86efac'  # green-200
+                      when 'ba' then '#fca5a5'  # red-200
+                      when 'fly' then '#93c5fd'  # blue-200
+                      when 'im' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>">
-                  <%= style %>
+                  <%= case style
+                    when 'fr' then '自由形'
+                    when 'br' then '平泳ぎ'
+                    when 'ba' then '背泳ぎ'
+                    when 'fly' then 'バタフライ'
+                    when 'im' then '個人メドレー'
+                    else style
+                  end %>
                 </th>
               <% end %>
             </tr>
@@ -272,11 +293,11 @@
               <% @events.each do |event| %>
                 <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider cursor-pointer hover:bg-gray-200"
                     style="background-color: <%= case event[:style]
-                      when '自由形' then '#fde047'  # yellow-200
-                      when '平泳ぎ' then '#86efac'  # green-200
-                      when '背泳ぎ' then '#fca5a5'  # red-200
-                      when 'バタフライ' then '#93c5fd'  # blue-200
-                      when '個人メドレー' then '#d8b4fe'  # purple-200
+                      when 'fr' then '#fde047'  # yellow-200
+                      when 'br' then '#86efac'  # green-200
+                      when 'ba' then '#fca5a5'  # red-200
+                      when 'fly' then '#93c5fd'  # blue-200
+                      when 'im' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>"
                     data-sort-by="<%= event[:id] %>"
@@ -304,16 +325,16 @@
                   <% @events.each do |event| %>
                     <td class="px-2 py-2 whitespace-nowrap text-center"
                         style="background-color: <%= case event[:style]
-                          when '自由形' then '#fefce8'  # yellow-50
-                          when '平泳ぎ' then '#f0fdf4'  # green-50
-                          when '背泳ぎ' then '#fef2f2'  # red-50
-                          when 'バタフライ' then '#eff6ff'  # blue-50
-                          when '個人メドレー' then '#faf5ff'  # purple-50
+                          when 'fr' then '#fefce8'  # yellow-50
+                          when 'br' then '#f0fdf4'  # green-50
+                          when 'ba' then '#fef2f2'  # red-50
+                          when 'fly' then '#eff6ff'  # blue-50
+                          when 'im' then '#faf5ff'  # purple-50
                           else '#f3f4f6'  # gray-100
                         end %>">
-                      <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
-                      <% if best_time %>
-                        <%= best_time.format_time(event[:id]) %>
+                      <% time = @best_times[player.id][event[:id]] %>
+                      <% if time %>
+                        <%= format_time(time) %>
                       <% else %>
                         -
                       <% end %>
@@ -334,16 +355,16 @@
                     <% @events.each do |event| %>
                       <td class="px-2 py-2 whitespace-nowrap text-center"
                           style="background-color: <%= case event[:style]
-                            when '自由形' then '#fefce8'  # yellow-50
-                            when '平泳ぎ' then '#f0fdf4'  # green-50
-                            when '背泳ぎ' then '#fef2f2'  # red-50
-                            when 'バタフライ' then '#eff6ff'  # blue-50
-                            when '個人メドレー' then '#faf5ff'  # purple-50
+                            when 'fr' then '#fefce8'  # yellow-50
+                            when 'br' then '#f0fdf4'  # green-50
+                            when 'ba' then '#fef2f2'  # red-50
+                            when 'fly' then '#eff6ff'  # blue-50
+                            when 'im' then '#faf5ff'  # purple-50
                             else '#f3f4f6'  # gray-100
                           end %>">
-                        <% best_time = @best_times.find { |bt| bt.user_id == player.id } %>
-                        <% if best_time %>
-                          <%= best_time.format_time(event[:id]) %>
+                        <% time = @best_times[player.id][event[:id]] %>
+                        <% if time %>
+                          <%= format_time(time) %>
                         <% else %>
                           -
                         <% end %>

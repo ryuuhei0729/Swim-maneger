@@ -13,4 +13,14 @@ module ApplicationHelper
       end
     end
   end
+
+  def format_time(time)
+    minutes = (time / 60).floor
+    seconds = time % 60
+    if minutes > 0
+      format("%d:%05.2f", minutes, seconds)
+    else
+      format("%.2f", seconds)
+    end
+  end
 end 
