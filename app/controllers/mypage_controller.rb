@@ -3,7 +3,18 @@ class MypageController < ApplicationController
 
   def index
     @user = current_user_auth.user
-    @best_time_table = @user.best_time_table || @user.create_best_time_table
+    @records = @user.records.includes(:style).order(created_at: :desc)
+    
+    # 各種目のベストタイムを取得
+    @best_times = {}
+    Style.all.each do |style|
+      best_record = @user.records
+        .joins(:style)
+        .where(styles: { name: style.name })
+        .order(:time)
+        .first
+      @best_times[style.name] = best_record&.time
+    end
   end
 
   def update

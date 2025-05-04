@@ -244,7 +244,11 @@
               </dt>
               <dd class="flex items-baseline">
                 <div class="text-2xl font-semibold text-gray-900">
-                  <%= @best_time_table.format_time('50m_fr') %>
+                  <% if @best_times['50M_FR'].present? %>
+                    <%= format_time(@best_times['50M_FR']) %>
+                  <% else %>
+                    -
+                  <% end %>
                 </div>
                 <span class="ml-2 text-sm text-gray-500">秒</span>
               </dd>
@@ -279,319 +283,79 @@
     </div>
   </div>
 
-  <!-- ベストタイムテーブル -->
+  <!-- ベストタイム一覧 -->
   <div class="mt-12">
     <div class="flex items-center mb-8">
       <h3 class="text-2xl font-bold text-gray-900 mr-4">My Best Time</h3>
       <div class="h-1 flex-grow bg-gradient-to-r from-blue-800 to-blue-400 rounded-full"></div>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-      <!-- 自由形 -->
-      <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-5 border border-gray-100">
-        <h3 class="text-lg font-bold mb-4 text-blue-800 text-center pb-2 border-b border-gray-100">自由形</h3>
-        <table class="w-full">
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">50m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['50m_fr'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('50m_fr') %>
-                </span>
-                <% if @best_time_table['50m_fr_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['50m_fr_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">100m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['100m_fr'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('100m_fr') %>
-                </span>
-                <% if @best_time_table['100m_fr_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['100m_fr_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">200m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['200m_fr'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('200m_fr') %>
-                </span>
-                <% if @best_time_table['200m_fr_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['200m_fr_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">400m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['400m_fr'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('400m_fr') %>
-                </span>
-                <% if @best_time_table['400m_fr_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['400m_fr_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">800m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['800m_fr'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('800m_fr') %>
-                </span>
-                <% if @best_time_table['800m_fr_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['800m_fr_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
 
-      <!-- 平泳ぎ -->
-      <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-5 border border-gray-100">
-        <h3 class="text-lg font-bold mb-4 text-blue-800 text-center pb-2 border-b border-gray-100">平泳ぎ</h3>
-        <table class="w-full">
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">50m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['50m_br'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('50m_br') %>
-                </span>
-                <% if @best_time_table['50m_br_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['50m_br_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">100m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['100m_br'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('100m_br') %>
-                </span>
-                <% if @best_time_table['100m_br_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['100m_br_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">200m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['200m_br'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('200m_br') %>
-                </span>
-                <% if @best_time_table['200m_br_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['200m_br_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-        </table>
+    <div class="mb-8">
+      <div class="flex w-full">
+        <% style_order = { 'fr' => 0, 'br' => 1, 'ba' => 2, 'fly' => 3, 'im' => 4 } %>
+        <% style_titles = { 'fr' => '自由形', 'br' => '平泳ぎ', 'ba' => '背泳ぎ', 'fly' => 'バタフライ', 'im' => '個人メドレー' } %>
+        <% style_header_colors = { 'fr' => 'bg-yellow-50', 'br' => 'bg-green-50', 'ba' => 'bg-red-50', 'fly' => 'bg-blue-50', 'im' => 'bg-purple-50' } %>
+        <% Style.all.group_by(&:style).sort_by { |style_type, _| style_order[style_type] || 5 }.each do |style_type, styles| %>
+          <div class="flex-1 min-w-0 mx-1 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-5 border border-gray-100 flex flex-col
+            <%= 'bg-yellow-50' if style_type == 'fr' %>
+            <%= 'bg-green-50' if style_type == 'br' %>
+            <%= 'bg-red-50' if style_type == 'ba' %>
+            <%= 'bg-blue-50' if style_type == 'fly' %>
+            <%= 'bg-purple-50' if style_type == 'im' %>" style="min-width:180px;">
+            <h3 class="text-lg font-bold mb-4 text-blue-800 text-center pb-2 border-b border-gray-300">
+              <%= style_titles[style_type] || style_type %>
+            </h3>
+            <table class="w-full">
+              <% styles.each do |style| %>
+                <tr>
+                  <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center"><%= style.name_jp.match(/\d+m/)[0] %></td>
+                  <td class="py-2.5 w-1/2 text-center">
+                    <div class="group relative">
+                      <span class="<%= @best_times[style.name].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
+                        <%= @best_times[style.name].present? ? format_time(@best_times[style.name]) : '-' %>
+                      </span>
+                      <% if defined?(@best_time_notes) && @best_time_notes[style.name].present? %>
+                        <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
+                          <%= @best_time_notes[style.name] %>
+                          <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
+                        </div>
+                      <% end %>
+                    </div>
+                  </td>
+                </tr>
+              <% end %>
+            </table>
+          </div>
+        <% end %>
       </div>
+    </div>
 
-      <!-- 背泳ぎ -->
-      <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-5 border border-gray-100">
-        <h3 class="text-lg font-bold mb-4 text-blue-800 text-center pb-2 border-b border-gray-100">背泳ぎ</h3>
-        <table class="w-full">
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">50m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['50m_ba'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('50m_ba') %>
-                </span>
-                <% if @best_time_table['50m_ba_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['50m_ba_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
+    <!-- 記録履歴 -->
+    <div class="flex items-center mb-8">
+      <h3 class="text-2xl font-bold text-gray-900 mr-4">My Records</h3>
+      <div class="h-1 flex-grow bg-gradient-to-r from-blue-800 to-blue-400 rounded-full"></div>
+    </div>
+    <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-5 border border-gray-100">
+      <table class="w-full">
+        <thead>
+          <tr class="border-b border-gray-200">
+            <th class="py-3 text-left text-gray-600 font-medium">種目</th>
+            <th class="py-3 text-left text-gray-600 font-medium">タイム</th>
+            <th class="py-3 text-left text-gray-600 font-medium">日付</th>
+            <th class="py-3 text-left text-gray-600 font-medium">メモ</th>
           </tr>
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">100m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['100m_ba'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('100m_ba') %>
-                </span>
-                <% if @best_time_table['100m_ba_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['100m_ba_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">200m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['200m_ba'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('200m_ba') %>
-                </span>
-                <% if @best_time_table['200m_ba_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['200m_ba_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <!-- バタフライ -->
-      <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-5 border border-gray-100">
-        <h3 class="text-lg font-bold mb-4 text-blue-800 text-center pb-2 border-b border-gray-100">バタフライ</h3>
-        <table class="w-full">
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">50m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['50m_fly'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('50m_fly') %>
-                </span>
-                <% if @best_time_table['50m_fly_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['50m_fly_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">100m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['100m_fly'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('100m_fly') %>
-                </span>
-                <% if @best_time_table['100m_fly_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['100m_fly_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">200m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['200m_fly'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('200m_fly') %>
-                </span>
-                <% if @best_time_table['200m_fly_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['200m_fly_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <!-- 個人メドレー -->
-      <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-5 border border-gray-100">
-        <h3 class="text-lg font-bold mb-4 text-blue-800 text-center pb-2 border-b border-gray-100">個人メドレー</h3>
-        <table class="w-full">
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">100m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['100m_im'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('100m_im') %>
-                </span>
-                <% if @best_time_table['100m_im_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['100m_im_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">200m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['200m_im'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('200m_im') %>
-                </span>
-                <% if @best_time_table['200m_im_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['200m_im_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center">400m</td>
-            <td class="py-2.5 w-1/2 text-center">
-              <div class="group relative">
-                <span class="<%= @best_time_table['400m_im'].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                  <%= @best_time_table.format_time('400m_im') %>
-                </span>
-                <% if @best_time_table['400m_im_note'].present? %>
-                  <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-4 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                    <%= @best_time_table['400m_im_note'] %>
-                    <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                  </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-        </table>
-      </div>
+        </thead>
+        <tbody>
+          <% @records.each do |record| %>
+            <tr class="border-b border-gray-100">
+              <td class="py-3"><%= record.style.name_jp %></td>
+              <td class="py-3"><%= format_time(record.time) %></td>
+              <td class="py-3"><%= record.created_at.strftime("%Y/%m/%d") %></td>
+              <td class="py-3"><%= record.note %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
     </div>
   </div>
 <% end %> 

@@ -54,16 +54,43 @@ end
 
 # ユーザータイプの定義
 USER_TYPES = ['director', 'coach', 'player', 'manager']
-GENDERS = ['male', 'female', 'other']
+GENDERS = ['male', 'female']
 
 # データベースをクリア
 puts "データベースをクリアしています..."
-# Attendance.destroy_all
-# AttendanceEvent.destroy_all
-# BestTimeTable.destroy_all
-# Announcement.destroy_all
-# User.destroy_all
-# UserAuth.destroy_all
+Attendance.destroy_all
+AttendanceEvent.destroy_all
+Record.destroy_all
+User.destroy_all
+UserAuth.destroy_all
+Style.destroy_all
+
+# 種目の作成
+puts "種目を作成中..."
+styles = [
+  { name_jp: "50m自由形", name: "50Fr", style: "fr", distance: 50 },
+  { name_jp: "100m自由形", name: "100Fr", style: "fr", distance: 100 },
+  { name_jp: "200m自由形", name: "200Fr", style: "fr", distance: 200 },
+  { name_jp: "400m自由形", name: "400Fr", style: "fr", distance: 400 },
+  { name_jp: "800m自由形", name: "800Fr", style: "fr", distance: 800 },
+  { name_jp: "50m平泳ぎ", name: "50Br", style: "br", distance: 50 },
+  { name_jp: "100m平泳ぎ", name: "100Br", style: "br", distance: 100 },
+  { name_jp: "200m平泳ぎ", name: "200Br", style: "br", distance: 200 },
+  { name_jp: "50m背泳ぎ", name: "50Ba", style: "ba", distance: 50 },
+  { name_jp: "100m背泳ぎ", name: "100Ba", style: "ba", distance: 100 },
+  { name_jp: "200m背泳ぎ", name: "200Ba", style: "ba", distance: 200 },
+  { name_jp: "50mバタフライ", name: "50Fly", style: "fly", distance: 50 },
+  { name_jp: "100mバタフライ", name: "100Fly", style: "fly", distance: 100 },
+  { name_jp: "200mバタフライ", name: "200Fly", style: "fly", distance: 200 },
+  { name_jp: "100m個人メドレー", name: "100IM", style: "im", distance: 100 },
+  { name_jp: "200m個人メドレー", name: "200IM", style: "im", distance: 200 },
+  { name_jp: "400m個人メドレー", name: "400IM", style: "im", distance: 400 }
+]
+
+styles.each do |style_data|
+  Style.create!(style_data)
+  puts "Created style: #{style_data[:name_jp]}"
+end
 
 # ユーザー作成
 puts "Creating users..."
@@ -149,61 +176,41 @@ end
   puts "Created player: #{user.name}"
 end
 
-# ベストタイムテーブル作成（プレイヤーのみ）
-puts "Creating best time tables for players..."
+# 記録の作成
+puts "Creating records..."
 
+# プレイヤーと種目の組み合わせで記録を作成
 User.where(user_type: 'player').each do |user|
-  best_time = BestTimeTable.create!(
-    user: user,
-    # フリースタイル
-    '50m_fr': generate_random_time("50m"),
-    '50m_fr_note': rand < 0.3 ? "メモ: #{user.name}の50mフリースタイル記録" : nil,
-    '100m_fr': generate_random_time("100m"),
-    '100m_fr_note': rand < 0.3 ? "メモ: #{user.name}の100mフリースタイル記録" : nil,
-    '200m_fr': generate_random_time("200m"),
-    '200m_fr_note': rand < 0.3 ? "メモ: #{user.name}の200mフリースタイル記録" : nil,
-    '400m_fr': generate_random_time("400m"),
-    '400m_fr_note': rand < 0.3 ? "メモ: #{user.name}の400mフリースタイル記録" : nil,
-    '800m_fr': generate_random_time("800m"),
-    '800m_fr_note': rand < 0.3 ? "メモ: #{user.name}の800mフリースタイル記録" : nil,
+  Style.all.each do |style|
+    # 種目に応じたランダムなタイムを生成
+    time = case style.distance
+    when 50
+      rand(22.00..35.00).round(2)  # 50m: 22-35秒
+    when 100
+      rand(50.00..80.00).round(2)  # 100m: 50-80秒
+    when 200
+      rand(110.00..180.00).round(2) # 200m: 1:50-3:00
+    when 400
+      rand(240.00..360.00).round(2) # 400m: 4:00-6:00
+    when 800
+      rand(480.00..720.00).round(2) # 800m: 8:00-12:00
+    else
+      0
+    end
 
-    # バタフライ
-    '50m_fly': generate_random_time("50m"),
-    '50m_fly_note': rand < 0.3 ? "メモ: #{user.name}の50mバタフライ記録" : nil,
-    '100m_fly': generate_random_time("100m"),
-    '100m_fly_note': rand < 0.3 ? "メモ: #{user.name}の100mバタフライ記録" : nil,
-    '200m_fly': generate_random_time("200m"),
-    '200m_fly_note': rand < 0.3 ? "メモ: #{user.name}の200mバタフライ記録" : nil,
-
-    # 背泳ぎ
-    '50m_ba': generate_random_time("50m"),
-    '50m_ba_note': rand < 0.3 ? "メモ: #{user.name}の50m背泳ぎ記録" : nil,
-    '100m_ba': generate_random_time("100m"),
-    '100m_ba_note': rand < 0.3 ? "メモ: #{user.name}の100m背泳ぎ記録" : nil,
-    '200m_ba': generate_random_time("200m"),
-    '200m_ba_note': rand < 0.3 ? "メモ: #{user.name}の200m背泳ぎ記録" : nil,
-
-    # 平泳ぎ
-    '50m_br': generate_random_time("50m"),
-    '50m_br_note': rand < 0.3 ? "メモ: #{user.name}の50m平泳ぎ記録" : nil,
-    '100m_br': generate_random_time("100m"),
-    '100m_br_note': rand < 0.3 ? "メモ: #{user.name}の100m平泳ぎ記録" : nil,
-    '200m_br': generate_random_time("200m"),
-    '200m_br_note': rand < 0.3 ? "メモ: #{user.name}の200m平泳ぎ記録" : nil,
-
-    # 個人メドレー
-    '100m_im': generate_random_time("100m"),
-    '100m_im_note': rand < 0.3 ? "メモ: #{user.name}の100m個人メドレー記録" : nil,
-    '200m_im': generate_random_time("200m"),
-    '200m_im_note': rand < 0.3 ? "メモ: #{user.name}の200m個人メドレー記録" : nil,
-    '400m_im': generate_random_time("400m"),
-    '400m_im_note': rand < 0.3 ? "メモ: #{user.name}の400m個人メドレー記録" : nil
-  )
+    # 記録を作成
+    Record.create!(
+      user: user,
+      style: style,
+      time: time,
+      created_at: rand(1..365).days.ago
+    )
+  end
 end
 
 puts "テストデータの作成が完了しました。"
 puts "作成されたユーザー数: #{User.count}"
-puts "作成されたベストタイム数: #{BestTimeTable.count}"
+puts "作成された記録数: #{Record.count}"
 
 # ユーザーが既に存在することを前提とします
 
@@ -303,19 +310,19 @@ puts "出席イベントの作成が完了しました"
 puts "出席データを作成中..."
 
 reasons_absent = ["体調不良", "家庭の事情", "学業の都合", "用事があるため", "怪我のため"]
-reasons_late = ["電車遅延", "寝坊", "授業が長引いた", "バスが遅れた", "準備に時間がかかった"]
+reasons_other = ["電車遅延", "寝坊", "授業が長引いた", "バスが遅れた", "準備に時間がかかった"]
 
 AttendanceEvent.all.each do |event|
   User.all.each do |user|
     # 50%〜90%の確率で出席データを作成
     next unless rand < rand(0.5..0.9)
-    status = [:present, :absent, :late].sample
+    status = [:present, :absent, :other].sample
     note =
       case status
       when :absent
         reasons_absent.sample
-      when :late
-        reasons_late.sample
+      when :other
+        reasons_other.sample
       else
         nil
       end
