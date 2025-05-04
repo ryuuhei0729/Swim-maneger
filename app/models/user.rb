@@ -20,6 +20,12 @@ class User < ApplicationRecord
     director: 'director'
   }.freeze
 
+  # 性別の定数
+  GENDERS = {
+    male: 'male',
+    female: 'female'
+  }.freeze
+
   # 管理者権限を持つユーザータイプ
   ADMIN_TYPES = [USER_TYPES[:coach], USER_TYPES[:director]].freeze
 
@@ -27,6 +33,9 @@ class User < ApplicationRecord
   def admin?
     ADMIN_TYPES.include?(user_type)
   end
+
+  # 性別のバリデーション
+  validates :gender, inclusion: { in: GENDERS.values }
 
   # ユーザータイプのバリデーション
   validates :user_type, inclusion: { in: USER_TYPES.values }
