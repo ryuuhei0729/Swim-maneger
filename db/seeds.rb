@@ -53,8 +53,8 @@ def generate_random_time(event)
 end
 
 # ユーザータイプの定義
-USER_TYPES = ['director', 'coach', 'player']
-GENDERS = ['male', 'female']
+USER_TYPES = ['director', 'coach', 'player', 'manager']
+GENDERS = ['male', 'female', 'other']
 
 # データベースをクリア
 puts "データベースをクリアしています..."
