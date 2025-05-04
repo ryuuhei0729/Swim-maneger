@@ -17,7 +17,8 @@ class User < ApplicationRecord
   USER_TYPES = {
     player: 'player',
     coach: 'coach',
-    director: 'director'
+    director: 'director',
+    manager: 'manager'
   }.freeze
 
   # 性別の定数
@@ -27,18 +28,17 @@ class User < ApplicationRecord
   }.freeze
 
   # 管理者権限を持つユーザータイプ
-  ADMIN_TYPES = [USER_TYPES[:coach], USER_TYPES[:director]].freeze
+  ADMIN_TYPES = [USER_TYPES[:coach], USER_TYPES[:director], USER_TYPES[:manager]].freeze
 
   # ユーザーが管理者かどうかを判定するメソッド
   def admin?
     ADMIN_TYPES.include?(user_type)
   end
 
-  # 性別のバリデーション
-  validates :gender, inclusion: { in: GENDERS.values }
-
   # ユーザータイプのバリデーション
   validates :user_type, inclusion: { in: USER_TYPES.values }
+  # 性別のバリデーション
+  validates :gender, inclusion: { in: GENDERS.values }
 
   # プロフィール画像のURLを取得するメソッド
   def profile_image_url

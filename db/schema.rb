@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_04_093100) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_04_093637) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -146,6 +146,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_04_093100) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.check_constraint "gender::text = ANY (ARRAY['male'::character varying, 'female'::character varying]::text[])", name: "check_gender"
+    t.check_constraint "user_type::text = ANY (ARRAY['player'::character varying, 'coach'::character varying, 'director'::character varying, 'manager'::character varying]::text[])", name: "check_user_type"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
