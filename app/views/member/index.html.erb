@@ -1,65 +1,135 @@
 <% content_for :title, 'Member' %>
 
-<div class="bg-white shadow rounded-lg p-6" data-controller="modal">
-  <div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-bold text-gray-900">メンバー一覧</h2>
-    <div class="flex space-x-4 mb-6">
+<div class="flex h-screen bg-gray-100">
+  <!-- 左側のサイドバー -->
+  <div class="w-64 bg-white shadow-lg">
+    <div class="p-4">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">メンバー区分</h2>
+      <nav class="space-y-2">
+        <div class="space-y-1">
+          <button
+            class="w-full text-left px-4 py-2 rounded-lg transition-colors duration-150 hover:bg-gray-50 group member-type-button active"
+            data-type="player"
+            data-toggle="player-generations"
+          >
+            <div class="flex items-center">
+              <span class="text-blue-800 font-medium group-hover:text-blue-900">選手</span>
+              <span class="ml-auto bg-blue-100 text-blue-800 text-xs font-medium px-2 py-0.5 rounded">
+                (<%= @grouped_by_type['player']&.size || 0 %>)
+              </span>
+            </div>
+          </button>
+          
+          <!-- 期別グループ -->
+          <div id="player-generations" class="pl-4 space-y-1">
+            <% @grouped_by_generation.each do |generation, users| %>
+              <% player_count = users.count { |u| u.user_type == 'player' } %>
+              <% if player_count > 0 %>
+                <button
+                  class="w-full text-left px-4 py-2 rounded-lg transition-colors duration-150 hover:bg-gray-50 group generation-button"
+                  data-type="player"
+                  data-generation="<%= generation %>"
+                >
+                  <div class="flex items-center">
+                    <span class="text-gray-600 font-medium group-hover:text-gray-900"><%= generation %>期</span>
+                    <span class="ml-auto bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded">
+                      (<%= player_count %>)
+                    </span>
+                  </div>
+                </button>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <button
+          class="w-full text-left px-4 py-2 rounded-lg transition-colors duration-150 hover:bg-gray-50 group member-type-button"
+          data-type="coach"
+        >
+          <div class="flex items-center">
+            <span class="text-gray-700 font-medium group-hover:text-gray-900">コーチ</span>
+            <span class="ml-auto bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded">
+              (<%= @grouped_by_type['coach']&.size || 0 %>)
+            </span>
+          </div>
+        </button>
+        <button
+          class="w-full text-left px-4 py-2 rounded-lg transition-colors duration-150 hover:bg-gray-50 group member-type-button"
+          data-type="director"
+        >
+          <div class="flex items-center">
+            <span class="text-gray-700 font-medium group-hover:text-gray-900">監督/顧問</span>
+            <span class="ml-auto bg-gray-100 text-gray-800 text-xs font-medium px-2 py-0.5 rounded">
+              (<%= @grouped_by_type['director']&.size || 0 %>)
+            </span>
+          </div>
+        </button>
+      </nav>
     </div>
   </div>
-  
-  <div class="overflow-x-auto">
-    <div id="type-view" data-group-view="type">
-      <% @grouped_by_type.each do |user_type, users| %>
-        <div class="mb-8">
-          <h3 class="text-lg font-semibold text-gray-900 mb-4">
-            <%= user_type == 'director' ? '監督/顧問' : (user_type == 'coach' ? 'コーチ' : '選手') %>
-          </h3>
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">プロフィール</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名前</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">期数</th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">生年月日</th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <% users.each do |user| %>
-                <tr class="hover:bg-gray-50 cursor-pointer" data-action="click->modal#open" data-modal-id="user-modal-<%= user.id %>">
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="flex-shrink-0">
-                      <% if user.avatar.attached? %>
-                        <%= image_tag url_for(user.avatar), alt: "#{user.name}のプロフィール画像", class: "w-16 h-16 rounded-full" %>
-                      <% else %>
-                        <div class="w-16 h-16 rounded-full bg-blue-800 flex items-center justify-center">
-                          <span class="text-white text-sm"><%= user.name[0] %></span>
-                        </div>
-                      <% end %>
-                    </div>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="text-blue-800 font-medium"><%= user.name %></span>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-gray-600">
-                    <%= user.generation %><%= ordinal_suffix(user.generation) %>
-                  </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-gray-500">
-                    <%= user.birthday.strftime('%Y年%m月%d日') %>
-                  </td>
+
+  <!-- 右側のメインコンテンツ -->
+  <div class="flex-1 p-8">
+    <% @grouped_by_type.each do |user_type, users| %>
+      <div class="member-list <%= user_type == 'player' ? '' : 'hidden' %>" data-type="<%= user_type %>">
+        <div class="bg-white shadow rounded-lg p-6">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">
+              <%= user_type == 'director' ? '監督/顧問' : (user_type == 'coach' ? 'コーチ' : '選手') %>一覧
+            </h2>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">プロフィール</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名前</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">期数</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">生年月日</th>
                 </tr>
-              <% end %>
-            </tbody>
-          </table>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% users.each do |user| %>
+                  <tr class="hover:bg-gray-50 cursor-pointer" 
+                      data-controller="modal" 
+                      data-action="click->modal#open" 
+                      data-modal-id="user-modal-<%= user.id %>">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="flex-shrink-0">
+                        <% if user.avatar.attached? %>
+                          <%= image_tag url_for(user.avatar), alt: "#{user.name}のプロフィール画像", class: "w-16 h-16 rounded-full" %>
+                        <% else %>
+                          <div class="w-16 h-16 rounded-full bg-blue-800 flex items-center justify-center">
+                            <span class="text-white text-sm"><%= user.name[0] %></span>
+                          </div>
+                        <% end %>
+                      </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <span class="text-blue-800 font-medium"><%= user.name %></span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-600">
+                      <%= user.generation %><%= ordinal_suffix(user.generation) %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-gray-500">
+                      <%= user.birthday.strftime('%Y年%m月%d日') %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
         </div>
-      <% end %>
-    </div>
+      </div>
+    <% end %>
   </div>
 </div>
 
 <!-- ユーザー詳細モーダル -->
 <% @users.each do |user| %>
   <%= render "shared/modal", modal_id: "user-modal-#{user.id}", title: "#{user.name}の詳細情報" do %>
-    <div class="flex items-center space-x-6 mb-6" >
+    <div class="flex items-center space-x-6 mb-6">
       <div class="flex-shrink-0">
         <% if user.avatar.attached? %>
           <%= image_tag url_for(user.avatar), alt: "#{user.name}のプロフィール画像", class: "w-48 h-48 rounded-full object-cover" %>
@@ -84,32 +154,121 @@
         <p class="text-gray-500 italic">自己紹介が設定されていません</p>
       <% end %>
     </div>
-  <% end %> 
-<% end %> 
+  <% end %>
+<% end %>
 
 
-# <!-- ここにモーダルのjavascriptのコードを記載 -->
-# <script>
-#   document.addEventListener('DOMContentLoaded', function() {
-#     // モーダルを開く処理
-#     document.querySelectorAll('[data-action="click->modal#open"]').forEach(button => {
-#       button.addEventListener('click', function() {
-#         const modalId = this.dataset.modalTarget;
-#         const modal = document.getElementById(modalId);
-#         if (modal) {
-#           modal.classList.remove('hidden');
-#         }
-#       });
-#     });
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const typeButtons = document.querySelectorAll('.member-type-button');
+  const generationButtons = document.querySelectorAll('.generation-button');
+  const memberLists = document.querySelectorAll('.member-list');
+  const playerGenerations = document.getElementById('player-generations');
 
-#     // モーダルを閉じる処理
-#     document.querySelectorAll('[data-action="click->modal#close"]').forEach(button => {
-#       button.addEventListener('click', function() {
-#         const modal = this.closest('[data-modal-target="modal"]');
-#         if (modal) {
-#           modal.classList.add('hidden');
-#         }
-#       });
-#     });
-#   });
-# </script> 
+  // 選手ボタンのクリック処理
+  const playerButton = document.querySelector('[data-toggle="player-generations"]');
+  playerButton.addEventListener('click', () => {
+    handleTypeButtonClick(playerButton);
+    showAllPlayersOfType('player');
+  });
+
+  // タイプボタンのクリック処理
+  typeButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const type = button.dataset.type;
+      if (type !== 'player') {
+        handleTypeButtonClick(button);
+        showAllPlayersOfType(type);
+      }
+    });
+  });
+
+  // 期別ボタンのクリック処理
+  generationButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const type = button.dataset.type;
+      const generation = button.dataset.generation;
+      
+      // ボタンのスタイル更新
+      generationButtons.forEach(btn => {
+        btn.querySelector('span:first-child').classList.remove('text-blue-800');
+        btn.querySelector('span:first-child').classList.add('text-gray-600');
+        btn.querySelector('span:last-child').classList.remove('bg-blue-100', 'text-blue-800');
+        btn.querySelector('span:last-child').classList.add('bg-gray-100', 'text-gray-800');
+      });
+      button.querySelector('span:first-child').classList.remove('text-gray-600');
+      button.querySelector('span:first-child').classList.add('text-blue-800');
+      button.querySelector('span:last-child').classList.remove('bg-gray-100', 'text-gray-800');
+      button.querySelector('span:last-child').classList.add('bg-blue-100', 'text-blue-800');
+
+      // 該当する期の選手のみ表示
+      showPlayersOfGeneration(type, generation);
+    });
+  });
+
+  function handleTypeButtonClick(button) {
+    typeButtons.forEach(btn => {
+      btn.classList.remove('active');
+      btn.querySelector('span:first-child').classList.remove('text-blue-800');
+      btn.querySelector('span:first-child').classList.add('text-gray-700');
+      btn.querySelector('span:last-child').classList.remove('bg-blue-100', 'text-blue-800');
+      btn.querySelector('span:last-child').classList.add('bg-gray-100', 'text-gray-800');
+    });
+    button.classList.add('active');
+    button.querySelector('span:first-child').classList.remove('text-gray-700');
+    button.querySelector('span:first-child').classList.add('text-blue-800');
+    button.querySelector('span:last-child').classList.remove('bg-gray-100', 'text-gray-800');
+    button.querySelector('span:last-child').classList.add('bg-blue-100', 'text-blue-800');
+  }
+
+  function showPlayersOfGeneration(type, generation) {
+    const playerList = document.querySelector(`.member-list[data-type="player"]`);
+    const rows = playerList.querySelectorAll('tbody tr');
+    
+    rows.forEach(row => {
+      const generationCell = row.querySelector('td:nth-child(3)');
+      const rowGeneration = parseInt(generationCell.textContent);
+      if (rowGeneration === parseInt(generation)) {
+        row.classList.remove('hidden');
+      } else {
+        row.classList.add('hidden');
+      }
+    });
+
+    memberLists.forEach(list => {
+      if (list.dataset.type === type) {
+        list.classList.remove('hidden');
+      } else {
+        list.classList.add('hidden');
+      }
+    });
+  }
+
+  function showAllPlayersOfType(type) {
+    memberLists.forEach(list => {
+      if (list.dataset.type === type) {
+        const rows = list.querySelectorAll('tbody tr');
+        rows.forEach(row => row.classList.remove('hidden'));
+        list.classList.remove('hidden');
+      } else {
+        list.classList.add('hidden');
+      }
+    });
+  }
+});
+</script>
+
+<style>
+.member-type-button.active {
+  background-color: #f0f9ff;
+}
+
+#player-generations {
+  display: block;
+}
+
+#player-generations.hidden {
+  display: none;
+}
+</style> 
