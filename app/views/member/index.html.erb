@@ -85,7 +85,7 @@
                    data-controller="modal"
                    data-action="click->modal#open"
                    data-modal-id="user-modal-<%= user.id %>">
-                <div class="flex justify-center pt-4">
+                <div class="flex justify-center pt-8">
                   <% if user.avatar.attached? %>
                     <%= image_tag url_for(user.avatar), 
                         alt: "#{user.name}のプロフィール画像",
@@ -96,7 +96,7 @@
                     </div>
                   <% end %>
                 </div>
-                <div class="px-3 py-2 text-center">
+                <div class="px-3 py-8 text-center">
                   <h3 class="text-base font-semibold text-gray-900 mb-0.5"><%= user.name %></h3>
                   <div class="text-sm text-gray-600">
                     <p class="mb-0.5"><%= user.generation %>期</p>
