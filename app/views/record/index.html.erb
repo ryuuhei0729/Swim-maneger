@@ -9,13 +9,13 @@
     <div class="flex items-center justify-between">
       <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="genderTabs" role="tablist">
         <li class="mr-2" role="presentation">
-          <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'all' ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="all-tab" data-tabs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="<%= @default_tab == 'all' %>">全体</button>
+          <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'all' ? 'border-blue-600 text-blue-600 bg-blue-100' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="all-tab" data-tabs-target="#all" type="button" role="tab" aria-controls="all" aria-selected="<%= @default_tab == 'all' %>">全体</button>
         </li>
         <li class="mr-2" role="presentation">
-          <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'male' ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="male-tab" data-tabs-target="#male" type="button" role="tab" aria-controls="male" aria-selected="<%= @default_tab == 'male' %>">男子</button>
+          <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'male' ? 'border-blue-600 text-blue-600 bg-blue-100' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="male-tab" data-tabs-target="#male" type="button" role="tab" aria-controls="male" aria-selected="<%= @default_tab == 'male' %>">男子</button>
         </li>
         <li class="mr-2" role="presentation">
-          <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'female' ? 'border-blue-600 text-blue-600 bg-blue-50' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="female-tab" data-tabs-target="#female" type="button" role="tab" aria-controls="female" aria-selected="<%= @default_tab == 'female' %>">女子</button>
+          <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'female' ? 'border-blue-600 text-blue-600 bg-blue-100' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="female-tab" data-tabs-target="#female" type="button" role="tab" aria-controls="female" aria-selected="<%= @default_tab == 'female' %>">女子</button>
         </li>
       </ul>
       <div class="text-sm text-red-600">
@@ -76,16 +76,16 @@
           <tbody class="bg-white divide-y divide-gray-200">
             <% if @sort_by.present? %>
               <% @players.each do |player| %>
-                <tr class="hover:bg-gray-50">
-                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                <tr class="<%= 'bg-blue-100' if player.id == current_user_auth.user.id %>">
+                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 <%= player.id == current_user_auth.user.id ? 'bg-blue-100' : 'bg-white' %> z-10">
                     <%= player.generation %>期
                   </td>
-                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 <%= player.id == current_user_auth.user.id ? 'bg-blue-100' : 'bg-white' %> z-10">
                     <%= player.name %>
                   </td>
                   <% @events.each do |event| %>
                     <td class="px-2 py-2 whitespace-nowrap text-center"
-                        style="background-color: <%= case event[:style]
+                        style="background-color: <%= player.id == current_user_auth.user.id ? '#dbeafe' : case event[:style]
                           when 'fr' then '#fefce8'  # yellow-50
                           when 'br' then '#f0fdf4'  # green-50
                           when 'ba' then '#fef2f2'  # red-50
@@ -106,16 +106,16 @@
             <% else %>
               <% @players_by_generation.each do |generation, players| %>
                 <% players.each do |player| %>
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                  <tr class="hover:bg-gray-50 <%= 'bg-blue-100' if player.id == current_user_auth.user.id %>">
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 <%= player.id == current_user_auth.user.id ? 'bg-blue-100' : 'bg-white' %> z-10">
                       <%= generation %>期
                     </td>
-                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 <%= player.id == current_user_auth.user.id ? 'bg-blue-100' : 'bg-white' %> z-10">
                       <%= player.name %>
                     </td>
                     <% @events.each do |event| %>
                       <td class="px-2 py-2 whitespace-nowrap text-center"
-                          style="background-color: <%= case event[:style]
+                          style="background-color: <%= player.id == current_user_auth.user.id ? '#dbeafe' : case event[:style]
                             when 'fr' then '#fefce8'  # yellow-50
                             when 'br' then '#f0fdf4'  # green-50
                             when 'ba' then '#fef2f2'  # red-50
@@ -191,16 +191,16 @@
           <tbody class="bg-white divide-y divide-gray-200">
             <% if @sort_by.present? %>
               <% @male_players.each do |player| %>
-                <tr class="hover:bg-gray-50">
-                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                <tr class="hover:bg-gray-50 <%= 'bg-blue-100' if player.id == current_user_auth.user.id %>">
+                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 <%= player.id == current_user_auth.user.id ? 'bg-blue-100' : 'bg-white' %> z-10">
                     <%= player.generation %>期
                   </td>
-                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 <%= player.id == current_user_auth.user.id ? 'bg-blue-100' : 'bg-white' %> z-10">
                     <%= player.name %>
                   </td>
                   <% @events.each do |event| %>
                     <td class="px-2 py-2 whitespace-nowrap text-center"
-                        style="background-color: <%= case event[:style]
+                        style="background-color: <%= player.id == current_user_auth.user.id ? '#dbeafe' : case event[:style]
                           when 'fr' then '#fefce8'  # yellow-50
                           when 'br' then '#f0fdf4'  # green-50
                           when 'ba' then '#fef2f2'  # red-50
@@ -221,16 +221,16 @@
             <% else %>
               <% @male_players_by_generation.each do |generation, players| %>
                 <% players.each do |player| %>
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                  <tr class="hover:bg-gray-50 <%= 'bg-blue-100' if player.id == current_user_auth.user.id %>">
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 <%= player.id == current_user_auth.user.id ? 'bg-blue-100' : 'bg-white' %> z-10">
                       <%= generation %>期
                     </td>
-                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 <%= player.id == current_user_auth.user.id ? 'bg-blue-100' : 'bg-white' %> z-10">
                       <%= player.name %>
                     </td>
                     <% @events.each do |event| %>
                       <td class="px-2 py-2 whitespace-nowrap text-center"
-                          style="background-color: <%= case event[:style]
+                          style="background-color: <%= player.id == current_user_auth.user.id ? '#dbeafe' : case event[:style]
                             when 'fr' then '#fefce8'  # yellow-50
                             when 'br' then '#f0fdf4'  # green-50
                             when 'ba' then '#fef2f2'  # red-50
@@ -306,16 +306,16 @@
           <tbody class="bg-white divide-y divide-gray-200">
             <% if @sort_by.present? %>
               <% @female_players.each do |player| %>
-                <tr class="hover:bg-gray-50">
-                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                <tr class="hover:bg-gray-50 <%= 'bg-blue-100' if player.id == current_user_auth.user.id %>">
+                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 <%= player.id == current_user_auth.user.id ? 'bg-blue-100' : 'bg-white' %> z-10">
                     <%= player.generation %>期
                   </td>
-                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                  <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 <%= player.id == current_user_auth.user.id ? 'bg-blue-100' : 'bg-white' %> z-10">
                     <%= player.name %>
                   </td>
                   <% @events.each do |event| %>
                     <td class="px-2 py-2 whitespace-nowrap text-center"
-                        style="background-color: <%= case event[:style]
+                        style="background-color: <%= player.id == current_user_auth.user.id ? '#dbeafe' : case event[:style]
                           when 'fr' then '#fefce8'  # yellow-50
                           when 'br' then '#f0fdf4'  # green-50
                           when 'ba' then '#fef2f2'  # red-50
@@ -336,16 +336,16 @@
             <% else %>
               <% @female_players_by_generation.each do |generation, players| %>
                 <% players.each do |player| %>
-                  <tr class="hover:bg-gray-50">
-                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                  <tr class="hover:bg-gray-50 <%= 'bg-blue-100' if player.id == current_user_auth.user.id %>">
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 <%= player.id == current_user_auth.user.id ? 'bg-blue-100' : 'bg-white' %> z-10">
                       <%= generation %>期
                     </td>
-                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 bg-white z-10">
+                    <td class="px-2 py-2 whitespace-nowrap font-medium text-gray-900 sticky left-0 <%= player.id == current_user_auth.user.id ? 'bg-blue-100' : 'bg-white' %> z-10">
                       <%= player.name %>
                     </td>
                     <% @events.each do |event| %>
                       <td class="px-2 py-2 whitespace-nowrap text-center"
-                          style="background-color: <%= case event[:style]
+                          style="background-color: <%= player.id == current_user_auth.user.id ? '#dbeafe' : case event[:style]
                             when 'fr' then '#fefce8'  # yellow-50
                             when 'br' then '#f0fdf4'  # green-50
                             when 'ba' then '#fef2f2'  # red-50
@@ -394,12 +394,12 @@
         
         // Update tab styles
         tabs.forEach(t => {
-          t.classList.remove('border-blue-600', 'text-blue-600', 'bg-blue-50');
+          t.classList.remove('border-blue-600', 'text-blue-600', 'bg-blue-100');
           t.classList.add('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
         });
         
         tab.classList.remove('border-transparent', 'hover:text-gray-600', 'hover:border-gray-300');
-        tab.classList.add('border-blue-600', 'text-blue-600', 'bg-blue-50');
+        tab.classList.add('border-blue-600', 'text-blue-600', 'bg-blue-100');
 
         // URLパラメータを更新
         const url = new URL(window.location.href);
