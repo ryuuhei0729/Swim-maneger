@@ -72,53 +72,39 @@
   <div class="flex-1 p-8">
     <% @grouped_by_type.each do |user_type, users| %>
       <div class="member-list <%= user_type == 'player' ? '' : 'hidden' %>" data-type="<%= user_type %>">
-        <div class="bg-white shadow rounded-lg p-6">
+        <div class="bg-white shadow rounded-lg p-6 w-full">
           <div class="flex items-center justify-between mb-6">
             <h2 class="text-2xl font-bold text-gray-900">
               <%= user_type == 'director' ? '監督/顧問' : (user_type == 'coach' ? 'コーチ' : '選手') %>一覧
             </h2>
           </div>
 
-          <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-              <thead class="bg-gray-50">
-                <tr>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">プロフィール</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名前</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">期数</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">生年月日</th>
-                </tr>
-              </thead>
-              <tbody class="bg-white divide-y divide-gray-200">
-                <% users.each do |user| %>
-                  <tr class="hover:bg-gray-50 cursor-pointer" 
-                      data-controller="modal" 
-                      data-action="click->modal#open" 
-                      data-modal-id="user-modal-<%= user.id %>">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="flex-shrink-0">
-                        <% if user.avatar.attached? %>
-                          <%= image_tag url_for(user.avatar), alt: "#{user.name}のプロフィール画像", class: "w-16 h-16 rounded-full" %>
-                        <% else %>
-                          <div class="w-16 h-16 rounded-full bg-blue-800 flex items-center justify-center">
-                            <span class="text-white text-sm"><%= user.name[0] %></span>
-                          </div>
-                        <% end %>
-                      </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                      <span class="text-blue-800 font-medium"><%= user.name %></span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-gray-600">
-                      <%= user.generation %><%= ordinal_suffix(user.generation) %>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-gray-500">
-                      <%= user.birthday.strftime('%Y年%m月%d日') %>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-            </table>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <% users.each do |user| %>
+              <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer min-w-0"
+                   data-controller="modal"
+                   data-action="click->modal#open"
+                   data-modal-id="user-modal-<%= user.id %>">
+                <div class="flex justify-center pt-4">
+                  <% if user.avatar.attached? %>
+                    <%= image_tag url_for(user.avatar), 
+                        alt: "#{user.name}のプロフィール画像",
+                        class: "w-20 h-20 rounded-full object-cover" %>
+                  <% else %>
+                    <div class="w-20 h-20 rounded-full bg-blue-800 flex items-center justify-center">
+                      <span class="text-white text-2xl"><%= user.name[0] %></span>
+                    </div>
+                  <% end %>
+                </div>
+                <div class="px-3 py-2 text-center">
+                  <h3 class="text-base font-semibold text-gray-900 mb-0.5"><%= user.name %></h3>
+                  <div class="text-sm text-gray-600">
+                    <p class="mb-0.5"><%= user.generation %>期</p>
+                    <p><%= user_type == 'director' ? '監督/顧問' : (user_type == 'coach' ? 'コーチ' : '選手') %></p>
+                  </div>
+                </div>
+              </div>
+            <% end %>
           </div>
         </div>
       </div>
@@ -141,7 +127,7 @@
       </div>
       <div class="flex-1">
         <h2 class="text-2xl font-bold text-gray-900"><%= user.name %></h2>
-        <p class="text-gray-500"><%= user.generation %><%= ordinal_suffix(user.generation) %></p>
+        <p class="text-gray-500"><%= user.generation %>期</p>
         <p class="text-gray-500"><%= user.birthday.strftime('%Y年%m月%d日') %></p>
       </div>
     </div>
@@ -160,46 +146,43 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // メンバータイプボタンのクリックイベント（選手、コーチ、監督/顧問）
+  // メンバー表示の切り替え関数
+  function showMembers(type, generation = null) {
+    // すべてのメンバーを一旦非表示
+    document.querySelectorAll('.member-list > div > .grid > div').forEach(card => {
+      card.classList.add('hidden');
+    });
+
+    // 条件に合うメンバーを表示
+    const cards = document.querySelectorAll(`.member-list[data-type="${type}"] > div > .grid > div`);
+    cards.forEach(card => {
+      if (generation) {
+        const cardGeneration = card.querySelector('.text-sm.text-gray-600 p').textContent.match(/(\d+)期/)[1];
+        if (cardGeneration === generation) {
+          card.classList.remove('hidden');
+        }
+      } else {
+        card.classList.remove('hidden');
+      }
+    });
+
+    // リストの表示切り替え
+    document.querySelectorAll('.member-list').forEach(list => {
+      list.classList.toggle('hidden', list.dataset.type !== type);
+    });
+  }
+
+  // メンバータイプボタンのクリックイベント
   document.querySelectorAll('.member-type-button').forEach(button => {
     button.addEventListener('click', () => {
-      // ボタンのアクティブ状態を更新
-      document.querySelectorAll('.member-type-button, .generation-button').forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
-
-      // 該当するメンバーリストのみを表示
-      const type = button.dataset.type;
-      document.querySelectorAll('.member-list').forEach(list => {
-        list.classList.toggle('hidden', list.dataset.type !== type);
-      });
-
-      // 選手が選択された場合は全ての行を表示
-      if (type === 'player') {
-        const playerList = document.querySelector('.member-list[data-type="player"]');
-        playerList.querySelectorAll('tbody tr').forEach(row => row.classList.remove('hidden'));
-      }
+      showMembers(button.dataset.type);
     });
   });
 
   // 期別ボタンのクリックイベント
   document.querySelectorAll('.generation-button').forEach(button => {
     button.addEventListener('click', () => {
-      // ボタンのアクティブ状態を更新
-      document.querySelectorAll('.member-type-button, .generation-button').forEach(btn => btn.classList.remove('active'));
-      button.classList.add('active');
-
-      // 選手リストを表示
-      document.querySelectorAll('.member-list').forEach(list => {
-        list.classList.toggle('hidden', list.dataset.type !== 'player');
-      });
-
-      // 選択された期の選手のみを表示
-      const generation = button.dataset.generation;
-      const playerList = document.querySelector('.member-list[data-type="player"]');
-      playerList.querySelectorAll('tbody tr').forEach(row => {
-        const rowGeneration = row.querySelector('td:nth-child(3)').textContent.match(/\d+/)[0];
-        row.classList.toggle('hidden', rowGeneration !== generation);
-      });
+      showMembers('player', button.dataset.generation);
     });
   });
 });
