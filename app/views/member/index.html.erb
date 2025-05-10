@@ -148,6 +148,18 @@
 document.addEventListener('DOMContentLoaded', function() {
   // メンバー表示の切り替え関数
   function showMembers(type, generation = null) {
+    // アクティブ状態のリセット
+    document.querySelectorAll('.member-type-button, .generation-button').forEach(btn => {
+      btn.classList.remove('active');
+    });
+
+    // クリックされたボタンをアクティブに
+    if (generation) {
+      document.querySelector(`.generation-button[data-generation="${generation}"]`).classList.add('active');
+    } else {
+      document.querySelector(`.member-type-button[data-type="${type}"]`).classList.add('active');
+    }
+
     // すべてのメンバーを一旦非表示
     document.querySelectorAll('.member-list > div > .grid > div').forEach(card => {
       card.classList.add('hidden');
@@ -191,16 +203,11 @@ document.addEventListener('DOMContentLoaded', function() {
 <style>
 .member-type-button.active,
 .generation-button.active {
-  background-color: #dbeafe;
+  background-color: #dbeafe !important;
 }
 
 .member-type-button:hover,
 .generation-button:hover {
   background-color: #f3f4f6;
-}
-
-.member-type-button span,
-.generation-button span {
-  color: #111827 !important;
 }
 </style> 
