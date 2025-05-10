@@ -5,7 +5,6 @@ class RecordController < ApplicationController
     @female_players = @players.select { |p| p.gender == 'female' }
     @default_tab = params[:tab] || (current_user_auth.user.gender == 'male' ? 'male' : 'female')
     @sort_by = params[:sort_by]
-    @sort_direction = params[:sort_direction] || 'asc'
     @events = Style.all.map do |style|
       {
         id: style.name,
@@ -30,9 +29,9 @@ class RecordController < ApplicationController
 
     # 並び替え処理
     if @sort_by.present?
-      @players = sort_players_by_time(@players, @sort_by, @sort_direction)
-      @male_players = sort_players_by_time(@male_players, @sort_by, @sort_direction)
-      @female_players = sort_players_by_time(@female_players, @sort_by, @sort_direction)
+      @players = sort_players_by_time(@players, @sort_by)
+      @male_players = sort_players_by_time(@male_players, @sort_by)
+      @female_players = sort_players_by_time(@female_players, @sort_by)
     else
       # デフォルト表示用のグループ化
       @players_by_generation = @players.group_by(&:generation)
@@ -42,20 +41,10 @@ class RecordController < ApplicationController
   end
 
   private
-
-  def sort_players_by_time(players, sort_by, direction)
+  def sort_players_by_time(players, sort_by)
     players.sort_by do |player|
       time = @best_times[player.id][sort_by]
-      
-      # タイムを秒数に変換
-      if time.present?
-        total_seconds = time.to_f
-      else
-        # タイムが無い場合は無限大として扱う
-        total_seconds = Float::INFINITY
-      end
-      
-      direction == 'asc' ? total_seconds : -total_seconds
+      time.present? ? time.to_f : Float::INFINITY
     end
   end
 end 

@@ -64,13 +64,10 @@
                       when 'im' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>"
-                    data-sort-by="<%= event[:id] %>"
-                    data-sort-direction="<%= @sort_direction %>">
+                    data-sort-by="<%= event[:id] %>">
                   <%= event[:title].match(/\d+m/)[0] %>
                   <% if @sort_by == event[:id] %>
-                    <span class="ml-1">
-                      <%= @sort_direction == 'asc' ? '↑' : '↓' %>
-                    </span>
+                    <span class="ml-1">↑</span>
                   <% end %>
                 </th>
               <% end %>
@@ -182,13 +179,10 @@
                       when 'im' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>"
-                    data-sort-by="<%= event[:id] %>"
-                    data-sort-direction="<%= @sort_direction %>">
+                    data-sort-by="<%= event[:id] %>">
                   <%= event[:title].match(/\d+m/)[0] %>
                   <% if @sort_by == event[:id] %>
-                    <span class="ml-1">
-                      <%= @sort_direction == 'asc' ? '↑' : '↓' %>
-                    </span>
+                    <span class="ml-1">↑</span>
                   <% end %>
                 </th>
               <% end %>
@@ -300,13 +294,10 @@
                       when 'im' then '#d8b4fe'  # purple-200
                       else '#f3f4f6'  # gray-100
                     end %>"
-                    data-sort-by="<%= event[:id] %>"
-                    data-sort-direction="<%= @sort_direction %>">
+                    data-sort-by="<%= event[:id] %>">
                   <%= event[:title].match(/\d+m/)[0] %>
                   <% if @sort_by == event[:id] %>
-                    <span class="ml-1">
-                      <%= @sort_direction == 'asc' ? '↑' : '↓' %>
-                    </span>
+                    <span class="ml-1">↑</span>
                   <% end %>
                 </th>
               <% end %>
@@ -430,11 +421,9 @@
         if (currentSortBy === sortBy) {
           // 同じヘッダーを再度クリックした場合は並び替えを解除
           url.searchParams.delete('sort_by');
-          url.searchParams.delete('sort_direction');
         } else {
           // 新しいヘッダーをクリックした場合は並び替えを適用
           url.searchParams.set('sort_by', sortBy);
-          url.searchParams.set('sort_direction', 'asc');
         }
 
         // 現在のタブを保持
