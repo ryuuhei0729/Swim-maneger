@@ -1,8 +1,8 @@
 <% content_for :title, 'Member' %>
 
-<div class="bg-white shadow rounded-lg p-6">
+<div class="bg-white shadow rounded-lg p-6" data-controller="modal">
   <div class="flex items-center justify-between mb-6">
-    <h2 class="text-2xl font-bold text-gray-900">メンバー</h2>
+    <h2 class="text-2xl font-bold text-gray-900">メンバー一覧</h2>
     <div class="flex space-x-4 mb-6">
     </div>
   </div>
@@ -25,7 +25,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <% users.each do |user| %>
-                <tr class="hover:bg-gray-50 cursor-pointer" data-action="click->modal#open" data-modal-target="user-modal-<%= user.id %>">
+                <tr class="hover:bg-gray-50 cursor-pointer" data-action="click->modal#open" data-modal-id="user-modal-<%= user.id %>">
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="flex-shrink-0">
                       <% if user.avatar.attached? %>
@@ -62,10 +62,10 @@
     <div class="flex items-center space-x-6 mb-6" >
       <div class="flex-shrink-0">
         <% if user.avatar.attached? %>
-          <%= image_tag url_for(user.avatar), alt: "#{user.name}のプロフィール画像", class: "w-24 h-24 rounded-full" %>
+          <%= image_tag url_for(user.avatar), alt: "#{user.name}のプロフィール画像", class: "w-48 h-48 rounded-full object-cover" %>
         <% else %>
-          <div class="w-24 h-24 rounded-full bg-blue-800 flex items-center justify-center">
-            <span class="text-white text-3xl"><%= user.name[0] %></span>
+          <div class="w-48 h-48 rounded-full bg-blue-800 flex items-center justify-center">
+            <span class="text-white text-5xl"><%= user.name[0] %></span>
           </div>
         <% end %>
       </div>
@@ -88,29 +88,28 @@
 <% end %> 
 
 
-<!-- ここにモーダルのjavascriptのコードを記載 -->
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // モーダルを開く処理
-    document.querySelectorAll('[data-action="click->modal#open"]').forEach(button => {
-      button.addEventListener('click', function() {
-        const modalId = this.dataset.modalTarget;
-        const modal = document.getElementById(modalId);
-        if (modal) {
-          modal.classList.remove('hidden');
-        }
-      });
-    });
+# <!-- ここにモーダルのjavascriptのコードを記載 -->
+# <script>
+#   document.addEventListener('DOMContentLoaded', function() {
+#     // モーダルを開く処理
+#     document.querySelectorAll('[data-action="click->modal#open"]').forEach(button => {
+#       button.addEventListener('click', function() {
+#         const modalId = this.dataset.modalTarget;
+#         const modal = document.getElementById(modalId);
+#         if (modal) {
+#           modal.classList.remove('hidden');
+#         }
+#       });
+#     });
 
-    // モーダルを閉じる処理
-    document.querySelectorAll('[data-action="click->modal#close"]').forEach(button => {
-      button.addEventListener('click', function() {
-        const modal = this.closest('[data-modal-target="modal"]');
-        if (modal) {
-          modal.classList.add('hidden');
-        }
-      });
-    });
-
-  });
-</script> 
+#     // モーダルを閉じる処理
+#     document.querySelectorAll('[data-action="click->modal#close"]').forEach(button => {
+#       button.addEventListener('click', function() {
+#         const modal = this.closest('[data-modal-target="modal"]');
+#         if (modal) {
+#           modal.classList.add('hidden');
+#         }
+#       });
+#     });
+#   });
+# </script> 
