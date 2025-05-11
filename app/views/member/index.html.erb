@@ -128,18 +128,55 @@
       <div class="flex-1">
         <h2 class="text-2xl font-bold text-gray-900"><%= user.name %></h2>
         <p class="text-gray-500"><%= user.generation %>期</p>
-        <p class="text-gray-500"><%= user.birthday.strftime('%Y年%m月%d日') %></p>
+        <p class="text-gray-500 mb-4"><%= user.birthday.strftime('%Y年%m月%d日') %></p>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">自己紹介</h3>
+        <% if user.bio.present? %>
+          <p class="text-gray-700 whitespace-pre-wrap"><%= user.bio %></p>
+        <% else %>
+          <p class="text-gray-500 italic">自己紹介が設定されていません</p>
+        <% end %>
       </div>
     </div>
-    
-    <div class="mt-4 border-t border-gray-200 pt-4">
-      <h3 class="text-lg font-semibold text-gray-900 mb-2">自己紹介</h3>
-      <% if user.bio.present? %>
-        <p class="text-gray-700 whitespace-pre-wrap"><%= user.bio %></p>
-      <% else %>
-        <p class="text-gray-500 italic">自己紹介が設定されていません</p>
-      <% end %>
-    </div>
+
+    <!-- ベストタイム一覧（選手のみ表示） -->
+    <% if user.user_type == 'player' %>
+      <div class="mt-6">
+        <div class="flex items-center mb-4">
+          <h3 class="text-base font-semibold text-gray-900 mr-3">Best Time</h3>
+          <div class="h-0.5 flex-grow bg-gradient-to-r from-blue-800 to-blue-400 rounded-full"></div>
+        </div>
+
+        <div class="mb-4">
+          <div class="flex w-full overflow-x-auto pb-2">
+            <% style_order = { 'fr' => 0, 'br' => 1, 'ba' => 2, 'fly' => 3, 'im' => 4 } %>
+            <% style_titles = { 'fr' => '自由形', 'br' => '平泳ぎ', 'ba' => '背泳ぎ', 'fly' => 'バタフライ', 'im' => '個人メドレー' } %>
+            <% style_header_colors = { 'fr' => 'bg-yellow-50', 'br' => 'bg-green-50', 'ba' => 'bg-red-50', 'fly' => 'bg-blue-50', 'im' => 'bg-purple-50' } %>
+            <% Style.all.group_by(&:style).sort_by { |style_type, _| style_order[style_type] || 5 }.each do |style_type, styles| %>
+              <div class="flex-none mx-1 rounded-lg shadow-sm px-1 py-2 border border-gray-100 flex flex-col <%= style_header_colors[style_type] %>" style="min-width:140px;">
+                <h4 class="text-sm font-bold mb-2 text-blue-800 text-center pb-1 border-b border-gray-300">
+                  <%= style_titles[style_type] || style_type %>
+                </h4>
+                <table class="w-full">
+                  <% styles.each do |style| %>
+                    <% best_record = user.records.where(style: style).order(time: :asc).first %>
+                    <tr>
+                      <td class="py-1 text-gray-600 font-medium w-1/2 text-center text-xs"><%= style.name_jp.match(/\d+m/)[0] %></td>
+                      <td class="py-1 w-1/2 text-center">
+                        <div class="group relative">
+                          <span class="<%= best_record&.time.present? ? 'font-semibold text-gray-800' : 'text-gray-400' %> text-xs">
+                            <%= best_record&.time.present? ? format_time(best_record.time) : '-' %>
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </table>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
   <% end %>
 <% end %>
 
