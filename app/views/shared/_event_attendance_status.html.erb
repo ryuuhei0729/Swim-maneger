@@ -29,7 +29,7 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
           <% sorted_players.each_with_index do |attendance, i| %>
-            <tr class="<%= i.even? ? 'bg-white' : 'bg-gray-50' %> hover:bg-blue-50 transition">
+            <tr class="<%= attendance.user_id == current_user_auth.user.id ? 'bg-blue-100 hover:bg-blue-200' : (i.even? ? 'bg-white' : 'bg-gray-50 hover:bg-blue-50') %> transition">
               <td class="px-4 py-2"><%= attendance.user.name %></td>
               <td class="px-4 py-2">
                 <% case attendance.status %>
@@ -66,7 +66,7 @@
         </thead>
         <tbody class="divide-y divide-gray-100">
           <% sorted_coaches.each_with_index do |attendance, i| %>
-            <tr class="<%= i.even? ? 'bg-white' : 'bg-gray-50' %> hover:bg-blue-50 transition">
+            <tr class="<%= attendance.user_id == current_user_auth.user.id ? 'bg-blue-100 hover:bg-blue-200' : (i.even? ? 'bg-white' : 'bg-gray-50 hover:bg-blue-50') %> transition">
               <td class="px-4 py-2"><%= attendance.user.name %></td>
               <td class="px-4 py-2">
                 <% case attendance.status %>
@@ -102,7 +102,7 @@
       </thead>
       <tbody class="divide-y divide-gray-100">
         <% unanswered_users.each_with_index do |user, i| %>
-          <tr class="<%= i.even? ? 'bg-white' : 'bg-gray-50' %> hover:bg-red-50 transition">
+          <tr class="<%= user.id == current_user_auth.user.id ? 'bg-blue-100 hover:bg-blue-200' : (i.even? ? 'bg-white' : 'bg-gray-50 hover:bg-red-50') %> transition">
             <td class="px-4 py-2"><%= user.name %></td>
             <td class="px-4 py-2">
               <% case user.user_type %>
