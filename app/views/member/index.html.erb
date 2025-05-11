@@ -1,6 +1,6 @@
 <% content_for :title, 'Member' %>
 
-<div class="flex h-screen bg-gray-100">
+<div class="flex h-screen bg-gray-100" data-controller="member">
   <!-- 左側のサイドバー -->
   <div class="w-64 bg-white shadow-lg">
     <div class="p-4">
@@ -10,6 +10,7 @@
           <button
             class="w-full text-left px-4 py-2 rounded-lg transition-colors duration-150 hover:bg-gray-100 group member-type-button active"
             data-type="player"
+            data-action="click->member#handleMemberTypeClick"
             data-toggle="player-generations"
           >
             <div class="flex items-center">
@@ -29,6 +30,7 @@
                   class="w-full text-left px-4 py-2 rounded-lg transition-colors duration-150 hover:bg-gray-100 group generation-button"
                   data-type="player"
                   data-generation="<%= generation %>"
+                  data-action="click->member#handleGenerationClick"
                 >
                   <div class="flex items-center">
                     <div class="flex items-center">
@@ -45,6 +47,7 @@
         <button
           class="w-full text-left px-4 py-2 rounded-lg transition-colors duration-150 hover:bg-gray-100 group member-type-button"
           data-type="coach"
+          data-action="click->member#handleMemberTypeClick"
         >
           <div class="flex items-center">
             <div class="flex items-center">
@@ -56,6 +59,7 @@
         <button
           class="w-full text-left px-4 py-2 rounded-lg transition-colors duration-150 hover:bg-gray-100 group member-type-button"
           data-type="director"
+          data-action="click->member#handleMemberTypeClick"
         >
           <div class="flex items-center">
             <div class="flex items-center">
