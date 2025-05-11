@@ -157,17 +157,17 @@
             <% style_header_colors = { 'fr' => 'bg-yellow-50', 'br' => 'bg-green-50', 'ba' => 'bg-red-50', 'fly' => 'bg-blue-50', 'im' => 'bg-purple-50' } %>
             <% Style.all.group_by(&:style).sort_by { |style_type, _| style_order[style_type] || 5 }.each do |style_type, styles| %>
               <div class="flex-none mx-1 rounded-lg shadow-sm px-1 py-2 border border-gray-100 flex flex-col <%= style_header_colors[style_type] %>" style="min-width:140px;">
-                <h4 class="text-sm font-bold mb-2 text-blue-800 text-center pb-1 border-b border-gray-300">
+                <h4 class="text-base font-bold mb-2 text-blue-800 text-center pb-1 border-b border-gray-300">
                   <%= style_titles[style_type] || style_type %>
                 </h4>
                 <table class="w-full">
                   <% styles.each do |style| %>
                     <% best_record = user.records.where(style: style).order(time: :asc).first %>
                     <tr>
-                      <td class="py-1 text-gray-600 font-medium w-1/2 text-center text-xs"><%= style.name_jp.match(/\d+m/)[0] %></td>
-                      <td class="py-1 w-1/2 text-center">
+                      <td class="py-3 px-3 text-gray-600 font-medium w-1/2 text-center text-base"><%= style.name_jp.match(/\d+m/)[0] %></td>
+                      <td class="py-3 px-3 w-1/2 text-center">
                         <div class="group relative">
-                          <span class="<%= best_record&.time.present? ? 'font-semibold text-gray-800' : 'text-gray-400' %> text-xs">
+                          <span class="<%= best_record&.time.present? ? 'font-semibold text-gray-800' : 'text-gray-400' %> text-base">
                             <%= best_record&.time.present? ? format_time(best_record.time) : '-' %>
                           </span>
                         </div>
