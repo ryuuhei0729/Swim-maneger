@@ -148,7 +148,7 @@
     <% if user.user_type == 'player' %>
       <div class="mt-6">
         <div class="flex items-center mb-4">
-          <h3 class="text-base font-semibold text-gray-900 mr-3">Best Time</h3>
+          <h3 class="text-lg font-semibold text-gray-900 mr-3">Best Time</h3>
           <div class="h-0.5 flex-grow bg-gradient-to-r from-blue-800 to-blue-400 rounded-full"></div>
         </div>
 
@@ -166,8 +166,8 @@
                   <% styles.each do |style| %>
                     <% best_record = user.records.where(style: style).order(time: :asc).first %>
                     <tr>
-                      <td class="py-3 px-3 text-gray-600 font-medium w-1/2 text-center text-base"><%= style.name_jp.match(/\d+m/)[0] %></td>
-                      <td class="py-3 px-3 w-1/2 text-center">
+                      <td class="py-2 px-3 text-gray-600 font-medium w-1/2 text-center text-base"><%= style.name_jp.match(/\d+m/)[0] %></td>
+                      <td class="py-2 px-3 w-1/2 text-center">
                         <div class="group relative">
                           <span class="<%= best_record&.time.present? ? 'font-semibold text-gray-800' : 'text-gray-400' %> text-base">
                             <%= best_record&.time.present? ? format_time(best_record.time) : '-' %>
