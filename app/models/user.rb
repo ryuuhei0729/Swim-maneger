@@ -4,12 +4,15 @@ class User < ApplicationRecord
   has_many :attendance, dependent: :destroy
   has_many :attendance_events, through: :attendance
   has_many :records, dependent: :destroy
+  has_many :objectives, dependent: :destroy
+  has_many :race_goals, dependent: :destroy
+  has_many :race_feedbacks, dependent: :destroy
 
   validates :generation, presence: true
   validates :name, presence: true
-  validates :gender, presence: true
+  validates :gender, presence: true, inclusion: { in: ['male', 'female'] }
   validates :birthday, presence: true
-  validates :user_type, presence: true
+  validates :user_type, presence: true, inclusion: { in: ['director', 'coach', 'player', 'manager'] }
 
   delegate :email, to: :user_auth, allow_nil: true
 
@@ -43,5 +46,13 @@ class User < ApplicationRecord
   # プロフィール画像のURLを取得するメソッド
   def profile_image_url
     avatar.attached? ? avatar : nil
+  end
+
+  def coach?
+    user_type == 'coach'
+  end
+
+  def player?
+    user_type == 'player'
   end
 end

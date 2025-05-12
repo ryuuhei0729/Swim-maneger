@@ -14,7 +14,10 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
     create_table :user_auths do |t|
       t.references :user, null: false, foreign_key: true
       t.string :email, null: false
-      t.string :password_digest, null: false
+      t.string :encrypted_password, null: false, default: ""
+      t.string :reset_password_token
+      t.datetime :reset_password_sent_at
+      t.datetime :remember_created_at
       t.timestamps
     end
 
@@ -24,16 +27,6 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
       t.string :name, null: false
       t.string :style, null: false
       t.integer :distance, null: false
-      t.timestamps
-    end
-
-    # 記録テーブル
-    create_table :records do |t|
-      t.references :user, null: false, foreign_key: true
-      t.references :style, null: false, foreign_key: true
-      t.decimal :time, precision: 10, scale: 2, null: false
-      t.text :note
-      t.references :attendance_event, null: true, foreign_key: true
       t.timestamps
     end
 
@@ -56,8 +49,77 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
+    # 記録テーブル
+    create_table :records do |t|
+      t.references :user, null: false, foreign_key: true
+      t.references :style, null: false, foreign_key: true
+      t.decimal :time, precision: 10, scale: 2, null: false
+      t.text :note
+      t.string :video_url
+      t.references :attendance_event, null: true, foreign_key: true
+      t.timestamps
+    end
+
+    # 目標テーブル
+    create_table :objectives do |t|
+      t.references :user, null: false, foreign_key: true
+      t.references :attendance_event, null: false, foreign_key: true
+      t.references :style, null: false, foreign_key: true
+      t.decimal :target_time, precision: 10, scale: 2, null: false
+      t.text :quantity_note, null: false
+      t.string :quality_title, null: false
+      t.text :quality_note, null: false
+      t.timestamps
+    end
+
+    # マイルストーンテーブル
+    create_table :milestones do |t|
+      t.references :objective, null: false, foreign_key: true
+      t.string :milestone_type, null: false
+      t.date :limit_date, null: false
+      t.text :note, null: false
+      t.timestamps
+    end
+
+    # マイルストーンレビューテーブル
+    create_table :milestone_reviews do |t|
+      t.references :milestone, null: false, foreign_key: true
+      t.integer :achievement_rate, null: false
+      t.text :negative_note, null: false
+      t.text :positive_note, null: false
+      t.timestamps
+    end
+
+    # レース目標テーブル
+    create_table :race_goals do |t|
+      t.references :user, null: false, foreign_key: true
+      t.references :attendance_event, null: false, foreign_key: true
+      t.references :style, null: false, foreign_key: true
+      t.decimal :time, precision: 10, scale: 2, null: false
+      t.text :note, null: false
+      t.timestamps
+    end
+
+    # レースレビューテーブル
+    create_table :race_reviews do |t|
+      t.references :race_goal, null: false, foreign_key: true
+      t.references :style, null: false, foreign_key: true
+      t.decimal :time, precision: 10, scale: 2, null: false
+      t.text :note, null: false
+      t.timestamps
+    end
+
+    # レースフィードバックテーブル
+    create_table :race_feedbacks do |t|
+      t.references :race_goal, null: false, foreign_key: true
+      t.references :user, null: false, foreign_key: true
+      t.text :note, null: false
+      t.timestamps
+    end
+
     # インデックス
     add_index :user_auths, :email, unique: true
+    add_index :user_auths, :reset_password_token, unique: true
     add_index :users, :user_type
     add_index :styles, [:style, :distance], unique: true
     add_index :attendance, [:user_id, :attendance_event_id], unique: true
@@ -75,6 +137,10 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
       ALTER TABLE attendance
       ADD CONSTRAINT check_status
       CHECK (status IN ('present', 'absent', 'other'));
+
+      ALTER TABLE milestones
+      ADD CONSTRAINT check_milestone_type
+      CHECK (milestone_type IN ('quality', 'quantity'));
     SQL
 
     # 種目の初期データ
@@ -104,6 +170,12 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
   end
 
   def down
+    drop_table :race_feedbacks
+    drop_table :race_reviews
+    drop_table :race_goals
+    drop_table :milestone_reviews
+    drop_table :milestones
+    drop_table :objectives
     drop_table :attendance
     drop_table :attendance_events
     drop_table :records
