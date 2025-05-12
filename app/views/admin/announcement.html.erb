@@ -119,7 +119,7 @@
         <div>
           <h3 class="text-lg font-medium text-gray-900 mb-4">・新規お知らせ作成</h3>
           
-          <%= form_with(model: @announcement, url: admin_announcement_path, local: true) do |f| %>
+          <%= form_with(model: @announcement, url: admin_announcement_path, method: :post, local: true) do |f| %>
             <% if @announcement.errors.any? %>
               <div class="mb-4 bg-red-50 p-4 rounded-lg">
                 <div class="flex">
