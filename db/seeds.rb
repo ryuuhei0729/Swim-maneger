@@ -58,12 +58,18 @@ GENDERS = ['male', 'female']
 
 # データベースをクリア
 puts "データベースをクリアしています..."
-Attendance.destroy_all
-AttendanceEvent.destroy_all
-Record.destroy_all
-User.destroy_all
-UserAuth.destroy_all
-Style.destroy_all
+RaceFeedback.destroy_all rescue nil
+RaceReview.destroy_all rescue nil
+RaceGoal.destroy_all rescue nil
+MilestoneReview.destroy_all rescue nil
+Milestone.destroy_all rescue nil
+Objective.destroy_all rescue nil
+Attendance.destroy_all rescue nil
+Record.destroy_all rescue nil
+AttendanceEvent.destroy_all rescue nil
+UserAuth.destroy_all rescue nil
+User.destroy_all rescue nil
+Style.destroy_all rescue nil
 
 # 種目の作成
 puts "種目を作成中..."
@@ -115,7 +121,6 @@ puts "Creating users..."
   UserAuth.create!(
     email: "director#{i+1}@test",
     password: "123123",
-    password_confirmation: "123123",
     user: user
   )
   
@@ -142,7 +147,6 @@ end
   UserAuth.create!(
     email: "coach#{i+1}@test",
     password: "123123",
-    password_confirmation: "123123",
     user: user
   )
   
@@ -169,7 +173,6 @@ end
   UserAuth.create!(
     email: "player#{i+1}@test",
     password: "123123",
-    password_confirmation: "123123",
     user: user
   )
   
@@ -217,84 +220,89 @@ puts "作成された記録数: #{Record.count}"
 # 出席イベントの作成
 puts "出席イベントを作成中..."
 
-# 今月と来月の日付を生成
+# 過去1ヶ月、今月、来月の日付を生成
+last_month_dates = (Date.current.prev_month.beginning_of_month..Date.current.prev_month.end_of_month).to_a
 current_month_dates = (Date.current.beginning_of_month..Date.current.end_of_month).to_a
 next_month_dates = (Date.current.next_month.beginning_of_month..Date.current.next_month.end_of_month).to_a
 
 # タイトル
 titles = ["陸トレ", "水泳練", "MTG", "大会"]
 
-# 今月のイベント作成
-current_month_dates.each do |date|
-  case date.wday
-  when 1 # 月曜日
-    if rand < 0.8 # 80%の確率で
-      AttendanceEvent.create!(
-        title: "陸トレ",
-        date: date,
-        place: '小石川5階',
-        note: "陸上の練習です。基礎体力向上を目指します。",
-        is_competition: false
-      )
-    end
-  when 2 # 火曜日
-    if rand < 0.9 # 90%の確率で
-      AttendanceEvent.create!(
-        title: "水泳練",
-        date: date,
-        place: 'コズミック',
-        note: "水泳の練習です。フォーム改善に重点を置きます。",
-        is_competition: false
-      )
-    end
-  when 3 # 水曜日
-    if rand < 0.7 # 70%の確率で
-      AttendanceEvent.create!(
-        title: "全体MTG",
-        date: date,
-        place: 'オンライン',
-        note: "今週の予定と目標の確認を行います。",
-        is_competition: false
-      )
-    end
-  when 4 # 木曜日
-    if rand < 0.85 # 85%の確率で
-      AttendanceEvent.create!(
-        title: "水泳練",
-        date: date,
-        place: 'コズミック',
-        note: "水泳の練習です。スピード練習を行います。",
-        is_competition: false
-      )
-    end
-  when 5 # 金曜日
-    if rand < 0.75 # 75%の確率で
-      AttendanceEvent.create!(
-        title: "陸トレ",
-        date: date,
-        place: '小石川5階',
-        note: "陸上の練習です。筋力トレーニングを行います。",
-        is_competition: false
-      )
-    end
-  when 6 # 土曜日
-    if rand < 0.6 # 60%の確率で
-      AttendanceEvent.create!(
-        title: ["水泳練", "合同練習"].sample,
-        date: date,
-        place: 'Bumb',
-        note: "週末練習です。実践的な練習を行います。",
-        is_competition: false
-      )
+# 3ヶ月分のイベント作成
+[last_month_dates, current_month_dates, next_month_dates].each do |dates|
+  dates.each do |date|
+    case date.wday
+    when 1 # 月曜日
+      if rand < 0.8 # 80%の確率で
+        AttendanceEvent.create!(
+          title: "陸トレ",
+          date: date,
+          place: '小石川5階',
+          note: "陸上の練習です。基礎体力向上を目指します。",
+          is_competition: false
+        )
+      end
+    when 2 # 火曜日
+      if rand < 0.9 # 90%の確率で
+        AttendanceEvent.create!(
+          title: "水泳練",
+          date: date,
+          place: 'コズミック',
+          note: "水泳の練習です。フォーム改善に重点を置きます。",
+          is_competition: false
+        )
+      end
+    when 3 # 水曜日
+      if rand < 0.7 # 70%の確率で
+        AttendanceEvent.create!(
+          title: "全体MTG",
+          date: date,
+          place: 'オンライン',
+          note: "今週の予定と目標の確認を行います。",
+          is_competition: false
+        )
+      end
+    when 4 # 木曜日
+      if rand < 0.85 # 85%の確率で
+        AttendanceEvent.create!(
+          title: "水泳練",
+          date: date,
+          place: 'コズミック',
+          note: "水泳の練習です。スピード練習を行います。",
+          is_competition: false
+        )
+      end
+    when 5 # 金曜日
+      if rand < 0.75 # 75%の確率で
+        AttendanceEvent.create!(
+          title: "陸トレ",
+          date: date,
+          place: '小石川5階',
+          note: "陸上の練習です。筋力トレーニングを行います。",
+          is_competition: false
+        )
+      end
+    when 6 # 土曜日
+      if rand < 0.6 # 60%の確率で
+        AttendanceEvent.create!(
+          title: ["水泳練", "合同練習"].sample,
+          date: date,
+          place: 'Bumb',
+          note: "週末練習です。実践的な練習を行います。",
+          is_competition: false
+        )
+      end
     end
   end
 end
 
-# 大会を2つ作成（土日に設定）
+# 大会を3つ作成（各月1つずつ、土日に設定）
+last_month_weekends = last_month_dates.select { |d| [6, 0].include?(d.wday) }
 current_month_weekends = current_month_dates.select { |d| [6, 0].include?(d.wday) }
 next_month_weekends = next_month_dates.select { |d| [6, 0].include?(d.wday) }
 
-[current_month_weekends.sample, next_month_weekends.sample].each do |date|
+[last_month_weekends, current_month_weekends, next_month_weekends].each do |weekends|
+  date = weekends.sample
   AttendanceEvent.create!(
     title: "大会",
     date: date,
@@ -337,3 +345,97 @@ AttendanceEvent.all.each do |event|
 end
 
 puts "出席データの作成が完了しました"
+
+# 大会関連の目標と反省データを作成
+puts "大会関連の目標、反省データを作成中..."
+
+# 大会イベントを取得
+competition_events = AttendanceEvent.where(is_competition: true).order(:date)
+today = Date.current
+next_month_start = Date.current.next_month.beginning_of_month
+next_month_end = Date.current.next_month.end_of_month
+
+# プレイヤー全員に対して大会関連データを作成
+User.where(user_type: 'player').each do |player|
+  competition_events.each do |event|
+    # プレイヤーの得意種目をランダムに2つ選択
+    target_styles = Style.all.sample(2)
+    
+    target_styles.each do |style|
+      # 来月の大会の場合のみObjectiveとMilestoneを作成
+      if event.date.between?(next_month_start, next_month_end)
+        # Objective（目標）の作成
+        objective = Objective.create!(
+          user: player,
+          attendance_event: event,
+          style: style,
+          target_time: generate_random_time(style.name_jp) * 0.95, # 現在の記録より5%速い目標
+          quantity_note: "週#{rand(3..6)}回の練習を行う",
+          quality_title: ["フォーム改善", "スタミナ強化", "スピード向上", "メンタル強化"].sample,
+          quality_note: "#{["キック力の向上", "ターンの改善", "呼吸の安定化", "ペース配分の最適化"].sample}を重点的に行う"
+        )
+
+        # Milestone（マイルストーン）の作成 - 2つのみ
+        milestone_dates = [
+          event.date - 2.months,
+          event.date - 1.month
+        ]
+
+        milestone_dates.each do |milestone_date|
+          milestone = Milestone.create!(
+            objective: objective,
+            milestone_type: ['quality', 'quantity'].sample,
+            limit_date: milestone_date,
+            note: "#{milestone_date.strftime('%Y年%m月')}の目標: #{["基礎練習の完了", "フォームの完成", "タイムの達成"].sample}"
+          )
+
+          # 過去のマイルストーンの場合、レビューを作成
+          if milestone_date < today
+            MilestoneReview.create!(
+              milestone: milestone,
+              achievement_rate: rand(60..100),
+              negative_note: ["課題が残る", "まだ改善の余地あり", "もう少し頑張れた"].sample,
+              positive_note: ["着実に進歩している", "目標に向かって順調", "良い調子で進んでいる"].sample
+            )
+          end
+        end
+      end
+
+      # 全ての大会に対してRaceGoalを作成
+      race_goal = RaceGoal.create!(
+        user: player,
+        attendance_event: event,
+        style: style,
+        time: generate_random_time(style.name_jp) * 0.95,
+        note: "#{["スタートダッシュを決める", "ラストスパートを意識", "安定したペース配分で"].sample}"
+      )
+
+      # 過去の大会の場合、レースレビューとフィードバックを作成
+      if event.date < today
+        race_review = RaceReview.create!(
+          race_goal: race_goal,
+          style: style,
+          time: generate_random_time(style.name_jp),
+          note: "#{["良いレース展開だった", "課題が見つかった", "次につながる内容"].sample}"
+        )
+
+        # ランダムに2人のコーチを選んでフィードバックを作成
+        User.where(user_type: 'coach').sample(2).each do |coach|
+          RaceFeedback.create!(
+            race_goal: race_goal,
+            user: coach,
+            note: [
+              "スタートのリアクションが良かった",
+              "ターンでのスピードロスが気になる",
+              "後半の粘りが素晴らしい",
+              "呼吸のタイミングを見直そう",
+              "フォームが安定していた"
+            ].sample
+          )
+        end
+      end
+    end
+  end
+end
+
+puts "大会関連のデータ作成が完了しました"
