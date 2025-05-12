@@ -11,6 +11,15 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
+    # お知らせテーブル
+    create_table :announcements do |t|
+      t.string :title, null: false
+      t.text :content
+      t.boolean :is_active, null: false, default: true
+      t.datetime :published_at, null: false
+      t.timestamps
+    end
+
     create_table :user_auths do |t|
       t.references :user, null: false, foreign_key: true
       t.string :email, null: false
@@ -123,6 +132,8 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
     add_index :users, :user_type
     add_index :styles, [:style, :distance], unique: true
     add_index :attendance, [:user_id, :attendance_event_id], unique: true
+    add_index :announcements, :published_at
+    add_index :announcements, :is_active
 
     # 制約
     execute <<-SQL
@@ -182,5 +193,6 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
     drop_table :styles
     drop_table :user_auths
     drop_table :users
+    drop_table :announcements
   end
 end 

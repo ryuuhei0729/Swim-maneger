@@ -42,6 +42,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_02_063901) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "announcements", force: :cascade do |t|
+    t.string "title", null: false
+    t.text "content"
+    t.boolean "is_active", default: true, null: false
+    t.datetime "published_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["is_active"], name: "index_announcements_on_is_active"
+    t.index ["published_at"], name: "index_announcements_on_published_at"
+  end
+
   create_table "attendance", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "attendance_event_id", null: false
