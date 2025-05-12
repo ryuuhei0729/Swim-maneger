@@ -2,13 +2,15 @@ class Announcement < ApplicationRecord
   validates :title, presence: true
   validates :content, presence: true
   validates :published_at, presence: true
+  validates :is_active, inclusion: { in: [true, false] }
   validate :published_at_must_be_future
   
   # デフォルトで有効なお知らせのみを取得
   scope :active, -> { where(is_active: true) }
   
   # 公開日時の降順で取得
-  default_scope { order(published_at: :desc) }
+  scope :published, -> { where('published_at <= ?', Time.current) }
+  scope :recent, -> { order(published_at: :desc) }
   
   # 公開日時を設定するコールバック
   before_validation :set_published_at, on: :create
