@@ -8,6 +8,9 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
+require 'ffaker'
+FFaker::NameJA.unique.clear # 一意の名前生成をリセット
+
 # タイムを表示用の文字列にフォーマットする（83.45秒 → "1:23.45"）
 def format_time(seconds)
   return "-" if seconds.nil? || seconds.zero?
@@ -110,7 +113,7 @@ puts "Creating users..."
   )
   user = User.create!(
     generation: 0,
-    name: "ディレクター#{i+1}",
+    name: FFaker::NameJA.name,
     gender: GENDERS.sample,
     birthday: birthday,
     user_type: 'director',
@@ -136,7 +139,7 @@ end
   )
   user = User.create!(
     generation: rand(73..77),
-    name: "コーチ#{i+1}",
+    name: FFaker::NameJA.name,
     gender: GENDERS.sample,
     birthday: birthday,
     user_type: 'coach',
@@ -162,7 +165,7 @@ end
   )
   user = User.create!(
     generation: rand(78..84),
-    name: "プレイヤー#{i+1}",
+    name: FFaker::NameJA.name,
     gender: GENDERS.sample,
     birthday: birthday,
     user_type: 'player',
