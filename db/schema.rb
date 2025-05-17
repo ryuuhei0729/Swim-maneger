@@ -63,7 +63,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_02_063901) do
     t.index ["attendance_event_id"], name: "index_attendance_on_attendance_event_id"
     t.index ["user_id", "attendance_event_id"], name: "index_attendance_on_user_id_and_attendance_event_id", unique: true
     t.index ["user_id"], name: "index_attendance_on_user_id"
-    t.check_constraint "status::text = ANY (ARRAY['present'::character varying, 'absent'::character varying, 'other'::character varying]::text[])", name: "check_status"
+    t.check_constraint "status::text = ANY (ARRAY['present'::character varying::text, 'absent'::character varying::text, 'other'::character varying::text])", name: "check_status"
   end
 
   create_table "attendance_events", force: :cascade do |t|
@@ -94,7 +94,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_02_063901) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["objective_id"], name: "index_milestones_on_objective_id"
-    t.check_constraint "milestone_type::text = ANY (ARRAY['quality'::character varying, 'quantity'::character varying]::text[])", name: "check_milestone_type"
+    t.check_constraint "milestone_type::text = ANY (ARRAY['quality'::character varying::text, 'quantity'::character varying::text])", name: "check_milestone_type"
   end
 
   create_table "objectives", force: :cascade do |t|
@@ -194,8 +194,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_02_063901) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_type"], name: "index_users_on_user_type"
-    t.check_constraint "gender::text = ANY (ARRAY['male'::character varying, 'female'::character varying]::text[])", name: "check_gender"
-    t.check_constraint "user_type::text = ANY (ARRAY['director'::character varying, 'coach'::character varying, 'player'::character varying, 'manager'::character varying]::text[])", name: "check_user_type"
+    t.check_constraint "gender::text = ANY (ARRAY['male'::character varying::text, 'female'::character varying::text])", name: "check_gender"
+    t.check_constraint "user_type::text = ANY (ARRAY['director'::character varying::text, 'coach'::character varying::text, 'player'::character varying::text, 'manager'::character varying::text])", name: "check_user_type"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
