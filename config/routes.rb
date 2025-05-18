@@ -25,6 +25,11 @@ Rails.application.routes.draw do
   get 'member', to: 'member#index', as: :member
   get 'record', to: 'record#index', as: :record
   
+  # 目標管理
+  get 'objective', to: 'objective#index', as: :objective_index
+  get 'objective/new', to: 'objective#new', as: :new_objective
+  post 'objective', to: 'objective#create', as: :objective
+  
   # 出席管理
   get 'attendance', to: 'attendance#index', as: :attendance
   post 'attendance/update', to: 'attendance#update_attendance', as: :update_attendance
