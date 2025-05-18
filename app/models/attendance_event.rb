@@ -12,4 +12,5 @@ class AttendanceEvent < ApplicationRecord
   scope :competitions, -> { where(is_competition: true) }
   scope :upcoming, -> { where('date >= ?', Date.current) }
   scope :past, -> { where('date < ?', Date.current) }
+  scope :future, -> { competitions.upcoming.order(:date) }
 end
