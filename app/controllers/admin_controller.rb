@@ -115,6 +115,11 @@ class AdminController < ApplicationController
     end
   end
 
+  def objective
+    @objectives = Objective.includes(:user, :attendance_event, :style, :milestones)
+                         .order('attendance_events.date DESC')
+  end
+
   private
 
   def check_admin_access
