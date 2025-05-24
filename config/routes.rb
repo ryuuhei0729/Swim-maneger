@@ -51,6 +51,9 @@ Rails.application.routes.draw do
   post 'admin/users', to: 'admin#create_user', as: 'admin_users'
   patch 'admin/users', to: 'admin#create_user'
   
+  # [管理者]目標管理
+  get 'admin/objective', to: 'admin#objective', as: 'admin_objective'
+  
   # [管理者]お知らせ管理
   delete 'admin/announcement/:id', to: 'admin#destroy_announcement', as: 'admin_destroy_announcement'
   patch 'admin/announcement/:id', to: 'admin#update_announcement', as: 'admin_update_announcement'
