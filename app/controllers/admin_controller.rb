@@ -120,6 +120,15 @@ class AdminController < ApplicationController
                          .order('attendance_events.date DESC')
   end
 
+  def practice_time
+    # 本日の日付を取得
+    today = Date.today
+
+    # 本日に最も近い練習を取得（過去の練習を優先）
+    @attendance_events = AttendanceEvent.order(date: :desc)
+    @default_event = @attendance_events.where('date <= ?', today).first || @attendance_events.first
+  end
+
   private
 
   def check_admin_access

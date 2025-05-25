@@ -70,6 +70,10 @@ Rails.application.routes.draw do
   patch 'admin/schedule/:id', to: 'admin#update_schedule', as: 'admin_update_schedule'
   delete 'admin/schedule/:id', to: 'admin#destroy_schedule', as: 'admin_destroy_schedule'
 
+  # [管理者]練習管理
+  get 'admin/practice', to: 'admin#practice', as: 'admin_practice'
+  get 'admin/practice/time', to: 'admin#practice_time', as: 'admin_practice_time'
+
   # エラーページ
   match '/404', to: 'errors#not_found', via: :all
   match '/500', to: 'errors#internal_server_error', via: :all
