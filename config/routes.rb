@@ -35,6 +35,9 @@ Rails.application.routes.draw do
   post 'attendance/update', to: 'attendance#update_attendance', as: :update_attendance
   get 'attendance/event_status/:event_id', to: 'attendance#event_status', as: :event_status
 
+  # 練習記録
+  get 'record/practice_times/:id', to: 'record#practice_times'
+
   # イベント管理
   resources :events do
     member do

@@ -88,7 +88,7 @@
               <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer min-w-0"
                    data-controller="modal"
                    data-action="click->modal#open"
-                   data-modal-id="user-modal-<%= user.id %>">
+                   data-modal-target="user-modal-<%= user.id %>">
                 <div class="flex justify-center pt-8">
                   <% if user.avatar.attached? %>
                     <%= image_tag url_for(user.avatar), 
