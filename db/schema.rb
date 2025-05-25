@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_05_02_063901) do
+ActiveRecord::Schema[8.0].define(version: 2025_05_24_094730) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -112,6 +112,34 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_02_063901) do
     t.index ["user_id"], name: "index_objectives_on_user_id"
   end
 
+  create_table "practice_logs", force: :cascade do |t|
+    t.bigint "attendance_event_id", null: false
+    t.json "tags"
+    t.string "style"
+    t.integer "rep_count", null: false
+    t.integer "set_count", null: false
+    t.integer "distance", null: false
+    t.decimal "circle", precision: 10, scale: 2, null: false
+    t.text "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["attendance_event_id"], name: "index_practice_logs_on_attendance_event_id"
+    t.index ["style"], name: "index_practice_logs_on_style"
+  end
+
+  create_table "practice_times", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "practice_log_id", null: false
+    t.integer "rep_number", null: false
+    t.integer "set_number", null: false
+    t.decimal "time", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["practice_log_id", "user_id", "rep_number", "set_number"], name: "index_practice_times_on_unique_combination", unique: true
+    t.index ["practice_log_id"], name: "index_practice_times_on_practice_log_id"
+    t.index ["user_id"], name: "index_practice_times_on_user_id"
+  end
+
   create_table "race_feedbacks", force: :cascade do |t|
     t.bigint "race_goal_id", null: false
     t.bigint "user_id", null: false
@@ -207,6 +235,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_05_02_063901) do
   add_foreign_key "objectives", "attendance_events"
   add_foreign_key "objectives", "styles"
   add_foreign_key "objectives", "users"
+  add_foreign_key "practice_logs", "attendance_events"
+  add_foreign_key "practice_times", "practice_logs"
+  add_foreign_key "practice_times", "users"
   add_foreign_key "race_feedbacks", "race_goals"
   add_foreign_key "race_feedbacks", "users"
   add_foreign_key "race_goals", "attendance_events"

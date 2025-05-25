@@ -61,6 +61,8 @@ GENDERS = ['male', 'female']
 
 # データベースをクリア
 puts "データベースをクリアしています..."
+PracticeTime.destroy_all rescue nil
+PracticeLog.destroy_all rescue nil
 RaceFeedback.destroy_all rescue nil
 RaceReview.destroy_all rescue nil
 RaceGoal.destroy_all rescue nil
@@ -442,3 +444,54 @@ User.where(user_type: 'player').each do |player|
 end
 
 puts "大会関連のデータ作成が完了しました"
+
+# 練習記録の作成
+puts "練習記録を作成中..."
+
+# 水泳練習のイベントを取得
+swim_events = AttendanceEvent.where(title: "水泳練").order(:date)
+
+# 各水泳練習イベントに対して練習ログを作成
+swim_events.each do |event|
+  # 練習ログの作成
+  practice_log = PracticeLog.create!(
+    attendance_event: event,
+    tags: ["スプリント", "持久力", "フォーム改善"].sample(rand(1..3)),
+    style: ["Fr", "Br", "Ba", "Fly", "IM", "S1"].sample,
+    rep_count: [1,3,5].sample,
+    set_count: [1,2,3].sample,
+    distance: [50, 100].sample,
+    circle: [60, 70, 80, 90].sample,
+    note: ["スプリント練習", "持久力強化", "フォーム改善", "ターン練習"].sample
+  )
+
+  # プレイヤー全員に対して練習タイムを作成
+  User.where(user_type: 'player').each do |player|
+    # セット数と本数の組み合わせで練習タイムを作成
+    (1..practice_log.set_count).each do |set_number|
+      (1..practice_log.rep_count).each do |rep_number|
+        # 種目に応じたランダムなタイムを生成
+        time = case practice_log.distance
+        when 50
+          rand(30.00..45.00).round(2)  # 50m: 30-45秒
+        when 100
+          rand(65.00..95.00).round(2)  # 100m: 65-95秒
+        else
+          0
+        end
+
+        PracticeTime.create!(
+          user: player,
+          practice_log: practice_log,
+          rep_number: rep_number,
+          set_number: set_number,
+          time: time
+        )
+      end
+    end
+  end
+end
+
+puts "練習記録の作成が完了しました"
+puts "作成された練習ログ数: #{PracticeLog.count}"
+puts "作成された練習タイム数: #{PracticeTime.count}"

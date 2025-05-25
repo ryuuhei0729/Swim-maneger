@@ -2,15 +2,25 @@ import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
   open(event) {
-    const modalId = event.currentTarget.dataset.modalId; // ボタンからdata-modal-id取得
-    const modal = document.getElementById(modalId); // idでモーダルを探す
+    const modalTarget = event.currentTarget.dataset.modalTarget;
+    const logId = event.currentTarget.dataset.practiceLogId;
+    const modal = document.getElementById(modalTarget);
+    const content = document.getElementById('practice-times-content');
     if (modal) {
       modal.classList.remove("hidden");
+      // 練習タイム用のfetchのみ、logIdとcontentが存在する場合のみ実行
+      if (logId && content) {
+        fetch(`/record/practice_times/${logId}`)
+          .then(response => response.text())
+          .then(html => {
+            content.innerHTML = html;
+          });
+      }
     }
   }
 
   close(event) {
-    const modal = event.currentTarget.closest(".fixed"); // 一番近いモーダルを探す
+    const modal = event.currentTarget.closest(".fixed");
     if (modal) {
       modal.classList.add("hidden");
     }
