@@ -19,9 +19,9 @@
           <h3 class="ml-4 text-xl font-semibold text-gray-900">練習メニュー作成</h3>
         </div>
         <p class="text-gray-600 mb-4">新しい練習メニューを作成します</p>
-        <button class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-300">
+        <%= link_to admin_practice_log_path, class: "w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors duration-300 inline-block text-center" do %>
           メニューを作成
-        </button>
+        <% end %>
       </div>
     </div>
 
@@ -53,31 +53,36 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日付</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">メニュー名</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">担当コーチ</th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">参加人数</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">泳法</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">距離</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">本数×セット</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">サークル</th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
             </tr>
           </thead>
           <tbody class="bg-white divide-y divide-gray-200">
-            <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024/03/20</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">基礎練習</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">山田コーチ</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15名</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <button class="text-indigo-600 hover:text-indigo-900">詳細</button>
-              </td>
-            </tr>
-            <tr>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024/03/19</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">スプリント練習</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">佐藤コーチ</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">12名</td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <button class="text-indigo-600 hover:text-indigo-900">詳細</button>
-              </td>
-            </tr>
+            <% @practice_logs.each do |log| %>
+              <tr>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= log.attendance_event.date.strftime('%Y/%m/%d') %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <%= PracticeLog::STYLE_OPTIONS[log.style] %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= log.distance %>m
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= log.rep_count %>×<%= log.set_count %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <%= format('%.1f', log.circle) %>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <button class="text-indigo-600 hover:text-indigo-900">詳細</button>
+                </td>
+              </tr>
+            <% end %>
           </tbody>
         </table>
       </div>

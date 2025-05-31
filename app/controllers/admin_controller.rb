@@ -127,6 +127,44 @@ class AdminController < ApplicationController
     # 本日に最も近い練習を取得（過去の練習を優先）
     @attendance_events = AttendanceEvent.order(date: :desc)
     @default_event = @attendance_events.where('date <= ?', today).first || @attendance_events.first
+
+    # パラメータがある場合はテーブルを生成
+    if params[:laps].present? && params[:sets].present?
+      @laps = params[:laps].to_i
+      @sets = params[:sets].to_i
+      @show_modal = true
+
+      # 選択された練習の参加者を取得（出席者とその他のみ、playerタイプのみ）
+      if params[:event_attendance_id].present?
+        @event = AttendanceEvent.find(params[:event_attendance_id])
+        @attendees = @event.attendance.includes(:user)
+                          .where(status: ['present', 'other'])
+                          .joins(:user)
+                          .where(users: { user_type: 'player' })
+                          .map(&:user)
+                          .sort_by { |user| [user.generation, user.name] }
+      end
+    end
+  end
+
+  def practice
+    @practice_logs = PracticeLog.includes(:attendance_event)
+                               .order('attendance_events.date DESC')
+                               .limit(5)
+  end
+
+  def practice_log
+    @practice_log = PracticeLog.new
+  end
+
+  def create_practice_log
+    @practice_log = PracticeLog.new(practice_log_params)
+
+    if @practice_log.save
+      redirect_to admin_practice_path, notice: '練習メニューを作成しました'
+    else
+      render :practice_log, status: :unprocessable_entity
+    end
   end
 
   private
@@ -156,5 +194,9 @@ class AdminController < ApplicationController
 
   def schedule_params
     params.require(:attendance_event).permit(:title, :date, :is_competition, :note, :place)
+  end
+
+  def practice_log_params
+    params.require(:practice_log).permit(:attendance_event_id, :style, :rep_count, :set_count, :distance, :circle, :note)
   end
 end
