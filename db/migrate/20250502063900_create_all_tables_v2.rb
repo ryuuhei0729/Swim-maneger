@@ -130,8 +130,8 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
     add_index :user_auths, :email, unique: true
     add_index :user_auths, :reset_password_token, unique: true
     add_index :users, :user_type
-    add_index :styles, [:style, :distance], unique: true
-    add_index :attendance, [:user_id, :attendance_event_id], unique: true
+    add_index :styles, [ :style, :distance ], unique: true
+    add_index :attendance, [ :user_id, :attendance_event_id ], unique: true
     add_index :announcements, :published_at
     add_index :announcements, :is_active
 
@@ -195,4 +195,4 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
     drop_table :users
     drop_table :announcements
   end
-end 
+end

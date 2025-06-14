@@ -10,11 +10,11 @@ class PracticeLog < ApplicationRecord
   validates :style, presence: true, inclusion: { in: %w[Fr Br Ba Fly IM S1] }
 
   STYLE_OPTIONS = {
-    'Fr' => '自由形',
-    'Br' => '平泳ぎ',
-    'Ba' => '背泳ぎ',
-    'Fly' => 'バタフライ',
-    'IM' => '個人メドレー',
-    'S1' => 'Style 1'
+    "Fr" => "自由形",
+    "Br" => "平泳ぎ",
+    "Ba" => "背泳ぎ",
+    "Fly" => "バタフライ",
+    "IM" => "個人メドレー",
+    "S1" => "Style 1"
   }.freeze
-end 
+end

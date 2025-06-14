@@ -8,4 +8,4 @@ class Objective < ApplicationRecord
   validates :quantity_note, presence: true
   validates :quality_title, presence: true
   validates :quality_note, presence: true
-end 
+end

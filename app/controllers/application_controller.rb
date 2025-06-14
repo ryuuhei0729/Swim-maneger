@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
   protected
 
   def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: [:name])
+    devise_parameter_sanitizer.permit(:sign_up, keys: [ :name ])
   end
 
   def after_sign_in_path_for(_resource)
@@ -23,10 +23,10 @@ class ApplicationController < ActionController::Base
   private
 
   def render_not_found(exception)
-    render file: "#{Rails.root}/app/views/errors/not_found.html.erb", status: :not_found, layout: 'error'
+    render file: "#{Rails.root}/app/views/errors/not_found.html.erb", status: :not_found, layout: "error"
   end
 
   def render_unprocessable_entity(exception)
-    render file: "#{Rails.root}/app/views/errors/unprocessable_entity.html.erb", status: :unprocessable_entity, layout: 'error'
+    render file: "#{Rails.root}/app/views/errors/unprocessable_entity.html.erb", status: :unprocessable_entity, layout: "error"
   end
 end

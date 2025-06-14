@@ -7,10 +7,10 @@ class AttendanceEvent < ApplicationRecord
 
   validates :title, presence: true
   validates :date, presence: true
-  validates :is_competition, inclusion: { in: [true, false] }
+  validates :is_competition, inclusion: { in: [ true, false ] }
 
   scope :competitions, -> { where(is_competition: true) }
-  scope :upcoming, -> { where('date >= ?', Date.current) }
-  scope :past, -> { where('date < ?', Date.current) }
+  scope :upcoming, -> { where("date >= ?", Date.current) }
+  scope :past, -> { where("date < ?", Date.current) }
   scope :future, -> { competitions.upcoming.order(:date) }
 end

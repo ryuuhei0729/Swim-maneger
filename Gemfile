@@ -68,6 +68,6 @@ end
 
 gem "tailwindcss-rails", "~> 4.2"
 
-gem 'active_storage_validations'
+gem "active_storage_validations"
 
-gem 'holiday_jp'
+gem "holiday_jp"

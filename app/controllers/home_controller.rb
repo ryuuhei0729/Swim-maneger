@@ -8,7 +8,7 @@ class HomeController < ApplicationController
       .where(date: @current_month.beginning_of_month..@current_month.end_of_month)
       .order(date: :asc)
       .group_by { |event| event.date }
-    
+
     # お知らせ表示で使うコントローラー
     @announcements = Announcement.active.where("published_at <= ?", Time.current).order(published_at: :desc)
 
@@ -16,10 +16,10 @@ class HomeController < ApplicationController
     @birthday_users = User.where(birthday: today)
 
     # ベストタイム表示で使うコントローラー
-    @players = User.where(user_type: 'player').order(generation: :asc)
-    @male_players = @players.select { |p| p.gender == 'male' }
-    @female_players = @players.select { |p| p.gender == 'female' }
-    @default_tab = params[:tab] || (current_user_auth.user.gender == 'male' ? 'male' : 'female')
+    @players = User.where(user_type: "player").order(generation: :asc)
+    @male_players = @players.select { |p| p.gender == "male" }
+    @female_players = @players.select { |p| p.gender == "female" }
+    @default_tab = params[:tab] || (current_user_auth.user.gender == "male" ? "male" : "female")
     @sort_by = params[:sort_by]
     @events = Style.all.map do |style|
       {

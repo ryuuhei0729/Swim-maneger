@@ -1,10 +1,10 @@
 class Attendance < ApplicationRecord
-  self.table_name = 'attendance'
-  
+  self.table_name = "attendance"
+
   belongs_to :user
   belongs_to :attendance_event
 
-  enum :status, { present: 'present', absent: 'absent', other: 'other' }
+  enum :status, { present: "present", absent: "absent", other: "other" }
 
   validates :status, presence: true
   validates :user_id, uniqueness: { scope: :attendance_event_id }

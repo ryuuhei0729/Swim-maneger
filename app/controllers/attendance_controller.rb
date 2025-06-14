@@ -31,8 +31,8 @@ class AttendanceController < ApplicationController
 
     respond_to do |format|
       format.html
-      format.js { 
-        render partial: 'shared/calendar', locals: { 
+      format.js {
+        render partial: "shared/calendar", locals: {
           current_month: @current_month,
           events_by_date: @events_by_date
         }
@@ -48,7 +48,7 @@ class AttendanceController < ApplicationController
     attendance_params.each do |event_id, data|
       event = AttendanceEvent.find(event_id)
       attendance = current_user_auth.user.attendance.find_or_initialize_by(attendance_event: event)
-      
+
       if data[:status].blank?
         error_messages << "#{event.title}の出席状況を選択してください。"
         success = false
@@ -71,7 +71,7 @@ class AttendanceController < ApplicationController
     end
 
     if success
-      redirect_to attendance_path, notice: '出席状況を更新しました。'
+      redirect_to attendance_path, notice: "出席状況を更新しました。"
     else
       redirect_to attendance_path, alert: error_messages.join("\n")
     end
@@ -80,7 +80,7 @@ class AttendanceController < ApplicationController
   def event_status
     @event = AttendanceEvent.find(params[:event_id])
     @attendance = @event.attendance.includes(:user)
-    render partial: 'shared/event_attendance_status', locals: { event: @event, attendance: @attendance }
+    render partial: "shared/event_attendance_status", locals: { event: @event, attendance: @attendance }
   end
 
   private
@@ -88,4 +88,4 @@ class AttendanceController < ApplicationController
   def attendance_params
     params.require(:attendance).permit(:status, :note)
   end
-end 
+end

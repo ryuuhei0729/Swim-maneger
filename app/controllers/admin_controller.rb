@@ -9,11 +9,11 @@ class AdminController < ApplicationController
     if request.post?
       @user = User.new(user_params)
       @user_auth = UserAuth.new(user_auth_params)
-      
+
       User.transaction do
         if @user.save && @user_auth.save
           @user_auth.update(user: @user)
-          redirect_to admin_path, notice: 'ユーザーを作成しました。'
+          redirect_to admin_path, notice: "ユーザーを作成しました。"
         else
           if @user_auth.errors.any?
             @user_auth.errors.messages.each do |attribute, messages|
@@ -43,9 +43,9 @@ class AdminController < ApplicationController
 
   def create_announcement
     @announcement = Announcement.new(announcement_params)
-    
+
     if @announcement.save
-      redirect_to admin_announcement_path, notice: 'お知らせを作成しました。'
+      redirect_to admin_announcement_path, notice: "お知らせを作成しました。"
     else
       @announcements = Announcement.all.order(published_at: :desc)
       render :announcement
@@ -54,9 +54,9 @@ class AdminController < ApplicationController
 
   def update_announcement
     @announcement = Announcement.find(params[:id])
-    
+
     if @announcement.update(announcement_params)
-      redirect_to admin_announcement_path, notice: 'お知らせを更新しました。'
+      redirect_to admin_announcement_path, notice: "お知らせを更新しました。"
     else
       @announcements = Announcement.all.order(published_at: :desc)
       render :announcement
@@ -67,8 +67,8 @@ class AdminController < ApplicationController
     Rails.logger.info "destroy_announcement called with id: #{params[:id]}"
     @announcement = Announcement.find(params[:id])
     @announcement.destroy
-    
-    redirect_to admin_announcement_path, notice: 'お知らせを削除しました。'
+
+    redirect_to admin_announcement_path, notice: "お知らせを削除しました。"
   end
 
   def schedule
@@ -79,7 +79,7 @@ class AdminController < ApplicationController
   def create_schedule
     @event = AttendanceEvent.new(schedule_params)
     if @event.save
-      redirect_to admin_schedule_path, notice: 'スケジュールを登録しました。'
+      redirect_to admin_schedule_path, notice: "スケジュールを登録しました。"
     else
       @events = AttendanceEvent.order(date: :asc)
       render :schedule
@@ -89,7 +89,7 @@ class AdminController < ApplicationController
   def update_schedule
     @event = AttendanceEvent.find(params[:id])
     if @event.update(schedule_params)
-      redirect_to admin_schedule_path, notice: 'スケジュールを更新しました。'
+      redirect_to admin_schedule_path, notice: "スケジュールを更新しました。"
     else
       @events = AttendanceEvent.order(date: :asc)
       render :schedule
@@ -99,7 +99,7 @@ class AdminController < ApplicationController
   def destroy_schedule
     @event = AttendanceEvent.find(params[:id])
     @event.destroy
-    redirect_to admin_schedule_path, notice: 'スケジュールを削除しました。'
+    redirect_to admin_schedule_path, notice: "スケジュールを削除しました。"
   end
 
   def edit_schedule
@@ -107,7 +107,7 @@ class AdminController < ApplicationController
     respond_to do |format|
       format.json { render json: {
         title: @event.title,
-        date: @event.date.strftime('%Y-%m-%d'),
+        date: @event.date.strftime("%Y-%m-%d"),
         is_competition: @event.is_competition,
         note: @event.note,
         place: @event.place
@@ -117,7 +117,7 @@ class AdminController < ApplicationController
 
   def objective
     @objectives = Objective.includes(:user, :attendance_event, :style, :milestones)
-                         .order('attendance_events.date DESC')
+                         .order("attendance_events.date DESC")
   end
 
   def practice_time
@@ -126,7 +126,7 @@ class AdminController < ApplicationController
 
     # 本日に最も近い練習を取得（過去の練習を優先）
     @attendance_events = AttendanceEvent.order(date: :desc)
-    @default_event = @attendance_events.where('date <= ?', today).first || @attendance_events.first
+    @default_event = @attendance_events.where("date <= ?", today).first || @attendance_events.first
 
     # パラメータがある場合はテーブルを生成
     if params[:laps].present? && params[:sets].present?
@@ -138,18 +138,18 @@ class AdminController < ApplicationController
       if params[:event_attendance_id].present?
         @event = AttendanceEvent.find(params[:event_attendance_id])
         @attendees = @event.attendance.includes(:user)
-                          .where(status: ['present', 'other'])
+                          .where(status: [ "present", "other" ])
                           .joins(:user)
-                          .where(users: { user_type: 'player' })
+                          .where(users: { user_type: "player" })
                           .map(&:user)
-                          .sort_by { |user| [user.generation, user.name] }
+                          .sort_by { |user| [ user.generation, user.name ] }
       end
     end
   end
 
   def practice
     @practice_logs = PracticeLog.includes(:attendance_event)
-                               .order('attendance_events.date DESC')
+                               .order("attendance_events.date DESC")
                                .limit(5)
   end
 
@@ -161,7 +161,7 @@ class AdminController < ApplicationController
     @practice_log = PracticeLog.new(practice_log_params)
 
     if @practice_log.save
-      redirect_to admin_practice_path, notice: '練習メニューを作成しました'
+      redirect_to admin_practice_path, notice: "練習メニューを作成しました"
     else
       render :practice_log, status: :unprocessable_entity
     end
@@ -170,8 +170,8 @@ class AdminController < ApplicationController
   private
 
   def check_admin_access
-    unless current_user_auth.user.user_type.in?(['coach', 'director'])
-      redirect_to root_path, alert: 'このページにアクセスする権限がありません。'
+    unless current_user_auth.user.user_type.in?([ "coach", "director" ])
+      redirect_to root_path, alert: "このページにアクセスする権限がありません。"
     end
   end
 
