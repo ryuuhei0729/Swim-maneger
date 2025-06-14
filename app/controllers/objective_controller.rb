@@ -4,7 +4,7 @@ class ObjectiveController < ApplicationController
   def index
     @objective = current_user_auth.user.objectives
                                 .includes(:attendance_event, :style, :milestones)
-                                .order('attendance_events.date DESC')
+                                .order("attendance_events.date DESC")
   end
 
   def new
@@ -13,7 +13,7 @@ class ObjectiveController < ApplicationController
 
   def create
     @objective = current_user_auth.user.objectives.build(objective_params)
-    
+
     # 目標タイムを秒に変換
     if params[:objective][:minutes].present? || params[:objective][:seconds].present?
       minutes = params[:objective][:minutes].to_i
@@ -22,7 +22,7 @@ class ObjectiveController < ApplicationController
     end
 
     if @objective.save
-      redirect_to objective_index_path, notice: '目標を設定しました。'
+      redirect_to objective_index_path, notice: "目標を設定しました。"
     else
       render :new, status: :unprocessable_entity
     end
@@ -37,7 +37,7 @@ class ObjectiveController < ApplicationController
       :quantity_note,
       :quality_title,
       :quality_note,
-      milestones_attributes: [:limit_date, :note]
+      milestones_attributes: [ :limit_date, :note ]
     )
   end
 end

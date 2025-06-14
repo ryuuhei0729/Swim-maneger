@@ -4,4 +4,4 @@ class RaceReview < ApplicationRecord
 
   validates :time, presence: true, numericality: { greater_than: 0 }
   validates :note, presence: true
-end 
+end

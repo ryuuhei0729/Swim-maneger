@@ -9,8 +9,8 @@ class RaceFeedback < ApplicationRecord
   private
 
   def user_must_be_coach
-    unless user&.user_type == 'coach'
-      errors.add(:user, 'must be a coach')
+    unless user&.user_type == "coach"
+      errors.add(:user, "must be a coach")
     end
   end
-end 
+end

@@ -13,4 +13,4 @@ class Admin::SchedulesController < ApplicationController
       redirect_to root_path
     end
   end
-end 
+end

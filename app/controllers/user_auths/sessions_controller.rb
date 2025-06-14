@@ -25,4 +25,4 @@ class UserAuths::SessionsController < Devise::SessionsController
   def after_sign_out_path_for(resource_or_scope)
     new_user_auth_session_path
   end
-end 
+end

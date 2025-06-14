@@ -10,4 +10,4 @@ class ErrorsController < ApplicationController
   def unprocessable_entity
     render status: 422
   end
-end 
+end

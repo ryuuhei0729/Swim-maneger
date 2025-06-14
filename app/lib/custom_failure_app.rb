@@ -6,4 +6,4 @@ class CustomFailureApp < Devise::FailureApp
       super
     end
   end
-end 
+end

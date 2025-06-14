@@ -10,28 +10,28 @@ class User < ApplicationRecord
 
   validates :generation, presence: true
   validates :name, presence: true
-  validates :gender, presence: true, inclusion: { in: ['male', 'female'] }
+  validates :gender, presence: true, inclusion: { in: [ "male", "female" ] }
   validates :birthday, presence: true
-  validates :user_type, presence: true, inclusion: { in: ['director', 'coach', 'player', 'manager'] }
+  validates :user_type, presence: true, inclusion: { in: [ "director", "coach", "player", "manager" ] }
 
   delegate :email, to: :user_auth, allow_nil: true
 
   # ユーザータイプの定数
   USER_TYPES = {
-    player: 'player',
-    coach: 'coach',
-    director: 'director',
-    manager: 'manager'
+    player: "player",
+    coach: "coach",
+    director: "director",
+    manager: "manager"
   }.freeze
 
   # 性別の定数
   GENDERS = {
-    male: 'male',
-    female: 'female'
+    male: "male",
+    female: "female"
   }.freeze
 
   # 管理者権限を持つユーザータイプ
-  ADMIN_TYPES = [USER_TYPES[:coach], USER_TYPES[:director], USER_TYPES[:manager]].freeze
+  ADMIN_TYPES = [ USER_TYPES[:coach], USER_TYPES[:director], USER_TYPES[:manager] ].freeze
 
   # ユーザーが管理者かどうかを判定するメソッド
   def admin?
@@ -49,10 +49,10 @@ class User < ApplicationRecord
   end
 
   def coach?
-    user_type == 'coach'
+    user_type == "coach"
   end
 
   def player?
-    user_type == 'player'
+    user_type == "player"
   end
 end

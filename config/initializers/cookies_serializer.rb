@@ -6,4 +6,4 @@
 # Read more about the new cookie serializer at:
 # https://edgeguides.rubyonrails.org/upgrading_ruby_on_rails.html#cookie-serializer
 
-# Rails.application.config.action_dispatch.cookies_serializer = :json 
+# Rails.application.config.action_dispatch.cookies_serializer = :json

@@ -9,6 +9,6 @@ class RecordController < ApplicationController
     @practice_log = PracticeLog.find(params[:id])
     @practice_times = @practice_log.practice_times.where(user_id: current_user_auth.user.id)
                                  .order(set_number: :asc, rep_number: :asc)
-    render partial: 'practice_times_table', locals: { log: @practice_log, practice_times: @practice_times }
+    render partial: "practice_times_table", locals: { log: @practice_log, practice_times: @practice_times }
   end
-end 
+end

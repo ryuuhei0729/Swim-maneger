@@ -5,4 +5,4 @@ class UserAuths::RegistrationsController < Devise::RegistrationsController
     session[:user_auth_id] = resource.id
     new_user_path
   end
-end 
+end

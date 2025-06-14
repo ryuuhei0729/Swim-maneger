@@ -4,7 +4,7 @@ module ObjectiveHelper
 
     minutes = (seconds / 60).floor
     remaining_seconds = (seconds % 60).round(2)
-    
+
     if minutes.zero?
       format("%05.2f", remaining_seconds)
     else

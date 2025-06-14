@@ -25,4 +25,4 @@ module ApplicationHelper
       format("%.2f", seconds)
     end
   end
-end 
+end

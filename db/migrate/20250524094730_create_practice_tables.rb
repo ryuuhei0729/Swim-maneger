@@ -25,7 +25,7 @@ class CreatePracticeTables < ActiveRecord::Migration[7.0]
 
     # インデックス
     add_index :practice_logs, :style
-    add_index :practice_times, [:practice_log_id, :user_id, :rep_number, :set_number], unique: true, name: 'index_practice_times_on_unique_combination'
+    add_index :practice_times, [ :practice_log_id, :user_id, :rep_number, :set_number ], unique: true, name: 'index_practice_times_on_unique_combination'
   end
 
   def down
