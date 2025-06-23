@@ -216,17 +216,22 @@ class AdminController < ApplicationController
                                .limit(5)
   end
 
-  def practice_log
-    @practice_log = PracticeLog.new
+  def practice_register
+    today = Date.today
+    @attendance_events = AttendanceEvent.order(date: :desc)
+    @default_event = @attendance_events.where("date <= ?", today).first || @attendance_events.first
+    @attendance_event = AttendanceEvent.new
   end
 
-  def create_practice_log
-    @practice_log = PracticeLog.new(practice_log_params)
-
-    if @practice_log.save
-      redirect_to admin_practice_path, notice: "練習メニューを作成しました"
+  def create_practice_register
+    @attendance_event = AttendanceEvent.find(params[:attendance_event][:id])
+    if @attendance_event.update(attendance_event_image_params)
+      redirect_to admin_practice_path, notice: "練習メニュー画像を更新しました"
     else
-      render :practice_log, status: :unprocessable_entity
+      today = Date.today
+      @attendance_events = AttendanceEvent.order(date: :desc)
+      @default_event = @attendance_event
+      render :practice_register, status: :unprocessable_entity
     end
   end
 
@@ -259,11 +264,7 @@ class AdminController < ApplicationController
     params.require(:attendance_event).permit(:title, :date, :is_competition, :note, :place)
   end
 
-  def practice_log_params
-    params.require(:practice_log).permit(:attendance_event_id, :style, :rep_count, :set_count, :distance, :circle, :note)
-  end
-
-  def practice_log_get_params
-    params.fetch(:practice_log, {}).permit(:attendance_event_id, :style, :rep_count, :set_count, :distance, :circle, :note)
+  def attendance_event_image_params
+    params.require(:attendance_event).permit(:menu_image)
   end
 end
