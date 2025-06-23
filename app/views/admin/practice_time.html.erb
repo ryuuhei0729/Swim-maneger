@@ -145,24 +145,78 @@
 document.addEventListener('DOMContentLoaded', function() {
   const form = document.getElementById('practice-log-form');
   const saveButton = document.getElementById('saveTimesBtn');
+  const modal = document.getElementById('tableModal');
   
   if (form && saveButton) {
     saveButton.addEventListener('click', function(e) {
       e.preventDefault(); // デフォルトのGET送信をキャンセル
       
-      // フォームの送信先とメソッドをPOST用に変更
       form.action = '<%= admin_create_practice_log_and_times_path %>';
       form.method = 'post';
       
-      // CSRFトークンを取得してフォームに追加
+      // CSRFトークンをフォームに追加
       const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-      const tokenInput = document.createElement('input');
-      tokenInput.setAttribute('type', 'hidden');
-      tokenInput.setAttribute('name', 'authenticity_token');
+      let tokenInput = form.querySelector('input[name="authenticity_token"]');
+      if (!tokenInput) {
+        tokenInput = document.createElement('input');
+        tokenInput.setAttribute('type', 'hidden');
+        tokenInput.setAttribute('name', 'authenticity_token');
+        form.appendChild(tokenInput);
+      }
       tokenInput.setAttribute('value', csrfToken);
-      form.appendChild(tokenInput);
 
       form.submit();
+    });
+  }
+
+  if (modal) {
+    modal.addEventListener('keydown', function(e) {
+      // Enterキーが押され、かつ対象がタイム入力欄の場合
+      if (e.key === 'Enter' && e.target.matches('input[type="text"][name^="times["]')) {
+        e.preventDefault();
+
+        const currentInput = e.target;
+        const currentCell = currentInput.closest('td');
+        const currentRow = currentInput.closest('tr');
+        const currentSetDiv = currentRow.closest('.mb-8');
+        
+        const cellIndex = Array.from(currentRow.children).indexOf(currentCell);
+        const nextRow = currentRow.nextElementSibling;
+        
+        let nextInput = null;
+
+        // 同じセット内に次の行がある場合
+        if (nextRow) {
+          const nextCell = nextRow.children[cellIndex];
+          if (nextCell) {
+            nextInput = nextCell.querySelector('input');
+          }
+        } else {
+          // セットの最終行の場合、次のセットを探す
+          let nextSetDiv = currentSetDiv.nextElementSibling;
+          while (nextSetDiv && !nextSetDiv.querySelector('table')) {
+            nextSetDiv = nextSetDiv.nextElementSibling;
+          }
+          
+          if (nextSetDiv) {
+            const nextTable = nextSetDiv.querySelector('table');
+            const firstRowInNextTable = nextTable.querySelector('tbody tr');
+            if (firstRowInNextTable) {
+              const nextCell = firstRowInNextTable.children[cellIndex];
+              if (nextCell) {
+                nextInput = nextCell.querySelector('input');
+              }
+            }
+          }
+        }
+
+        if (nextInput) {
+          nextInput.focus();
+        } else {
+          // 移動先がなければ保存ボタンにフォーカス
+          saveButton.focus();
+        }
+      }
     });
   }
 });
