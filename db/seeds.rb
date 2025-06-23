@@ -184,42 +184,6 @@ end
   puts "Created player: #{user.name}"
 end
 
-# 記録の作成
-puts "Creating records..."
-
-# プレイヤーと種目の組み合わせで記録を作成
-User.where(user_type: 'player').each do |user|
-  Style.all.each do |style|
-    # 種目に応じたランダムなタイムを生成
-    time = case style.distance
-    when 50
-      rand(22.00..35.00).round(2)  # 50m: 22-35秒
-    when 100
-      rand(50.00..80.00).round(2)  # 100m: 50-80秒
-    when 200
-      rand(110.00..180.00).round(2) # 200m: 1:50-3:00
-    when 400
-      rand(240.00..360.00).round(2) # 400m: 4:00-6:00
-    when 800
-      rand(480.00..720.00).round(2) # 800m: 8:00-12:00
-    else
-      0
-    end
-
-    # 記録を作成
-    Record.create!(
-      user: user,
-      style: style,
-      time: time,
-      created_at: rand(1..365).days.ago
-    )
-  end
-end
-
-puts "テストデータの作成が完了しました。"
-puts "作成されたユーザー数: #{User.count}"
-puts "作成された記録数: #{Record.count}"
-
 # ユーザーが既に存在することを前提とします
 
 # 出席イベントの作成
@@ -318,6 +282,90 @@ next_month_weekends = next_month_dates.select { |d| [ 6, 0 ].include?(d.wday) }
 end
 
 puts "出席イベントの作成が完了しました"
+
+# 記録の作成
+puts "Creating records..."
+
+# 過去の大会イベントを取得
+# is_competition: trueかつ、日付が今日より前のものを取得
+competition_events = AttendanceEvent.where(is_competition: true).where("date < ?", Date.current)
+
+# プレイヤーと過去の大会の組み合わせで記録を作成
+User.where(user_type: 'player').each do |user|
+  competition_events.each do |event|
+    # 各大会でランダムに1〜3種目の記録を作成
+    Style.all.sample(rand(1..3)).each do |style|
+
+      # 種目に応じたランダムなタイムを生成
+      time = case style.distance
+      when 50
+        rand(22.00..35.00).round(2)  # 50m: 22-35秒
+      when 100
+        rand(50.00..80.00).round(2)  # 100m: 50-80秒
+      when 200
+        rand(110.00..180.00).round(2) # 200m: 1:50-3:00
+      when 400
+        rand(240.00..360.00).round(2) # 400m: 4:00-6:00
+      when 800
+        rand(480.00..720.00).round(2) # 800m: 8:00-12:00
+      else
+        0
+      end
+
+      # 記録を作成（find_or_create_by!で重複を防ぐ）
+      Record.find_or_create_by!(
+        user: user,
+        style: style,
+        attendance_event: event
+      ) do |record|
+        record.time = time
+        # 記録の日付を大会の日付に合わせる
+        record.created_at = event.date
+        record.updated_at = event.date
+      end
+    end
+  end
+end
+
+# 記録がない種目に対してダミーの記録を作成
+puts "記録がない種目に対してダミーの記録を作成中..."
+User.where(user_type: 'player').each do |user|
+  # ユーザーがすでに記録を持っている種目IDのリスト
+  recorded_style_ids = user.records.pluck(:style_id)
+  # 記録がない種目IDのリスト
+  unrecorded_styles = Style.where.not(id: recorded_style_ids)
+
+  unrecorded_styles.each do |style|
+    # 種目に応じたランダムなタイムを生成
+    time = case style.distance
+    when 50
+      rand(22.00..35.00).round(2)
+    when 100
+      rand(50.00..80.00).round(2)
+    when 200
+      rand(110.00..180.00).round(2)
+    when 400
+      rand(240.00..360.00).round(2)
+    when 800
+      rand(480.00..720.00).round(2)
+    else
+      0
+    end
+
+    # 記録を作成
+    Record.create!(
+      user: user,
+      style: style,
+      time: time,
+      created_at: rand(1..365).days.ago
+      # attendance_event_id は nil になる
+    )
+  end
+end
+
+puts "全記録の作成が完了しました。"
+puts "作成されたユーザー数: #{User.count}"
+puts "作成された記録数: #{Record.count}"
 
 # 出席データの作成
 puts "出席データを作成中..."
