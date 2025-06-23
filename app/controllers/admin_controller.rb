@@ -164,10 +164,14 @@ class AdminController < ApplicationController
           rep_data.each do |rep_number, time|
             next if time.blank?
             
-            # 時間を秒に変換
-            minutes, seconds_milliseconds = time.split(':')
-            seconds, milliseconds = seconds_milliseconds.split('.')
-            total_seconds = minutes.to_i * 60 + seconds.to_i + milliseconds.to_f / 100
+            # 時間を秒に変換 (MM:SS.ss or SS.ss)
+            total_seconds = 0.0
+            if time.include?(':')
+              minutes, seconds_part = time.split(':', 2)
+              total_seconds = minutes.to_i * 60 + seconds_part.to_f
+            else
+              total_seconds = time.to_f
+            end
 
             PracticeTime.create!(
               user_id: user_id,
