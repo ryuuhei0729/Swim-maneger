@@ -335,6 +335,7 @@
             <th class="py-3 text-left text-gray-600 font-medium">種目</th>
             <th class="py-3 text-left text-gray-600 font-medium">タイム</th>
             <th class="py-3 text-left text-gray-600 font-medium">日付</th>
+            <th class="py-3 text-left text-gray-600 font-medium">大会名</th>
             <th class="py-3 text-left text-gray-600 font-medium">メモ</th>
           </tr>
         </thead>
@@ -344,6 +345,7 @@
               <td class="py-3"><%= record.style.name_jp %></td>
               <td class="py-3"><%= format_time(record.time) %></td>
               <td class="py-3"><%= record.created_at.strftime("%Y/%m/%d") %></td>
+              <td class="py-3"><%= record.attendance_event.present? ? record.attendance_event.title : '-' %></td>
               <td class="py-3"><%= record.note %></td>
             </tr>
           <% end %>

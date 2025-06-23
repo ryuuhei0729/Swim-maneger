@@ -3,7 +3,7 @@ class MypageController < ApplicationController
 
   def index
     @user = current_user_auth.user
-    @records = @user.records.includes(:style).order(created_at: :desc)
+    @records = @user.records.includes(:style, :attendance_event).order(created_at: :desc)
 
     # 各種目のベストタイムを取得
     @best_times = {}

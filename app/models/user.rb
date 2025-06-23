@@ -55,4 +55,13 @@ class User < ApplicationRecord
   def player?
     user_type == "player"
   end
+
+  def best_time_notes
+    best_notes = {}
+    Style.all.each do |style|
+      best_record = records.where(style: style).order(:time).first
+      best_notes[style.name] = best_record&.note
+    end
+    best_notes
+  end
 end
