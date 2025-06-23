@@ -73,8 +73,9 @@ Rails.application.routes.draw do
   # [管理者]練習管理
   get "admin/practice", to: "admin#practice", as: "admin_practice"
   get "admin/practice/time", to: "admin#practice_time", as: "admin_practice_time"
+  post "admin/practice/time", to: "admin#create_practice_log_and_times", as: "admin_create_practice_log_and_times"
   get "admin/practice/log", to: "admin#practice_log", as: "admin_practice_log"
-  post "admin/practice/log", to: "admin#create_practice_log", as: "admin_practice_log_create"
+  post "admin/practice_log", to: "admin#create_practice_log", as: "admin_practice_log_create"
 
   # エラーページ
   match "/404", to: "errors#not_found", via: :all
