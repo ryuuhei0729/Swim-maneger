@@ -127,16 +127,21 @@ class AdminController < ApplicationController
     # 本日に最も近い練習を取得（過去の練習を優先）
     @attendance_events = AttendanceEvent.order(date: :desc)
     @default_event = @attendance_events.where("date <= ?", today).first || @attendance_events.first
+    @styles = PracticeLog::STYLE_OPTIONS
+    
+    # GETパラメータから@practice_logを初期化
+    @practice_log = PracticeLog.new(practice_log_get_params)
 
     # パラメータがある場合はテーブルを生成
-    if params[:laps].present? && params[:sets].present?
-      @laps = params[:laps].to_i
-      @sets = params[:sets].to_i
+    if @practice_log.rep_count.present? && @practice_log.set_count.present?
+      @laps = @practice_log.rep_count
+      @sets = @practice_log.set_count
       @show_modal = true
 
-      # 選択された練習の参加者を取得（出席者とその他のみ、playerタイプのみ）
-      if params[:event_attendance_id].present?
-        @event = AttendanceEvent.find(params[:event_attendance_id])
+      # 選択された練習の参加者を取得
+      event_id = @practice_log.attendance_event_id.presence || params.dig(:practice_log, :attendance_event_id).presence || @default_event&.id
+      if event_id.present?
+        @event = AttendanceEvent.find(event_id)
         @attendees = @event.attendance.includes(:user)
                           .where(status: [ "present", "other" ])
                           .joins(:user)
@@ -144,6 +149,60 @@ class AdminController < ApplicationController
                           .map(&:user)
                           .sort_by { |user| [ user.generation, user.name ] }
       end
+    end
+  end
+
+  def create_practice_log_and_times
+    @practice_log = PracticeLog.new(practice_log_params)
+
+    PracticeLog.transaction do
+      @practice_log.save!
+
+      times_params = params.require(:times)
+      times_params.each do |user_id, set_data|
+        set_data.each do |set_number, rep_data|
+          rep_data.each do |rep_number, time|
+            next if time.blank?
+            
+            # 時間を秒に変換
+            minutes, seconds_milliseconds = time.split(':')
+            seconds, milliseconds = seconds_milliseconds.split('.')
+            total_seconds = minutes.to_i * 60 + seconds.to_i + milliseconds.to_f / 100
+
+            PracticeTime.create!(
+              user_id: user_id,
+              practice_log_id: @practice_log.id,
+              set_number: set_number,
+              rep_number: rep_number,
+              time: total_seconds
+            )
+          end
+        end
+      end
+
+      redirect_to admin_practice_path, notice: "練習タイムとメニューを保存しました。"
+    rescue ActiveRecord::RecordInvalid => e
+      # 失敗した場合、必要なインスタンス変数を再設定して元のページをレンダリング
+      @styles = PracticeLog::STYLE_OPTIONS
+      @attendance_events = AttendanceEvent.order(date: :desc)
+      @default_event = @attendance_events.find_by(id: practice_log_params[:attendance_event_id]) || @attendance_events.first
+      
+      # モーダルを再表示するためのパラメータも設定
+      @laps = @practice_log.rep_count
+      @sets = @practice_log.set_count
+      @show_modal = true
+      if practice_log_params[:attendance_event_id].present?
+        @event = AttendanceEvent.find(practice_log_params[:attendance_event_id])
+        @attendees = @event.attendance.includes(:user)
+                          .where(status: ["present", "other"])
+                          .joins(:user)
+                          .where(users: { user_type: "player" })
+                          .map(&:user)
+                          .sort_by { |user| [ user.generation, user.name ] }
+      end
+      
+      flash.now[:alert] = "保存に失敗しました: #{@practice_log.errors.full_messages.join(', ')}"
+      render :practice_time, status: :unprocessable_entity
     end
   end
 
@@ -198,5 +257,9 @@ class AdminController < ApplicationController
 
   def practice_log_params
     params.require(:practice_log).permit(:attendance_event_id, :style, :rep_count, :set_count, :distance, :circle, :note)
+  end
+
+  def practice_log_get_params
+    params.fetch(:practice_log, {}).permit(:attendance_event_id, :style, :rep_count, :set_count, :distance, :circle, :note)
   end
 end
