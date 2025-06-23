@@ -14,6 +14,21 @@
 <% unanswered_users = User.where.not(id: answered_user_ids).order(generation: :desc) %>
 
 <h4 class="text-lg font-bold mb-4"><%= event.title %>（<%= event.date.strftime('%Y/%m/%d') %>）</h4>
+
+<% if event.menu_image.attached? %>
+  <div class="mb-4">
+    <% if event.menu_image.image? %>
+      <%= image_tag event.menu_image, class: "w-full rounded-lg shadow-md" %>
+    <% elsif event.menu_image.content_type == "application/pdf" %>
+      <iframe src="<%= url_for(event.menu_image) %>" width="100%" height="500px" class="rounded-lg shadow-md border">
+        <p>お使いのブラウザはPDFの埋め込み表示に対応していません。<%= link_to "こちらをクリックしてPDFを開いてください。", url_for(event.menu_image), target: "_blank", class: "text-blue-600 hover:underline" %></p>
+      </iframe>
+    <% else %>
+      <%= link_to "練習メニューのファイルを開く", url_for(event.menu_image), target: "_blank", class: "inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" %>
+    <% end %>
+  </div>
+<% end %>
+
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
   <!-- 左：選手 -->
   <div>

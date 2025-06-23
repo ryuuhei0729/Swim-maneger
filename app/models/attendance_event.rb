@@ -1,4 +1,5 @@
 class AttendanceEvent < ApplicationRecord
+  has_one_attached :menu_image
   has_many :attendance, dependent: :destroy
   has_many :users, through: :attendance
   has_many :records, dependent: :destroy
@@ -8,6 +9,10 @@ class AttendanceEvent < ApplicationRecord
   validates :title, presence: true
   validates :date, presence: true
   validates :is_competition, inclusion: { in: [ true, false ] }
+  validates :menu_image, content_type: { 
+    in: %w[image/jpeg image/png application/pdf], 
+    message: 'はJPEG、PNG、またはPDF形式でアップロードしてください' 
+  }, allow_blank: true
 
   scope :competitions, -> { where(is_competition: true) }
   scope :upcoming, -> { where("date >= ?", Date.current) }
