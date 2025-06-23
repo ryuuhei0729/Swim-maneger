@@ -11,6 +11,14 @@
   </head>
 
   <body class="min-h-screen bg-gray-50">
+    <% if flash[:needs_reload] %>
+      <script>
+        if (sessionStorage.getItem('reloaded_after_login') !== 'true') {
+          sessionStorage.setItem('reloaded_after_login', 'true');
+          window.location.reload();
+        }
+      </script>
+    <% end %>
     <% if user_auth_signed_in? %>
       <div class="flex min-h-screen">
         <!-- サイドバー -->

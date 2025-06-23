@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class UserAuths::SessionsController < Devise::SessionsController
   # before_action :configure_sign_in_params, only: [:create]
 
@@ -7,9 +9,13 @@ class UserAuths::SessionsController < Devise::SessionsController
   # end
 
   # POST /resource/sign_in
-  # def create
-  #   super
-  # end
+  def create
+    super do |resource|
+      if resource.persisted?
+        flash[:needs_reload] = true
+      end
+    end
+  end
 
   # DELETE /resource/sign_out
   # def destroy
@@ -25,4 +31,9 @@ class UserAuths::SessionsController < Devise::SessionsController
   def after_sign_out_path_for(resource_or_scope)
     new_user_auth_session_path
   end
+
+  # If you have extra params to permit, append them to the sanitizer.
+  # def configure_sign_in_params
+  #   devise_parameter_sanitizer.permit(:sign_in, keys: [:attribute])
+  # end
 end
