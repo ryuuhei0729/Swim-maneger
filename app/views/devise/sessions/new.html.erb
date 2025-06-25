@@ -9,6 +9,15 @@
       <p class="text-sm text-gray-600">Swim Managerへようこそ</p>
     </div>
 
+    <% if flash[:alert] %>
+      <div class="mb-4 p-3 bg-red-100 text-red-700 rounded"> <%= flash[:alert] %> </div>
+    <% end %>
+    <% if flash[:notice] %>
+      <div class="mb-4 p-3 bg-green-100 text-green-700 rounded"> <%= flash[:notice] %> </div>
+    <% end %>
+
+    <%= render "devise/shared/error_messages", resource: resource %>
+
     <%= form_for(resource, as: resource_name, url: session_path(resource_name), html: { class: "mt-8 space-y-6" }) do |f| %>
       <div class="space-y-5">
         <div>
