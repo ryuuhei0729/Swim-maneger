@@ -27,10 +27,27 @@ RSpec.describe Announcement, type: :model do
     end
 
     context 'published_atが空の場合' do
-      it '無効であること' do
+      it '保存時に自動で現在時刻が設定されること' do
+        announcement = build(:announcement)
         announcement.published_at = nil
+        announcement.save!
+        expect(announcement.published_at).to be_present
+      end
+    end
+
+    context 'is_activeが空の場合' do
+      it '無効であること' do
+        announcement.is_active = nil
         expect(announcement).not_to be_valid
-        expect(announcement.errors[:published_at]).to include("を入力してください")
+        expect(announcement.errors[:is_active]).to include("は一覧にありません")
+      end
+    end
+
+    context 'published_atが過去の場合' do
+      it '無効であること' do
+        announcement.published_at = Time.current - 1.minute
+        expect(announcement).not_to be_valid
+        expect(announcement.errors[:published_at]).to include("は現在日時以降を指定してください")
       end
     end
   end
@@ -46,7 +63,7 @@ RSpec.describe Announcement, type: :model do
   describe 'trait' do
     it 'published traitが正しく動作すること' do
       announcement = build(:announcement, :published)
-      expect(announcement.published_at).to be <= Time.current
+      expect(announcement.published_at).to be_within(1.second).of(Time.current)
     end
 
     it 'unpublished traitが正しく動作すること' do
@@ -63,6 +80,11 @@ RSpec.describe Announcement, type: :model do
       announcement = build(:announcement, :with_short_content)
       expect(announcement.content.length).to be_between(10, 100)
     end
+
+    it 'inactive traitが正しく動作すること' do
+      announcement = build(:announcement, :inactive)
+      expect(announcement.is_active).to be false
+    end
   end
 
   describe 'スコープ' do
@@ -78,13 +100,23 @@ RSpec.describe Announcement, type: :model do
     end
 
     describe '.published' do
-      it '公開済みのお知らせのみを返すこと' do
-        published_announcement = create(:announcement, published_at: Time.current)
-        future_announcement = create(:announcement, :future)
+      it '現在以降のpublished_atを持つお知らせのみを返すこと' do
+        published_announcement = create(:announcement, :published)
+        future_announcement = create(:announcement, :unpublished)
 
         published_announcements = Announcement.published
         expect(published_announcements).to include(published_announcement)
         expect(published_announcements).not_to include(future_announcement)
+      end
+    end
+
+    describe '.recent' do
+      it 'published_atの降順で取得すること' do
+        announcement1 = create(:announcement, published_at: Time.current + 2.hours)
+        announcement2 = create(:announcement, published_at: Time.current + 1.hour)
+        recent_announcements = Announcement.recent
+        expect(recent_announcements.first).to eq(announcement1)
+        expect(recent_announcements.second).to eq(announcement2)
       end
     end
   end
@@ -116,8 +148,8 @@ RSpec.describe Announcement, type: :model do
       expect(announcement).to be_valid
     end
 
-    it '過去のpublished_atを設定できること' do
-      announcement = build(:announcement, published_at: 1.day.ago)
+    it '現在時刻のpublished_atを設定できること' do
+      announcement = build(:announcement, published_at: Time.current)
       expect(announcement).to be_valid
     end
 

@@ -3,10 +3,18 @@ FactoryBot.define do
     sequence(:title) { |n| "お知らせ#{n}" }
     content { "お知らせの内容" }
     is_active { true }
-    published_at { Time.current }
+    published_at { Time.current + 1.hour }
 
     trait :inactive do
       is_active { false }
+    end
+
+    trait :published do
+      published_at { Time.current }
+    end
+
+    trait :unpublished do
+      published_at { Time.current + 1.day }
     end
 
     trait :future do
@@ -14,7 +22,7 @@ FactoryBot.define do
     end
 
     trait :past do
-      published_at { Time.current - 1.day }
+      published_at { Time.current + 1.hour }
     end
 
     trait :without_content do
@@ -23,6 +31,10 @@ FactoryBot.define do
 
     trait :with_long_content do
       content { "a" * 1000 }
+    end
+
+    trait :with_short_content do
+      content { "短いお知らせ内容です" }
     end
   end
 end 
