@@ -101,6 +101,10 @@ ja:
       not_a_number: "は数値で入力してください"
       confirmation: "は%{attribute}と一致しません"
       inclusion: "は無効な値です"
+      required_for_absence_or_other: "欠席またはその他の場合は理由を入力してください"
+      greater_than: "は%{count}より大きい値にしてください"
+      greater_than_or_equal_to: "は%{count}以上の値にしてください"
+      less_than_or_equal_to: "は%{count}以下の値にしてください"
     models:
       user:
         attributes:
@@ -135,6 +139,106 @@ ja:
             blank: パスワードを入力してください
             too_short: パスワードは%{count}文字以上で入力してください
             confirmation: パスワード（確認）はパスワードと一致しません
+      attendance:
+        attributes:
+          note:
+            required_for_absence_or_other: 欠席またはその他の場合は理由を入力してください
+      style:
+        attributes:
+          name_jp:
+            blank: 日本語名を入力してください
+          name:
+            blank: 名前を入力してください
+          style:
+            blank: 種目を入力してください
+          distance:
+            blank: 距離を入力してください
+      record:
+        attributes:
+          time:
+            blank: タイムを入力してください
+            greater_than: タイムは0より大きい値にしてください
+      objective:
+        attributes:
+          target_time:
+            blank: 目標タイムを入力してください
+            greater_than: 目標タイムは0より大きい値にしてください
+          quantity_note:
+            blank: 量の目標に関する詳細を入力してください
+          quality_title:
+            blank: 質の目標タイトルを入力してください
+          quality_note:
+            blank: 質の目標に関する詳細を入力してください
+      race_goal:
+        attributes:
+          time:
+            blank: タイムを入力してください
+            greater_than: タイムは0より大きい値にしてください
+          note:
+            blank: レース目標の詳細を入力してください
+      race_feedback:
+        attributes:
+          note:
+            blank: フィードバックを入力してください
+      race_review:
+        attributes:
+          time:
+            blank: タイムを入力してください
+            greater_than: タイムは0より大きい値にしてください
+          note:
+            blank: レースレビューを入力してください
+      milestone:
+        attributes:
+          milestone_type:
+            blank: マイルストーンタイプを入力してください
+            inclusion: 無効なマイルストーンタイプです
+          limit_date:
+            blank: 期限日を入力してください
+          note:
+            blank: マイルストーンの詳細を入力してください
+      milestone_review:
+        attributes:
+          achievement_rate:
+            blank: 達成率を入力してください
+            greater_than_or_equal_to: 達成率は0以上の値にしてください
+            less_than_or_equal_to: 達成率は100以下の値にしてください
+          negative_note:
+            blank: 改善点を入力してください
+          positive_note:
+            blank: 良い点を入力してください
+      practice_log:
+        attributes:
+          rep_count:
+            blank: 回数を入力してください
+            greater_than: 回数は0より大きい値にしてください
+          set_count:
+            blank: セット数を入力してください
+            greater_than: セット数は0より大きい値にしてください
+          distance:
+            blank: 距離を入力してください
+            greater_than: 距離は0より大きい値にしてください
+          circle:
+            blank: ラップタイムを入力してください
+            greater_than: ラップタイムは0より大きい値にしてください
+      practice_time:
+        attributes:
+          rep_number:
+            blank: 回数を入力してください
+            greater_than: 回数は0より大きい値にしてください
+          set_number:
+            blank: セット数を入力してください
+            greater_than: セット数は0より大きい値にしてください
+          time:
+            blank: タイムを入力してください
+            greater_than: タイムは0より大きい値にしてください
+      announcement:
+        attributes:
+          title:
+            blank: タイトルを入力してください
+          is_active:
+            inclusion: 無効なアクティブ状態です
+          published_at:
+            blank: 公開日時を入力してください
   activerecord:
     errors:
       messages:
@@ -150,9 +254,25 @@ ja:
         too_long: "は%{count}文字以下で入力してください"
         not_a_number: "は数値で入力してください"
         confirmation: "は%{attribute}と一致しません"
+        greater_than: "は%{count}より大きい値にしてください"
+        greater_than_or_equal_to: "は%{count}以上の値にしてください"
+        less_than_or_equal_to: "は%{count}以下の値にしてください"
     models:
       user: ユーザー
       user_auth: ユーザー認証
+      attendance: 出席
+      attendance_event: イベント
+      style: 種目
+      record: 記録
+      objective: 目標
+      race_goal: レース目標
+      race_feedback: レースフィードバック
+      race_review: レースレビュー
+      milestone: マイルストーン
+      milestone_review: マイルストーンレビュー
+      practice_log: 練習ログ
+      practice_time: 練習タイム
+      announcement: お知らせ
       best_time_table: ベストタイム
     attributes:
       user:
@@ -170,6 +290,62 @@ ja:
         email: メールアドレス
         password: パスワード
         password_confirmation: パスワード（確認）
+      attendance:
+        status: 出席状況
+        note: 備考
+      attendance_event:
+        title: タイトル
+        date: 日付
+        place: 場所
+        note: 備考
+        is_competition: 競技会フラグ
+      style:
+        name_jp: 日本語名
+        name: 名前
+        style: 種目
+        distance: 距離
+      record:
+        time: タイム
+        note: 備考
+        video_url: 動画URL
+      objective:
+        target_time: 目標タイム
+        quantity_note: 量の目標に関する詳細
+        quality_title: 質の目標タイトル
+        quality_note: 質の目標に関する詳細
+      race_goal:
+        time: タイム
+        note: レース目標の詳細
+      race_feedback:
+        note: フィードバック
+      race_review:
+        time: タイム
+        note: レースレビュー
+      milestone:
+        milestone_type: マイルストーンタイプ
+        limit_date: 期限日
+        note: マイルストーンの詳細
+      milestone_review:
+        achievement_rate: 達成率
+        negative_note: 改善点
+        positive_note: 良い点
+      practice_log:
+        tags: タグ
+        style: 種目
+        rep_count: 回数
+        set_count: セット数
+        distance: 距離
+        circle: ラップタイム
+        note: 備考
+      practice_time:
+        rep_number: 回数
+        set_number: セット数
+        time: タイム
+      announcement:
+        title: タイトル
+        content: 内容
+        is_active: アクティブ状態
+        published_at: 公開日時
       best_time_table:
         50m_fr: 50m自由形
         100m_fr: 100m自由形
