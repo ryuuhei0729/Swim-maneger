@@ -72,6 +72,7 @@ Objective.destroy_all rescue nil
 Attendance.destroy_all rescue nil
 Record.destroy_all rescue nil
 AttendanceEvent.destroy_all rescue nil
+Event.destroy_all rescue nil
 UserAuth.destroy_all rescue nil
 User.destroy_all rescue nil
 Style.destroy_all rescue nil
@@ -184,7 +185,77 @@ end
   puts "Created player: #{user.name}"
 end
 
-# ユーザーが既に存在することを前提とします
+# イベントの作成
+puts "イベントを作成中..."
+
+# 2ヶ月に1回、月末にテスト期間がある（4日間、平日）
+current_year = Date.current.year
+(1..12).each do |month|
+  # 2ヶ月ごと（奇数月）にテスト期間を設定
+  next if month % 2 == 0
+  
+  # 月末の平日を4日間取得
+  end_of_month = Date.new(current_year, month, 1).end_of_month
+  weekdays = []
+  
+  # 月末から遡って平日を4日間取得
+  (0..30).each do |day_offset|
+    date = end_of_month - day_offset.days
+    if date.month == month && [1, 2, 3, 4, 5].include?(date.wday) # 月〜金
+      weekdays << date
+      break if weekdays.length == 4
+    end
+  end
+  
+  # テスト期間のイベントを作成
+  weekdays.reverse.each_with_index do |date, index|
+    Event.create!(
+      title: "テスト期間",
+      date: date,
+      place: "学校",
+      note: "テスト期間#{index + 1}日目。学業に集中してください。"
+    )
+  end
+end
+
+# 1年〜6年の修学旅行がバラバラのタイミングで2日間ある
+grades = [1, 2, 3, 4, 5, 6]
+grade_events = {}
+
+grades.each do |grade|
+  # 各学年でランダムな月を選択（4月〜11月の間）
+  month = rand(4..11)
+  
+  # その月の平日を2日間ランダムに選択
+  month_start = Date.new(current_year, month, 1)
+  month_end = month_start.end_of_month
+  
+  weekdays_in_month = []
+  (month_start..month_end).each do |date|
+    if [1, 2, 3, 4, 5].include?(date.wday) # 月〜金
+      weekdays_in_month << date
+    end
+  end
+  
+  # 2日間をランダムに選択（連続する日付）
+  if weekdays_in_month.length >= 2
+    start_index = rand(0..weekdays_in_month.length - 2)
+    travel_dates = weekdays_in_month[start_index, 2]
+    
+    travel_dates.each_with_index do |date, index|
+      Event.create!(
+        title: "#{grade}年生修学旅行",
+        date: date,
+        place: "修学旅行先",
+        note: "#{grade}年生の修学旅行#{index + 1}日目。楽しい思い出を作ってください。"
+      )
+    end
+  end
+end
+
+puts "イベントの作成が完了しました"
+puts "作成されたイベント数: #{Event.count}"
+
 
 # 出席イベントの作成
 puts "出席イベントを作成中..."

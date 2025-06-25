@@ -4,10 +4,29 @@ class HomeController < ApplicationController
   def index
     # カレンダーの表示で使うコントローラー
     @current_month = Date.current
-    @events_by_date = AttendanceEvent
+    
+    attendance_events = AttendanceEvent
       .where(date: @current_month.beginning_of_month..@current_month.end_of_month)
       .order(date: :asc)
-      .group_by { |event| event.date }
+    
+    events = Event
+      .where(date: @current_month.beginning_of_month..@current_month.end_of_month)
+      .order(date: :asc)
+    
+    # 両方のイベントを日付ごとにグループ化してマージ
+    @events_by_date = {}
+    
+    # Eventを先に追加（上に表示される）
+    events.each do |event|
+      @events_by_date[event.date] ||= []
+      @events_by_date[event.date] << event
+    end
+    
+    # AttendanceEventを後から追加（下に表示される）
+    attendance_events.each do |event|
+      @events_by_date[event.date] ||= []
+      @events_by_date[event.date] << event
+    end
 
     # お知らせ表示で使うコントローラー
     @announcements = Announcement.active.where("published_at <= ?", Time.current).order(published_at: :desc)
