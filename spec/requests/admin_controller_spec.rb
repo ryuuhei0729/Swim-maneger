@@ -151,7 +151,7 @@ RSpec.describe AdminController, type: :request do
             title: 'テストお知らせ',
             content: 'テスト内容',
             is_active: true,
-            published_at: Date.current
+            published_at: 1.day.from_now
           }
         }
       end
@@ -173,7 +173,7 @@ RSpec.describe AdminController, type: :request do
             title: '',
             content: '',
             is_active: true,
-            published_at: Date.current
+            published_at: 1.day.from_now
           }
         }
       end
@@ -353,10 +353,11 @@ RSpec.describe AdminController, type: :request do
         {
           practice_log: {
             attendance_event_id: event.id,
-            style: 'freestyle',
+            style: 'Fr',
             rep_count: 4,
             set_count: 2,
             distance: 100,
+            circle: 120,
             note: 'テスト練習'
           },
           times: {
@@ -398,6 +399,7 @@ RSpec.describe AdminController, type: :request do
             rep_count: nil,
             set_count: nil,
             distance: 100,
+            circle: 120,
             note: 'テスト練習'
           },
           times: {}
