@@ -267,4 +267,12 @@ class AdminController < ApplicationController
   def attendance_event_image_params
     params.require(:attendance_event).permit(:menu_image)
   end
+
+  def practice_log_params
+    params.require(:practice_log).permit(:attendance_event_id, :style, :rep_count, :set_count, :distance, :note)
+  end
+
+  def practice_log_get_params
+    params.permit(:attendance_event_id, :rep_count, :set_count)
+  end
 end
