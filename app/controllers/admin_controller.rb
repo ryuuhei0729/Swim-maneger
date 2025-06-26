@@ -11,23 +11,28 @@ class AdminController < ApplicationController
       @user_auth = UserAuth.new(user_auth_params)
 
       User.transaction do
-        if @user.save && @user_auth.save
-          @user_auth.update(user: @user)
-          redirect_to admin_path, notice: "ユーザーを作成しました。"
-        else
-          if @user_auth.errors.any?
-            @user_auth.errors.messages.each do |attribute, messages|
-              messages.each do |message|
-                if message.is_a?(Symbol)
-                  translated_message = I18n.t("errors.messages.#{message}", default: I18n.t("activerecord.errors.messages.#{message}", default: message))
-                  @user.errors.add(attribute, translated_message)
-                else
-                  @user.errors.add(attribute, message)
+        if @user.save
+          @user_auth.user = @user
+          if @user_auth.save
+            redirect_to admin_path, notice: "ユーザーを作成しました。"
+          else
+            @user.destroy
+            if @user_auth.errors.any?
+              @user_auth.errors.messages.each do |attribute, messages|
+                messages.each do |message|
+                  if message.is_a?(Symbol)
+                    translated_message = I18n.t("errors.messages.#{message}", default: I18n.t("activerecord.errors.messages.#{message}", default: message))
+                    @user.errors.add(attribute, translated_message)
+                  else
+                    @user.errors.add(attribute, message)
+                  end
                 end
               end
             end
+            render :create_user, status: :unprocessable_entity
           end
-          render :create_user
+        else
+          render :create_user, status: :unprocessable_entity
         end
       end
     else
@@ -48,7 +53,7 @@ class AdminController < ApplicationController
       redirect_to admin_announcement_path, notice: "お知らせを作成しました。"
     else
       @announcements = Announcement.all.order(published_at: :desc)
-      render :announcement
+      render :announcement, status: :unprocessable_entity
     end
   end
 
@@ -59,7 +64,7 @@ class AdminController < ApplicationController
       redirect_to admin_announcement_path, notice: "お知らせを更新しました。"
     else
       @announcements = Announcement.all.order(published_at: :desc)
-      render :announcement
+      render :announcement, status: :unprocessable_entity
     end
   end
 
@@ -82,7 +87,7 @@ class AdminController < ApplicationController
       redirect_to admin_schedule_path, notice: "スケジュールを登録しました。"
     else
       @events = AttendanceEvent.order(date: :asc)
-      render :schedule
+      render :schedule, status: :unprocessable_entity
     end
   end
 
@@ -92,7 +97,7 @@ class AdminController < ApplicationController
       redirect_to admin_schedule_path, notice: "スケジュールを更新しました。"
     else
       @events = AttendanceEvent.order(date: :asc)
-      render :schedule
+      render :schedule, status: :unprocessable_entity
     end
   end
 
@@ -192,8 +197,8 @@ class AdminController < ApplicationController
       @default_event = @attendance_events.find_by(id: practice_log_params[:attendance_event_id]) || @attendance_events.first
       
       # モーダルを再表示するためのパラメータも設定
-      @laps = @practice_log.rep_count
-      @sets = @practice_log.set_count
+      @laps = @practice_log.rep_count || 1
+      @sets = @practice_log.set_count || 1
       @show_modal = true
       if practice_log_params[:attendance_event_id].present?
         @event = AttendanceEvent.find(practice_log_params[:attendance_event_id])
@@ -266,5 +271,13 @@ class AdminController < ApplicationController
 
   def attendance_event_image_params
     params.require(:attendance_event).permit(:menu_image)
+  end
+
+  def practice_log_params
+    params.require(:practice_log).permit(:attendance_event_id, :style, :rep_count, :set_count, :distance, :circle, :note)
+  end
+
+  def practice_log_get_params
+    params.permit(:attendance_event_id, :rep_count, :set_count, :circle)
   end
 end

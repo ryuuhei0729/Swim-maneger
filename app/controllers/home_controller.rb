@@ -44,7 +44,8 @@ class HomeController < ApplicationController
       {
         id: style.name,
         title: style.name_jp,
-        style: style.style
+        style: style.style,
+        distance: style.distance
       }
     end
 
