@@ -32,6 +32,17 @@ class AttendanceController < ApplicationController
       .where(date: @current_month.beginning_of_month..@current_month.end_of_month)
       .order(date: :asc)
     
+    # 誕生日データを取得
+    @birthdays_by_date = {}
+    User.where(user_type: "player").each do |user|
+      # その月の誕生日を取得（年は考慮しない）
+      birthday_this_month = Date.new(@current_month.year, user.birthday.month, user.birthday.day)
+      if birthday_this_month.month == @current_month.month
+        @birthdays_by_date[birthday_this_month] ||= []
+        @birthdays_by_date[birthday_this_month] << user
+      end
+    end
+    
     # 両方のイベントを日付ごとにグループ化してマージ
     @events_by_date = {}
     
@@ -52,7 +63,8 @@ class AttendanceController < ApplicationController
       format.js {
         render partial: "shared/calendar", locals: {
           current_month: @current_month,
-          events_by_date: @events_by_date
+          events_by_date: @events_by_date,
+          birthdays_by_date: @birthdays_by_date
         }
       }
     end
