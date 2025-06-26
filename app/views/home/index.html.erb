@@ -146,7 +146,7 @@
             </tr>
             <tr>
               <% @events.each do |event| %>
-                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider cursor-pointer hover:bg-gray-200"
+                <th class="px-2 py-2 text-center font-medium text-gray-900 tracking-wider cursor-pointer hover:bg-gray-200"
                     style="background-color: <%= case event[:style]
                       when 'fr' then '#fde047'  # yellow-200
                       when 'br' then '#86efac'  # green-200
@@ -156,7 +156,7 @@
                       else '#f3f4f6'  # gray-100
                     end %>"
                     data-sort-by="<%= event[:id] %>">
-                  <%= event[:title].match(/\d+m/)[0] %>
+                  <%= "#{event[:distance]}m" %>
                   <% if @sort_by == event[:id] %>
                     <span class="ml-1">↑</span>
                   <% end %>
@@ -261,7 +261,7 @@
             </tr>
             <tr>
               <% @events.each do |event| %>
-                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider cursor-pointer hover:bg-gray-200"
+                <th class="px-2 py-2 text-center font-medium text-gray-900 tracking-wider cursor-pointer hover:bg-gray-200"
                     style="background-color: <%= case event[:style]
                       when 'fr' then '#fde047'  # yellow-200
                       when 'br' then '#86efac'  # green-200
@@ -271,7 +271,7 @@
                       else '#f3f4f6'  # gray-100
                     end %>"
                     data-sort-by="<%= event[:id] %>">
-                  <%= event[:title].match(/\d+m/)[0] %>
+                  <%= "#{event[:distance]}m" %>
                   <% if @sort_by == event[:id] %>
                     <span class="ml-1">↑</span>
                   <% end %>
@@ -376,7 +376,7 @@
             </tr>
             <tr>
               <% @events.each do |event| %>
-                <th class="px-2 py-2 text-center font-medium text-gray-900 uppercase tracking-wider cursor-pointer hover:bg-gray-200"
+                <th class="px-2 py-2 text-center font-medium text-gray-900 tracking-wider cursor-pointer hover:bg-gray-200"
                     style="background-color: <%= case event[:style]
                       when 'fr' then '#fde047'  # yellow-200
                       when 'br' then '#86efac'  # green-200
@@ -386,7 +386,7 @@
                       else '#f3f4f6'  # gray-100
                     end %>"
                     data-sort-by="<%= event[:id] %>">
-                  <%= event[:title].match(/\d+m/)[0] %>
+                  <%= "#{event[:distance]}m" %>
                   <% if @sort_by == event[:id] %>
                     <span class="ml-1">↑</span>
                   <% end %>

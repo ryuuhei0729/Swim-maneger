@@ -3,7 +3,7 @@ FactoryBot.define do
     sequence(:title) { |n| "お知らせ#{n}" }
     content { "お知らせの内容" }
     is_active { true }
-    published_at { Time.current + 1.hour }
+    published_at { Time.current }
 
     trait :inactive do
       is_active { false }
@@ -22,7 +22,7 @@ FactoryBot.define do
     end
 
     trait :past do
-      published_at { Time.current + 1.hour }
+      published_at { Time.current - 1.hour }
     end
 
     trait :without_content do
