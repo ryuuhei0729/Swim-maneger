@@ -10,13 +10,13 @@ RSpec.describe Event, type: :model do
     it 'is not valid without a title' do
       event = Event.new(date: Date.current)
       expect(event).not_to be_valid
-      expect(event.errors[:title]).to include("can't be blank")
+      expect(event.errors[:title]).to include("を入力してください")
     end
 
     it 'is not valid without a date' do
       event = Event.new(title: 'Test Event')
       expect(event).not_to be_valid
-      expect(event.errors[:date]).to include("can't be blank")
+      expect(event.errors[:date]).to include("を入力してください")
     end
   end
-end 
+end
