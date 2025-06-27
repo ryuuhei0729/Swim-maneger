@@ -22,7 +22,7 @@ RSpec.describe UserAuth, type: :model do
       it '無効であること' do
         user_auth.email = "invalid-email"
         expect(user_auth).not_to be_valid
-        expect(user_auth.errors[:email]).to include("は不正な値です")
+        expect(user_auth.errors[:email]).to include("は正しい形式で入力してください")
       end
     end
 

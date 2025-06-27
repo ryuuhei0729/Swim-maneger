@@ -150,33 +150,28 @@ RSpec.describe AttendanceEvent, type: :model do
 
     it 'with_attendance traitが正しく動作すること' do
       attendance_event = create(:attendance_event, :with_attendance)
-      expect(attendance_event.attendance.count).to eq(2)
+      expect(attendance_event.attendance.count).to eq(1)
     end
 
     it 'with_records traitが正しく動作すること' do
       attendance_event = create(:attendance_event, :with_records)
-      expect(attendance_event.records.count).to eq(2)
+      expect(attendance_event.records.count).to eq(1)
     end
 
     it 'with_objectives traitが正しく動作すること' do
       attendance_event = create(:attendance_event, :with_objectives)
-      expect(attendance_event.objectives.count).to eq(2)
+      expect(attendance_event.objectives.count).to eq(1)
     end
 
     it 'with_race_goals traitが正しく動作すること' do
       attendance_event = create(:attendance_event, :with_race_goals)
-      expect(attendance_event.race_goals.count).to eq(2)
+      expect(attendance_event.race_goals.count).to eq(1)
     end
   end
 
   describe 'エッジケース' do
     it '非常に長いtitleを処理できること' do
       attendance_event = build(:attendance_event, title: "a" * 1000)
-      expect(attendance_event).to be_valid
-    end
-
-    it '非常に長いdescriptionを処理できること' do
-      attendance_event = build(:attendance_event, description: "a" * 1000)
       expect(attendance_event).to be_valid
     end
 

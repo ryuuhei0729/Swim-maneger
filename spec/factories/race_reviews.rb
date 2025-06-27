@@ -16,5 +16,9 @@ FactoryBot.define do
     trait :with_long_note do
       note { "a" * 1000 }
     end
+
+    trait :with_short_note do
+      note { "短いレビュー" }
+    end
   end
 end

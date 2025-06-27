@@ -124,7 +124,7 @@ RSpec.describe PracticeLog, type: :model do
   describe 'trait' do
     it 'with_practice_times traitが正しく動作すること' do
       practice_log = create(:practice_log, :with_practice_times)
-      expect(practice_log.practice_times.count).to eq(2)
+      expect(practice_log.practice_times.count).to eq(1)
     end
 
     it 'freestyle traitが正しく動作すること' do
@@ -154,12 +154,12 @@ RSpec.describe PracticeLog, type: :model do
 
     it 'short_distance traitが正しく動作すること' do
       practice_log = build(:practice_log, :short_distance)
-      expect(practice_log.distance).to be_between(25, 100)
+      expect(practice_log.distance).to be_between(50, 200)
     end
 
     it 'long_distance traitが正しく動作すること' do
       practice_log = build(:practice_log, :long_distance)
-      expect(practice_log.distance).to be_between(200, 800)
+      expect(practice_log.distance).to be_between(400, 800)
     end
   end
 

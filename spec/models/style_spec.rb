@@ -119,11 +119,11 @@ RSpec.describe Style, type: :model do
 
   describe 'enum' do
     it '正しいstyle enum値を持つこと' do
-      expect(Style.styles).to have_key("fr")
-      expect(Style.styles).to have_key("br")
-      expect(Style.styles).to have_key("ba")
-      expect(Style.styles).to have_key("fly")
-      expect(Style.styles).to have_key("im")
+      expect(Style.styles).to include("fr")
+      expect(Style.styles).to include("br")
+      expect(Style.styles).to include("ba")
+      expect(Style.styles).to include("fly")
+      expect(Style.styles).to include("im")
     end
 
     describe '#fr?' do

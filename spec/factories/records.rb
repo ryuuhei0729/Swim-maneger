@@ -26,5 +26,13 @@ FactoryBot.define do
     trait :slow_time do
       time { rand(100.0..120.0).round(2) }
     end
+
+    trait :with_video do
+      video_url { "https://www.youtube.com/watch?v=example" }
+    end
+
+    trait :with_note do
+      note { "詳細な記録のノート" }
+    end
   end
 end

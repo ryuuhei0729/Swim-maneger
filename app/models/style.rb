@@ -9,7 +9,9 @@ class Style < ApplicationRecord
   validates :style, presence: true, inclusion: { in: [ "fr", "br", "ba", "fly", "im" ] }
   validates :distance, presence: true, numericality: { only_integer: true, greater_than: 0 }
 
+  enum style: { fr: :fr, br: :br, ba: :ba, fly: :fly, im: :im }
+
   def self.styles
-    [ "fr", "br", "ba", "fly", "im" ]
+    styles.keys
   end
 end

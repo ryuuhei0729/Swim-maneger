@@ -14,6 +14,9 @@ class User < ApplicationRecord
   validates :birthday, presence: true
   validates :user_type, presence: true, inclusion: { in: [ "director", "coach", "player", "manager" ] }
 
+  enum gender: { male: :male, female: :female }
+  enum user_type: { director: :director, coach: :coach, player: :player, manager: :manager }
+
   delegate :email, to: :user_auth, allow_nil: true
 
   # ユーザータイプの定数

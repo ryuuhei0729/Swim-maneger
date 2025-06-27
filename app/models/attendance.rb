@@ -7,6 +7,8 @@ class Attendance < ApplicationRecord
   enum :status, { present: "present", absent: "absent", other: "other" }
 
   validates :status, presence: true
+  validates :user_id, presence: true
+  validates :attendance_event_id, presence: true
   validates :user_id, uniqueness: { scope: :attendance_event_id }
   validate :note_required_for_absence_or_other
 
