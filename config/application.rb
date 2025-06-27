@@ -16,6 +16,9 @@ module SwimManager
     config.time_zone = "Tokyo"
     config.active_record.default_timezone = :local
 
+    # Rails 8.1の非推奨警告を解決
+    config.active_support.to_time_preserves_timezone = :zone
+
     # エラーページの設定
     config.exceptions_app = self.routes
 
