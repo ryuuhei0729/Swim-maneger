@@ -240,6 +240,10 @@ class AdminController < ApplicationController
     end
   end
 
+  def schedules_index
+    # スケジュール一覧を取得する処理を追加予定
+  end
+
   private
 
   def check_admin_access
