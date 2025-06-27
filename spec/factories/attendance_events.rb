@@ -16,6 +16,14 @@ FactoryBot.define do
       title { "練習" }
     end
 
+    trait :future_date do
+      date { Date.current + rand(1..30).days }
+    end
+
+    trait :past_date do
+      date { Date.current - rand(1..30).days }
+    end
+
     trait :future do
       date { Date.current + rand(1..30).days }
     end
@@ -26,6 +34,30 @@ FactoryBot.define do
 
     trait :today do
       date { Date.current }
+    end
+
+    trait :with_attendance do
+      after(:create) do |event|
+        create(:attendance, attendance_event: event)
+      end
+    end
+
+    trait :with_records do
+      after(:create) do |event|
+        create(:record, attendance_event: event)
+      end
+    end
+
+    trait :with_objectives do
+      after(:create) do |event|
+        create(:objective, attendance_event: event)
+      end
+    end
+
+    trait :with_race_goals do
+      after(:create) do |event|
+        create(:race_goal, attendance_event: event)
+      end
     end
   end
 end

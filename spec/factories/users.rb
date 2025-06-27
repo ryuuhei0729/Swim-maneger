@@ -30,5 +30,11 @@ FactoryBot.define do
     trait :female do
       gender { "female" }
     end
+
+    trait :with_user_auth do
+      after(:create) do |user|
+        create(:user_auth, user: user)
+      end
+    end
   end
 end

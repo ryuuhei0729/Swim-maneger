@@ -21,5 +21,13 @@ FactoryBot.define do
     trait :last_rep do
       rep_number { 10 }
     end
+
+    trait :first_set do
+      set_number { 1 }
+    end
+
+    trait :last_set do
+      set_number { 5 }
+    end
   end
 end

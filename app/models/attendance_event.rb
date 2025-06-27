@@ -5,6 +5,7 @@ class AttendanceEvent < ApplicationRecord
   has_many :records, dependent: :destroy
   has_many :objectives, dependent: :destroy
   has_many :race_goals, dependent: :destroy
+  has_many :practice_logs, dependent: :destroy
 
   validates :title, presence: true
   validates :date, presence: true

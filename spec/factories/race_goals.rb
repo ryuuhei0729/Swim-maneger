@@ -17,5 +17,17 @@ FactoryBot.define do
     trait :with_long_note do
       note { "a" * 1000 }
     end
+
+    trait :with_reviews do
+      after(:create) do |race_goal|
+        create(:race_review, race_goal: race_goal)
+      end
+    end
+
+    trait :with_feedbacks do
+      after(:create) do |race_goal|
+        create(:race_feedback, race_goal: race_goal)
+      end
+    end
   end
 end

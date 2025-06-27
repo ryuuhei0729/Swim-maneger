@@ -25,9 +25,17 @@ FactoryBot.define do
       name_jp { "バタフライ" }
     end
 
-    trait :medley do
+    trait :individual_medley do
       style { "im" }
       name_jp { "個人メドレー" }
+    end
+
+    trait :short_distance do
+      distance { [50, 100].sample }
+    end
+
+    trait :long_distance do
+      distance { [400, 800].sample }
     end
 
     trait :distance_50 do

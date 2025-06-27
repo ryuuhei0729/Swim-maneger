@@ -4,6 +4,9 @@ class Objective < ApplicationRecord
   belongs_to :style
   has_many :milestones, dependent: :destroy
 
+  validates :user_id, presence: true
+  validates :attendance_event_id, presence: true
+  validates :style_id, presence: true
   validates :target_time, presence: true, numericality: { greater_than: 0 }
   validates :quantity_note, presence: true
   validates :quality_title, presence: true

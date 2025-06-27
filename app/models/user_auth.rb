@@ -23,7 +23,7 @@ class UserAuth < ApplicationRecord
       generation: 1,  # デフォルト値
       name: email.split("@").first,  # メールアドレスの@より前の部分を名前として使用
       gender: "male",  # デフォルト値
-      # birthday: Date.today,  # デフォルト値
+      birthday: Date.today,  # デフォルト値
       user_type: "player"  # デフォルト値
     )
   end
