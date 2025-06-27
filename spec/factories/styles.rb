@@ -3,7 +3,7 @@ FactoryBot.define do
     sequence(:name_jp) { |n| "種目#{n}" }
     sequence(:name) { |n| "Style#{n}" }
     style { %w[fr br ba fly im].sample }
-    distance { [50, 100, 200, 400, 800].sample }
+    distance { [ 50, 100, 200, 400, 800 ].sample }
 
     trait :freestyle do
       style { "fr" }
@@ -50,4 +50,4 @@ FactoryBot.define do
       distance { 800 }
     end
   end
-end 
+end

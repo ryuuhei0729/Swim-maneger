@@ -37,7 +37,7 @@ RSpec.describe Attendance, type: :model do
     context 'user_idとattendance_event_idの組み合わせが重複している場合' do
       it '無効であること' do
         existing_attendance = create(:attendance)
-        duplicate_attendance = build(:attendance, 
+        duplicate_attendance = build(:attendance,
           user: existing_attendance.user,
           attendance_event: existing_attendance.attendance_event
         )
@@ -160,4 +160,4 @@ RSpec.describe Attendance, type: :model do
       expect(attendance).to be_valid
     end
   end
-end 
+end

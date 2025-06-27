@@ -123,4 +123,4 @@ RSpec.describe Milestone, type: :model do
       expect(milestone).to be_valid
     end
   end
-end 
+end

@@ -18,4 +18,4 @@ FactoryBot.define do
       note { "a" * 1000 }
     end
   end
-end 
+end

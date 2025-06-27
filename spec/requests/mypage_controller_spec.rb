@@ -95,7 +95,7 @@ RSpec.describe MypageController, type: :request do
       it '各種目のベストタイムが取得される' do
         get mypage_path
         best_times = assigns(:best_times)
-        
+
         expect(best_times['50M_FR']).to eq(25.5) # より速いタイムが選択される
         expect(best_times['100M_BR']).to eq(80.0)
       end
@@ -135,7 +135,7 @@ RSpec.describe MypageController, type: :request do
     context '正常な更新' do
       it '自己紹介を更新できる' do
         patch mypage_path, params: { user: { bio: '新しい自己紹介です' } }
-        
+
         expect(response).to redirect_to(mypage_path)
         expect(flash[:notice]).to eq('プロフィールを更新しました')
         expect(user.reload.bio).to eq('新しい自己紹介です')
@@ -143,7 +143,7 @@ RSpec.describe MypageController, type: :request do
 
       it '自己紹介を空にできる' do
         patch mypage_path, params: { user: { bio: '' } }
-        
+
         expect(response).to redirect_to(mypage_path)
         expect(flash[:notice]).to eq('プロフィールを更新しました')
         expect(user.reload.bio).to be_blank
@@ -156,7 +156,7 @@ RSpec.describe MypageController, type: :request do
 
       it '有効な画像形式（JPG）をアップロードできる' do
         patch mypage_path, params: { user: { avatar: valid_image } }
-        
+
         expect(response).to redirect_to(mypage_path)
         expect(flash[:notice]).to eq('プロフィールを更新しました')
         expect(user.reload.avatar).to be_attached
@@ -164,19 +164,19 @@ RSpec.describe MypageController, type: :request do
 
       it '無効なファイル形式をアップロードするとエラーメッセージが表示される' do
         patch mypage_path, params: { user: { avatar: invalid_file } }
-        
+
         expect(response).to redirect_to(mypage_path)
         expect(flash[:alert]).to eq('JPGまたはPNG形式の画像のみアップロード可能です')
       end
 
       it '画像と自己紹介を同時に更新できる' do
-        patch mypage_path, params: { 
-          user: { 
+        patch mypage_path, params: {
+          user: {
             bio: '画像付きの自己紹介です',
-            avatar: valid_image 
-          } 
+            avatar: valid_image
+          }
         }
-        
+
         expect(response).to redirect_to(mypage_path)
         expect(flash[:notice]).to eq('プロフィールを更新しました')
         expect(user.reload.bio).to eq('画像付きの自己紹介です')
@@ -188,9 +188,9 @@ RSpec.describe MypageController, type: :request do
       it '無効なパラメータで更新に失敗した場合エラーメッセージが表示される' do
         # 無効なパラメータを送信（例：存在しない属性）
         allow_any_instance_of(User).to receive(:update).and_return(false)
-        
+
         patch mypage_path, params: { user: { bio: '新しい自己紹介です' } }
-        
+
         expect(response).to redirect_to(mypage_path)
         expect(flash[:alert]).to eq('プロフィールの更新に失敗しました')
       end
@@ -200,10 +200,10 @@ RSpec.describe MypageController, type: :request do
       it '許可されていないパラメータは無視される' do
         original_name = user.name
         patch mypage_path, params: { user: { name: '新しい名前', bio: '新しい自己紹介' } }
-        
+
         expect(user.reload.name).to eq(original_name) # 名前は変更されない
         expect(user.bio).to eq('新しい自己紹介') # 自己紹介は変更される
       end
     end
   end
-end 
+end

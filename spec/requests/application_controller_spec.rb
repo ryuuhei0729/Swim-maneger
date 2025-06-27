@@ -120,4 +120,4 @@ RSpec.describe ApplicationController, type: :request do
       expect(devise_callbacks).not_to be_empty
     end
   end
-end 
+end

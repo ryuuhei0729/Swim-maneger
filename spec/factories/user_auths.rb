@@ -13,4 +13,4 @@ FactoryBot.define do
       user { nil }
     end
   end
-end 
+end

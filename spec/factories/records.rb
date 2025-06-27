@@ -27,4 +27,4 @@ FactoryBot.define do
       time { rand(100.0..120.0).round(2) }
     end
   end
-end 
+end

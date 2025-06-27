@@ -97,7 +97,7 @@ RSpec.describe PracticeTime, type: :model do
 
   describe 'エッジケース' do
     it '非常に大きな数値を処理できること' do
-      practice_time = build(:practice_time, 
+      practice_time = build(:practice_time,
         rep_number: 999,
         set_number: 999,
         time: 999999.99
@@ -110,4 +110,4 @@ RSpec.describe PracticeTime, type: :model do
       expect(practice_time).to be_valid
     end
   end
-end 
+end

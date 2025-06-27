@@ -65,7 +65,7 @@ RSpec.describe UserAuth, type: :model do
         it 'デフォルトのuserを作成すること' do
           user_auth = build(:user_auth, user: nil)
           user_auth.save
-          
+
           expect(user_auth.user).to be_present
           expect(user_auth.user.generation).to eq(1)
           expect(user_auth.user.name).to eq(user_auth.email.split("@").first)
@@ -79,7 +79,7 @@ RSpec.describe UserAuth, type: :model do
           existing_user = create(:user)
           user_auth = build(:user_auth, user: existing_user)
           user_auth.save
-          
+
           expect(user_auth.user).to eq(existing_user)
         end
       end
@@ -91,7 +91,7 @@ RSpec.describe UserAuth, type: :model do
       it 'GravatarのURLを返すこと' do
         user_auth = build(:user_auth, email: "test@example.com")
         expected_url = "https://www.gravatar.com/avatar/#{Digest::MD5.hexdigest('test@example.com')}?s=200&d=identicon"
-        
+
         expect(user_auth.profile_image_url).to eq(expected_url)
       end
     end
@@ -135,4 +135,4 @@ RSpec.describe UserAuth, type: :model do
       expect(user_auth).to be_valid
     end
   end
-end 
+end

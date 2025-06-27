@@ -27,11 +27,11 @@ class AttendanceController < ApplicationController
     attendance_events = AttendanceEvent
       .where(date: @current_month.beginning_of_month..@current_month.end_of_month)
       .order(date: :asc)
-    
+
     events = Event
       .where(date: @current_month.beginning_of_month..@current_month.end_of_month)
       .order(date: :asc)
-    
+
     # 誕生日データを取得
     @birthdays_by_date = {}
     User.where(user_type: "player").each do |user|
@@ -42,16 +42,16 @@ class AttendanceController < ApplicationController
         @birthdays_by_date[birthday_this_month] << user
       end
     end
-    
+
     # 両方のイベントを日付ごとにグループ化してマージ
     @events_by_date = {}
-    
+
     # Eventを先に追加（上に表示される）
     events.each do |event|
       @events_by_date[event.date] ||= []
       @events_by_date[event.date] << event
     end
-    
+
     # AttendanceEventを後から追加（下に表示される）
     attendance_events.each do |event|
       @events_by_date[event.date] ||= []

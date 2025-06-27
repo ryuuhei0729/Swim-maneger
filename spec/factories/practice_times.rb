@@ -22,4 +22,4 @@ FactoryBot.define do
       rep_number { 10 }
     end
   end
-end 
+end

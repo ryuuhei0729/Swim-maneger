@@ -86,7 +86,7 @@ RSpec.describe AttendanceEvent, type: :model do
       it '競技会のみを返すこと' do
         competition = create(:attendance_event, :competition)
         practice = create(:attendance_event, :practice)
-        
+
         expect(AttendanceEvent.competitions).to include(competition)
         expect(AttendanceEvent.competitions).not_to include(practice)
       end
@@ -96,7 +96,7 @@ RSpec.describe AttendanceEvent, type: :model do
       it '今日以降のイベントを返すこと' do
         future_event = create(:attendance_event, date: 1.day.from_now)
         past_event = create(:attendance_event, date: 1.day.ago)
-        
+
         expect(AttendanceEvent.upcoming).to include(future_event)
         expect(AttendanceEvent.upcoming).not_to include(past_event)
       end
@@ -106,7 +106,7 @@ RSpec.describe AttendanceEvent, type: :model do
       it '過去のイベントを返すこと' do
         future_event = create(:attendance_event, date: 1.day.from_now)
         past_event = create(:attendance_event, date: 1.day.ago)
-        
+
         expect(AttendanceEvent.past).to include(past_event)
         expect(AttendanceEvent.past).not_to include(future_event)
       end
@@ -117,7 +117,7 @@ RSpec.describe AttendanceEvent, type: :model do
         competition1 = create(:attendance_event, :competition, date: 2.days.from_now)
         competition2 = create(:attendance_event, :competition, date: 1.day.from_now)
         practice = create(:attendance_event, :practice, date: 1.day.from_now)
-        
+
         future_competitions = AttendanceEvent.future
         expect(future_competitions).to include(competition1, competition2)
         expect(future_competitions).not_to include(practice)
@@ -195,4 +195,4 @@ RSpec.describe AttendanceEvent, type: :model do
       expect(attendance_event).to be_valid
     end
   end
-end 
+end

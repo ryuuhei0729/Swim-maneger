@@ -109,4 +109,4 @@ RSpec.describe RaceReview, type: :model do
       expect(race_review).to be_valid
     end
   end
-end 
+end

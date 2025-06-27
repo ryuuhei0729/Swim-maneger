@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :practice_log do
     association :attendance_event
-    tags { ["クロール", "練習"] }
+    tags { [ "クロール", "練習" ] }
     style { "Fr" }
     rep_count { rand(1..10) }
     set_count { rand(1..5) }
@@ -45,4 +45,4 @@ FactoryBot.define do
       note { "a" * 1000 }
     end
   end
-end 
+end

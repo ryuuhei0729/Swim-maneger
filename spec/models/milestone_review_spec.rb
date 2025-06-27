@@ -94,7 +94,7 @@ RSpec.describe MilestoneReview, type: :model do
     end
 
     it '非常に長いnoteを処理できること' do
-      milestone_review = build(:milestone_review, 
+      milestone_review = build(:milestone_review,
         positive_note: "a" * 1000,
         negative_note: "b" * 1000
       )
@@ -102,11 +102,11 @@ RSpec.describe MilestoneReview, type: :model do
     end
 
     it '特殊文字を含むnoteを処理できること' do
-      milestone_review = build(:milestone_review, 
+      milestone_review = build(:milestone_review,
         positive_note: "良い点：\n- フォームが改善された\n- タイムが向上した\n- 継続性が良くなった",
         negative_note: "改善点：\n- スタートが遅い\n- ターンで時間をロス\n- 持久力が不足"
       )
       expect(milestone_review).to be_valid
     end
   end
-end 
+end

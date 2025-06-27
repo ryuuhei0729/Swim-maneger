@@ -84,10 +84,10 @@ RSpec.describe 'User Authentication', type: :system do
       it 'ログアウトボタンをクリックすることでログアウトが成功すること' do
         # ログイン後のページにいることを確認
         expect(current_path).to eq('/home')
-        
+
         # ログアウトボタンをクリック
         click_button 'ログアウト'
-        
+
         # ログアウト後の確認
         expect(page).to have_content('ログアウトしました。')
         expect(current_path).to eq(new_user_auth_session_path)
@@ -95,7 +95,7 @@ RSpec.describe 'User Authentication', type: :system do
 
       it 'ログアウト後にログイン画面にリダイレクトされること' do
         click_button 'ログアウト'
-        
+
         # ログイン画面にいることを確認
         expect(current_path).to eq(new_user_auth_session_path)
         expect(page).to have_content('ログイン')
@@ -103,13 +103,13 @@ RSpec.describe 'User Authentication', type: :system do
 
       it 'ログアウト後に保護されたページにアクセスできないこと' do
         click_button 'ログアウト'
-        
+
         # 保護されたページにアクセス
         visit home_path
-        
+
         # ログイン画面にリダイレクトされることを確認
         expect(current_path).to eq(new_user_auth_session_path)
       end
     end
   end
-end 
+end

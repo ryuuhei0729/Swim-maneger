@@ -12,4 +12,4 @@ FactoryBot.define do
       note { "短いフィードバック" }
     end
   end
-end 
+end

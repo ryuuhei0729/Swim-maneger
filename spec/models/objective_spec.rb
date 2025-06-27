@@ -132,7 +132,7 @@ RSpec.describe Objective, type: :model do
     end
 
     it '非常に長いnoteを処理できること' do
-      objective = build(:objective, 
+      objective = build(:objective,
         quantity_note: "a" * 1000,
         quality_note: "b" * 1000
       )
@@ -140,11 +140,11 @@ RSpec.describe Objective, type: :model do
     end
 
     it '特殊文字を含むnoteを処理できること' do
-      objective = build(:objective, 
+      objective = build(:objective,
         quantity_note: "目標：\n- 100m 1分以内\n- 200m 2分以内",
         quality_note: "フォーム改善：\n- ストロークの改善\n- ターンの精度向上"
       )
       expect(objective).to be_valid
     end
   end
-end 
+end

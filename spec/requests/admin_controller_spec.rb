@@ -5,7 +5,7 @@ RSpec.describe AdminController, type: :request do
   let(:coach_user) { create(:user, :coach) }
   let(:director_user) { create(:user, :director) }
   let(:manager_user) { create(:user, :manager) }
-  
+
   let(:player_auth) { create(:user_auth, user: player_user) }
   let(:coach_auth) { create(:user_auth, user: coach_user) }
   let(:director_auth) { create(:user_auth, user: director_user) }
@@ -100,7 +100,7 @@ RSpec.describe AdminController, type: :request do
           post admin_users_path, params: valid_params
         }.to change(User, :count).by(1)
           .and change(UserAuth, :count).by(1)
-        
+
         expect(response).to redirect_to(admin_path)
         expect(flash[:notice]).to eq('ユーザーを作成しました。')
       end
@@ -126,7 +126,7 @@ RSpec.describe AdminController, type: :request do
         expect {
           post admin_users_path, params: invalid_params
         }.not_to change(User, :count)
-        
+
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
@@ -160,7 +160,7 @@ RSpec.describe AdminController, type: :request do
         expect {
           post admin_announcement_path, params: valid_params
         }.to change(Announcement, :count).by(1)
-        
+
         expect(response).to redirect_to(admin_announcement_path)
         expect(flash[:notice]).to eq('お知らせを作成しました。')
       end
@@ -182,7 +182,7 @@ RSpec.describe AdminController, type: :request do
         expect {
           post admin_announcement_path, params: invalid_params
         }.not_to change(Announcement, :count)
-        
+
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
@@ -208,7 +208,7 @@ RSpec.describe AdminController, type: :request do
         patch admin_update_announcement_path(announcement), params: valid_params
         expect(response).to redirect_to(admin_announcement_path)
         expect(flash[:notice]).to eq('お知らせを更新しました。')
-        
+
         announcement.reload
         expect(announcement.title).to eq('更新されたお知らせ')
       end
@@ -223,7 +223,7 @@ RSpec.describe AdminController, type: :request do
       expect {
         delete admin_destroy_announcement_path(announcement)
       }.to change(Announcement, :count).by(-1)
-      
+
       expect(response).to redirect_to(admin_announcement_path)
       expect(flash[:notice]).to eq('お知らせを削除しました。')
     end
@@ -258,7 +258,7 @@ RSpec.describe AdminController, type: :request do
         expect {
           post admin_create_schedule_path, params: valid_params
         }.to change(AttendanceEvent, :count).by(1)
-        
+
         expect(response).to redirect_to(admin_schedule_path)
         expect(flash[:notice]).to eq('スケジュールを登録しました。')
       end
@@ -286,7 +286,7 @@ RSpec.describe AdminController, type: :request do
         patch admin_update_schedule_path(event), params: valid_params
         expect(response).to redirect_to(admin_schedule_path)
         expect(flash[:notice]).to eq('スケジュールを更新しました。')
-        
+
         event.reload
         expect(event.title).to eq('更新された練習')
       end
@@ -301,7 +301,7 @@ RSpec.describe AdminController, type: :request do
       expect {
         delete admin_destroy_schedule_path(event)
       }.to change(AttendanceEvent, :count).by(-1)
-      
+
       expect(response).to redirect_to(admin_schedule_path)
       expect(flash[:notice]).to eq('スケジュールを削除しました。')
     end
@@ -314,7 +314,7 @@ RSpec.describe AdminController, type: :request do
     it 'スケジュール編集用のJSONが返される' do
       get admin_edit_schedule_path(event), headers: { 'Accept' => 'application/json' }
       expect(response).to have_http_status(:ok)
-      
+
       json_response = JSON.parse(response.body)
       expect(json_response['title']).to eq(event.title)
       expect(json_response['date']).to eq(event.date.strftime('%Y-%m-%d'))
@@ -384,7 +384,7 @@ RSpec.describe AdminController, type: :request do
           post admin_create_practice_log_and_times_path, params: valid_params
         }.to change(PracticeLog, :count).by(1)
           .and change(PracticeTime, :count).by(8)
-        
+
         expect(response).to redirect_to(admin_practice_path)
         expect(flash[:notice]).to eq('練習タイムとメニューを保存しました。')
       end
@@ -410,7 +410,7 @@ RSpec.describe AdminController, type: :request do
         expect {
           post admin_create_practice_log_and_times_path, params: invalid_params
         }.not_to change(PracticeLog, :count)
-        
+
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
@@ -454,4 +454,4 @@ RSpec.describe AdminController, type: :request do
       end
     end
   end
-end 
+end
