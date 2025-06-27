@@ -193,20 +193,20 @@ current_year = Date.current.year
 (1..12).each do |month|
   # 2ヶ月ごと（奇数月）にテスト期間を設定
   next if month % 2 == 0
-  
+
   # 月末の平日を4日間取得
   end_of_month = Date.new(current_year, month, 1).end_of_month
   weekdays = []
-  
+
   # 月末から遡って平日を4日間取得
   (0..30).each do |day_offset|
     date = end_of_month - day_offset.days
-    if date.month == month && [1, 2, 3, 4, 5].include?(date.wday) # 月〜金
+    if date.month == month && [ 1, 2, 3, 4, 5 ].include?(date.wday) # 月〜金
       weekdays << date
       break if weekdays.length == 4
     end
   end
-  
+
   # テスト期間のイベントを作成
   weekdays.reverse.each_with_index do |date, index|
     Event.create!(
@@ -219,29 +219,29 @@ current_year = Date.current.year
 end
 
 # 1年〜6年の修学旅行がバラバラのタイミングで2日間ある
-grades = [1, 2, 3, 4, 5, 6]
+grades = [ 1, 2, 3, 4, 5, 6 ]
 grade_events = {}
 
 grades.each do |grade|
   # 各学年でランダムな月を選択（4月〜11月の間）
   month = rand(4..11)
-  
+
   # その月の平日を2日間ランダムに選択
   month_start = Date.new(current_year, month, 1)
   month_end = month_start.end_of_month
-  
+
   weekdays_in_month = []
   (month_start..month_end).each do |date|
-    if [1, 2, 3, 4, 5].include?(date.wday) # 月〜金
+    if [ 1, 2, 3, 4, 5 ].include?(date.wday) # 月〜金
       weekdays_in_month << date
     end
   end
-  
+
   # 2日間をランダムに選択（連続する日付）
   if weekdays_in_month.length >= 2
     start_index = rand(0..weekdays_in_month.length - 2)
     travel_dates = weekdays_in_month[start_index, 2]
-    
+
     travel_dates.each_with_index do |date, index|
       Event.create!(
         title: "#{grade}年生修学旅行",
@@ -366,7 +366,6 @@ User.where(user_type: 'player').each do |user|
   competition_events.each do |event|
     # 各大会でランダムに1〜3種目の記録を作成
     Style.all.sample(rand(1..3)).each do |style|
-
       # 種目に応じたランダムなタイムを生成
       time = case style.distance
       when 50

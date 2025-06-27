@@ -70,4 +70,4 @@ RSpec.describe RaceFeedback, type: :model do
       expect(race_feedback).to be_valid
     end
   end
-end 
+end

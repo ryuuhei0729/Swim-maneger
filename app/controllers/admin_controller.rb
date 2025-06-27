@@ -133,7 +133,7 @@ class AdminController < ApplicationController
     @attendance_events = AttendanceEvent.order(date: :desc)
     @default_event = @attendance_events.where("date <= ?", today).first || @attendance_events.first
     @styles = PracticeLog::STYLE_OPTIONS
-    
+
     # GETパラメータから@practice_logを初期化
     @practice_log = PracticeLog.new(practice_log_get_params)
 
@@ -168,11 +168,11 @@ class AdminController < ApplicationController
         set_data.each do |set_number, rep_data|
           rep_data.each do |rep_number, time|
             next if time.blank?
-            
+
             # 時間を秒に変換 (MM:SS.ss or SS.ss)
             total_seconds = 0.0
-            if time.include?(':')
-              minutes, seconds_part = time.split(':', 2)
+            if time.include?(":")
+              minutes, seconds_part = time.split(":", 2)
               total_seconds = minutes.to_i * 60 + seconds_part.to_f
             else
               total_seconds = time.to_f
@@ -195,7 +195,7 @@ class AdminController < ApplicationController
       @styles = PracticeLog::STYLE_OPTIONS
       @attendance_events = AttendanceEvent.order(date: :desc)
       @default_event = @attendance_events.find_by(id: practice_log_params[:attendance_event_id]) || @attendance_events.first
-      
+
       # モーダルを再表示するためのパラメータも設定
       @laps = @practice_log.rep_count || 1
       @sets = @practice_log.set_count || 1
@@ -203,13 +203,13 @@ class AdminController < ApplicationController
       if practice_log_params[:attendance_event_id].present?
         @event = AttendanceEvent.find(practice_log_params[:attendance_event_id])
         @attendees = @event.attendance.includes(:user)
-                          .where(status: ["present", "other"])
+                          .where(status: [ "present", "other" ])
                           .joins(:user)
                           .where(users: { user_type: "player" })
                           .map(&:user)
                           .sort_by { |user| [ user.generation, user.name ] }
       end
-      
+
       flash.now[:alert] = "保存に失敗しました: #{@practice_log.errors.full_messages.join(', ')}"
       render :practice_time, status: :unprocessable_entity
     end

@@ -170,7 +170,7 @@ RSpec.describe PracticeLog, type: :model do
     end
 
     it '非常に大きな数値を処理できること' do
-      practice_log = build(:practice_log, 
+      practice_log = build(:practice_log,
         rep_count: 999,
         set_count: 999,
         distance: 999999,
@@ -179,4 +179,4 @@ RSpec.describe PracticeLog, type: :model do
       expect(practice_log).to be_valid
     end
   end
-end 
+end

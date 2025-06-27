@@ -141,7 +141,7 @@ RSpec.describe Announcement, type: :model do
     end
 
     it '特殊文字を含むcontentを処理できること' do
-      announcement = build(:announcement, 
+      announcement = build(:announcement,
         title: "重要なお知らせ",
         content: "お知らせ内容：\n- 練習時間の変更\n- 大会の日程\n- 注意事項について"
       )
@@ -158,4 +158,4 @@ RSpec.describe Announcement, type: :model do
       expect(announcement).to be_valid
     end
   end
-end 
+end

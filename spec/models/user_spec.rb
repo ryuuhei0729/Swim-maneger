@@ -215,7 +215,7 @@ RSpec.describe User, type: :model do
         user = create(:user)
         style = create(:style)
         record = create(:record, user: user, style: style, note: "ベストタイム")
-        
+
         expect(user.best_time_notes).to be_a(Hash)
         expect(user.best_time_notes[style.name]).to eq("ベストタイム")
       end

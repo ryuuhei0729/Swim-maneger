@@ -62,4 +62,4 @@ RSpec.describe RecordController, type: :request do
       expect(response).to render_template(partial: '_practice_times_table')
     end
   end
-end 
+end

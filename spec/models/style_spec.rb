@@ -170,7 +170,7 @@ RSpec.describe Style, type: :model do
   describe 'クラスメソッド' do
     describe '.styles' do
       it '有効なスタイルの配列を返すこと' do
-        expect(Style.styles).to eq(["fr", "br", "ba", "fly", "im"])
+        expect(Style.styles).to eq([ "fr", "br", "ba", "fly", "im" ])
       end
     end
   end
@@ -228,4 +228,4 @@ RSpec.describe Style, type: :model do
       expect(style).to be_valid
     end
   end
-end 
+end

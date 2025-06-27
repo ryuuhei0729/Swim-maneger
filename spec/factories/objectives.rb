@@ -21,4 +21,4 @@ FactoryBot.define do
       quality_note { "b" * 1000 }
     end
   end
-end 
+end

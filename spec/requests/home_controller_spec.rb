@@ -77,7 +77,7 @@ RSpec.describe HomeController, type: :request do
       it '「published_atが過去のもの」かつ「active」のお知らせが降順で並んでいる' do
         old_announcement = create(:announcement, published_at: 2.hours.ago)
         get home_path
-        
+
         announcements = assigns(:announcements)
         expect(announcements).to include(active_announcement, old_announcement)
         expect(announcements).not_to include(inactive_announcement, future_announcement)
@@ -265,4 +265,4 @@ RSpec.describe HomeController, type: :request do
       end
     end
   end
-end 
+end

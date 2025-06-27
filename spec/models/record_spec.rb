@@ -158,4 +158,4 @@ RSpec.describe Record, type: :model do
       expect(record).to be_valid
     end
   end
-end 
+end

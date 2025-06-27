@@ -9,9 +9,9 @@ class AttendanceEvent < ApplicationRecord
   validates :title, presence: true
   validates :date, presence: true
   validates :is_competition, inclusion: { in: [ true, false ] }
-  validates :menu_image, content_type: { 
-    in: %w[image/jpeg image/png application/pdf], 
-    message: 'はJPEG、PNG、またはPDF形式でアップロードしてください' 
+  validates :menu_image, content_type: {
+    in: %w[image/jpeg image/png application/pdf],
+    message: "はJPEG、PNG、またはPDF形式でアップロードしてください"
   }, allow_blank: true
 
   scope :competitions, -> { where(is_competition: true) }

@@ -28,4 +28,4 @@ FactoryBot.define do
       date { Date.current }
     end
   end
-end 
+end

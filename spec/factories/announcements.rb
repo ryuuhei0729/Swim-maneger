@@ -37,4 +37,4 @@ FactoryBot.define do
       content { "短いお知らせ内容です" }
     end
   end
-end 
+end

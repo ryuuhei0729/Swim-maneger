@@ -134,4 +134,4 @@ RSpec.describe RaceGoal, type: :model do
       expect(race_goal).to be_valid
     end
   end
-end 
+end

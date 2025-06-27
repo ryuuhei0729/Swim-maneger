@@ -79,7 +79,7 @@ RSpec.describe MemberController, type: :request do
       it 'ユーザータイプ別に正しくグループ化される' do
         get member_path
         grouped_by_type = assigns(:grouped_by_type)
-        
+
         expect(grouped_by_type['player']).to include(player1, player2)
         expect(grouped_by_type['coach']).to include(coach1)
         expect(grouped_by_type['director']).to include(director1)
@@ -89,7 +89,7 @@ RSpec.describe MemberController, type: :request do
         get member_path
         grouped_by_type = assigns(:grouped_by_type)
         type_order = grouped_by_type.keys
-        expect(type_order).to eq(['player', 'coach', 'director'])
+        expect(type_order).to eq([ 'player', 'coach', 'director' ])
       end
     end
 
@@ -101,7 +101,7 @@ RSpec.describe MemberController, type: :request do
       it '世代別に正しくグループ化される' do
         get member_path
         grouped_by_generation = assigns(:grouped_by_generation)
-        
+
         expect(grouped_by_generation[90]).to include(player1, coach1)
         expect(grouped_by_generation[91]).to include(player2)
       end
@@ -173,4 +173,4 @@ RSpec.describe MemberController, type: :request do
       end
     end
   end
-end 
+end
