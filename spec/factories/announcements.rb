@@ -34,7 +34,7 @@ FactoryBot.define do
     end
 
     trait :with_short_content do
-      content { "短いお知らせ内容です" }
+      content { "短いお知らせ内容です。" }
     end
   end
 end

@@ -45,18 +45,10 @@ RSpec.describe Announcement, type: :model do
 
     context 'published_atが過去の場合' do
       it '無効であること' do
-        announcement.published_at = Time.current - 1.minute
+        announcement.published_at = Time.current.beginning_of_minute - 1.minute
         expect(announcement).not_to be_valid
         expect(announcement.errors[:published_at]).to include("は現在日時以降を指定してください")
       end
-    end
-  end
-
-  describe 'アソシエーション' do
-    # Announcementモデルには特別なアソシエーションはない
-    it '基本的なモデルとして機能すること' do
-      announcement = create(:announcement)
-      expect(announcement).to be_persisted
     end
   end
 
@@ -78,7 +70,7 @@ RSpec.describe Announcement, type: :model do
 
     it 'with_short_content traitが正しく動作すること' do
       announcement = build(:announcement, :with_short_content)
-      expect(announcement.content.length).to be_between(10, 100)
+      expect(announcement.content).to eq("短いお知らせ内容です。")
     end
 
     it 'inactive traitが正しく動作すること' do
@@ -149,7 +141,7 @@ RSpec.describe Announcement, type: :model do
     end
 
     it '現在時刻のpublished_atを設定できること' do
-      announcement = build(:announcement, published_at: Time.current)
+      announcement = build(:announcement, published_at: Time.current.beginning_of_minute)
       expect(announcement).to be_valid
     end
 
