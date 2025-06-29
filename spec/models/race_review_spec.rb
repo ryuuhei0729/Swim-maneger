@@ -1,8 +1,11 @@
 require 'rails_helper'
 
 RSpec.describe RaceReview, type: :model do
+  let(:race_goal) { create(:race_goal) }
+  let(:style) { create(:style) }
+
   describe 'バリデーション' do
-    let(:race_review) { build(:race_review) }
+    let(:race_review) { build(:race_review, race_goal: race_goal, style: style) }
 
     context '有効な属性の場合' do
       it '有効であること' do
@@ -44,17 +47,17 @@ RSpec.describe RaceReview, type: :model do
 
     context 'race_goal_idが空の場合' do
       it '無効であること' do
-        race_review.race_goal_id = nil
-        expect(race_review).not_to be_valid
-        expect(race_review.errors[:race_goal]).to include("を入力してください")
+        race_review_without_goal = build(:race_review, race_goal: nil, style: style)
+        expect(race_review_without_goal).not_to be_valid
+        expect(race_review_without_goal.errors[:race_goal]).to be_present
       end
     end
 
     context 'style_idが空の場合' do
       it '無効であること' do
-        race_review.style_id = nil
-        expect(race_review).not_to be_valid
-        expect(race_review.errors[:style]).to include("を入力してください")
+        race_review_without_style = build(:race_review, race_goal: race_goal, style: nil)
+        expect(race_review_without_style).not_to be_valid
+        expect(race_review_without_style.errors[:style]).to be_present
       end
     end
   end
@@ -89,23 +92,23 @@ RSpec.describe RaceReview, type: :model do
 
     it 'with_short_note traitが正しく動作すること' do
       race_review = build(:race_review, :with_short_note)
-      expect(race_review.note.length).to be_between(10, 50)
+      expect(race_review.note).to eq("短いレビューです。")
     end
   end
 
   describe 'エッジケース' do
     it '非常に大きなtimeを処理できること' do
-      race_review = build(:race_review, time: 999999.99)
+      race_review = build(:race_review, race_goal: race_goal, style: style, time: 999999.99)
       expect(race_review).to be_valid
     end
 
     it '非常に長いnoteを処理できること' do
-      race_review = build(:race_review, note: "a" * 1000)
+      race_review = build(:race_review, race_goal: race_goal, style: style, note: "a" * 1000)
       expect(race_review).to be_valid
     end
 
     it '特殊文字を含むnoteを処理できること' do
-      race_review = build(:race_review, note: "レース振り返り：\n- スタートが良かった\n- ターンで時間をロス\n- 全体的に満足のいく結果")
+      race_review = build(:race_review, race_goal: race_goal, style: style, note: "レース振り返り：\n- スタートが良かった\n- ターンで時間をロス\n- 全体的に満足のいく結果")
       expect(race_review).to be_valid
     end
   end

@@ -1,8 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe PracticeLog, type: :model do
+  let(:attendance_event) { create(:attendance_event) }
+
   describe 'バリデーション' do
-    let(:practice_log) { build(:practice_log) }
+    let(:practice_log) { build(:practice_log, attendance_event: attendance_event) }
 
     context '有効な属性の場合' do
       it '有効であること' do
@@ -12,9 +14,9 @@ RSpec.describe PracticeLog, type: :model do
 
     context 'attendance_event_idが空の場合' do
       it '無効であること' do
-        practice_log.attendance_event_id = nil
-        expect(practice_log).not_to be_valid
-        expect(practice_log.errors[:attendance_event]).to include("を入力してください")
+        practice_log_without_event = build(:practice_log, attendance_event: nil)
+        expect(practice_log_without_event).not_to be_valid
+        expect(practice_log_without_event.errors[:attendance_event_id]).to include("を入力してください")
       end
     end
 
@@ -92,7 +94,9 @@ RSpec.describe PracticeLog, type: :model do
 
     context 'styleが無効な値の場合' do
       it '無効であること' do
-        expect { practice_log.style = "invalid" }.to raise_error(ArgumentError)
+        practice_log.style = "invalid"
+        expect(practice_log).not_to be_valid
+        expect(practice_log.errors[:style]).to include("は一覧にありません")
       end
     end
   end
@@ -110,14 +114,14 @@ RSpec.describe PracticeLog, type: :model do
     end
   end
 
-  describe 'enum' do
-    it '正しいstyle enum値を持つこと' do
-      expect(PracticeLog.styles).to have_key("Fr")
-      expect(PracticeLog.styles).to have_key("Br")
-      expect(PracticeLog.styles).to have_key("Ba")
-      expect(PracticeLog.styles).to have_key("Fly")
-      expect(PracticeLog.styles).to have_key("IM")
-      expect(PracticeLog.styles).to have_key("S1")
+  describe 'STYLE_OPTIONS' do
+    it '正しいstyle定数を持つこと' do
+      expect(PracticeLog::STYLE_OPTIONS).to have_key("Fr")
+      expect(PracticeLog::STYLE_OPTIONS).to have_key("Br")
+      expect(PracticeLog::STYLE_OPTIONS).to have_key("Ba")
+      expect(PracticeLog::STYLE_OPTIONS).to have_key("Fly")
+      expect(PracticeLog::STYLE_OPTIONS).to have_key("IM")
+      expect(PracticeLog::STYLE_OPTIONS).to have_key("S1")
     end
   end
 
@@ -165,12 +169,12 @@ RSpec.describe PracticeLog, type: :model do
 
   describe 'エッジケース' do
     it 'circleが0の場合有効であること' do
-      practice_log = build(:practice_log, circle: 0)
+      practice_log = build(:practice_log, attendance_event: attendance_event, circle: 0)
       expect(practice_log).to be_valid
     end
 
     it '非常に大きな数値を処理できること' do
-      practice_log = build(:practice_log,
+      practice_log = build(:practice_log, attendance_event: attendance_event,
         rep_count: 999,
         set_count: 999,
         distance: 999999,
