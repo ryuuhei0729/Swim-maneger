@@ -1,0 +1,17 @@
+<div class="milestone-fields bg-gray-50 p-4 rounded-lg relative">
+  <button type="button" class="remove-milestone absolute top-2 right-2 text-gray-400 hover:text-red-500">
+    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+    </svg>
+  </button>
+  <div class="grid grid-cols-1 gap-4">
+    <div>
+      <%= f.label :limit_date, "期限", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.date_field :limit_date, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+    </div>
+    <div>
+      <%= f.label :note, "内容", class: "block text-sm font-medium text-gray-700" %>
+      <%= f.text_area :note, rows: 2, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500", placeholder: "例：50mを45秒で泳げるようになる" %>
+    </div>
+  </div>
+</div> 
