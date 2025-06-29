@@ -1,8 +1,11 @@
 require 'rails_helper'
 
 RSpec.describe Attendance, type: :model do
+  let(:user) { create(:user) }
+  let(:attendance_event) { create(:attendance_event) }
+
   describe 'バリデーション' do
-    let(:attendance) { build(:attendance) }
+    let(:attendance) { build(:attendance, user: user, attendance_event: attendance_event) }
 
     context '有効な属性の場合' do
       it '有効であること' do
@@ -22,7 +25,7 @@ RSpec.describe Attendance, type: :model do
       it '無効であること' do
         attendance.user_id = nil
         expect(attendance).not_to be_valid
-        expect(attendance.errors[:user]).to include("を入力してください")
+        expect(attendance.errors[:user_id]).to include("を入力してください")
       end
     end
 
@@ -30,7 +33,7 @@ RSpec.describe Attendance, type: :model do
       it '無効であること' do
         attendance.attendance_event_id = nil
         expect(attendance).not_to be_valid
-        expect(attendance.errors[:attendance_event]).to include("を入力してください")
+        expect(attendance.errors[:attendance_event_id]).to include("を入力してください")
       end
     end
 
@@ -62,7 +65,7 @@ RSpec.describe Attendance, type: :model do
       end
 
       it 'noteがある場合は有効であること' do
-        attendance = build(:attendance, :absent, note: "体調不良")
+        attendance = build(:attendance, :absent, user: user, attendance_event: attendance_event, note: "体調不良")
         expect(attendance).to be_valid
       end
     end
@@ -75,14 +78,14 @@ RSpec.describe Attendance, type: :model do
       end
 
       it 'noteがある場合は有効であること' do
-        attendance = build(:attendance, :other, note: "その他の理由")
+        attendance = build(:attendance, :other, user: user, attendance_event: attendance_event, note: "その他の理由")
         expect(attendance).to be_valid
       end
     end
 
     context 'present statusの場合' do
       it 'noteがなくても有効であること' do
-        attendance = build(:attendance, :present, note: nil)
+        attendance = build(:attendance, :present, user: user, attendance_event: attendance_event, note: nil)
         expect(attendance).to be_valid
       end
     end
@@ -151,12 +154,12 @@ RSpec.describe Attendance, type: :model do
 
   describe 'エッジケース' do
     it '非常に長いnoteを処理できること' do
-      attendance = build(:attendance, note: "a" * 1000)
+      attendance = build(:attendance, user: user, attendance_event: attendance_event, note: "a" * 1000)
       expect(attendance).to be_valid
     end
 
     it '特殊文字を含むnoteを処理できること' do
-      attendance = build(:attendance, note: "欠席理由：\n- 体調不良\n- ご迷惑をおかけします")
+      attendance = build(:attendance, user: user, attendance_event: attendance_event, note: "欠席理由：\n- 体調不良\n- ご迷惑をおかけします")
       expect(attendance).to be_valid
     end
   end

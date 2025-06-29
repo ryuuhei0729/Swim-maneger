@@ -1,8 +1,12 @@
 require 'rails_helper'
 
 RSpec.describe RaceGoal, type: :model do
+  let(:user) { create(:user) }
+  let(:attendance_event) { create(:attendance_event) }
+  let(:style) { create(:style) }
+
   describe 'バリデーション' do
-    let(:race_goal) { build(:race_goal) }
+    let(:race_goal) { build(:race_goal, user: user, attendance_event: attendance_event, style: style) }
 
     context '有効な属性の場合' do
       it '有効であること' do
@@ -44,25 +48,25 @@ RSpec.describe RaceGoal, type: :model do
 
     context 'user_idが空の場合' do
       it '無効であること' do
-        race_goal.user_id = nil
-        expect(race_goal).not_to be_valid
-        expect(race_goal.errors[:user]).to include("を入力してください")
+        race_goal_without_user = build(:race_goal, user: nil, attendance_event: attendance_event, style: style)
+        expect(race_goal_without_user).not_to be_valid
+        expect(race_goal_without_user.errors[:user_id]).to include("を入力してください")
       end
     end
 
     context 'attendance_event_idが空の場合' do
       it '無効であること' do
-        race_goal.attendance_event_id = nil
-        expect(race_goal).not_to be_valid
-        expect(race_goal.errors[:attendance_event]).to include("を入力してください")
+        race_goal_without_event = build(:race_goal, user: user, attendance_event: nil, style: style)
+        expect(race_goal_without_event).not_to be_valid
+        expect(race_goal_without_event.errors[:attendance_event_id]).to include("を入力してください")
       end
     end
 
     context 'style_idが空の場合' do
       it '無効であること' do
-        race_goal.style_id = nil
-        expect(race_goal).not_to be_valid
-        expect(race_goal.errors[:style]).to include("を入力してください")
+        race_goal_without_style = build(:race_goal, user: user, attendance_event: attendance_event, style: nil)
+        expect(race_goal_without_style).not_to be_valid
+        expect(race_goal_without_style.errors[:style_id]).to include("を入力してください")
       end
     end
   end
@@ -83,10 +87,10 @@ RSpec.describe RaceGoal, type: :model do
       expect(race_goal.style).to be_present
     end
 
-    it 'race_reviewsとの関連を持つこと' do
+    it 'race_reviewとの関連を持つこと' do
       race_goal = create(:race_goal)
       race_review = create(:race_review, race_goal: race_goal)
-      expect(race_goal.race_reviews).to include(race_review)
+      expect(race_goal.race_review).to eq(race_review)
     end
 
     it 'race_feedbacksとの関連を持つこと' do
@@ -99,12 +103,12 @@ RSpec.describe RaceGoal, type: :model do
   describe 'trait' do
     it 'with_reviews traitが正しく動作すること' do
       race_goal = create(:race_goal, :with_reviews)
-      expect(race_goal.race_reviews.count).to eq(2)
+      expect(race_goal.race_review).to be_present
     end
 
     it 'with_feedbacks traitが正しく動作すること' do
       race_goal = create(:race_goal, :with_feedbacks)
-      expect(race_goal.race_feedbacks.count).to eq(2)
+      expect(race_goal.race_feedbacks.count).to eq(1)
     end
 
     it 'fast_goal traitが正しく動作すること' do
@@ -120,17 +124,17 @@ RSpec.describe RaceGoal, type: :model do
 
   describe 'エッジケース' do
     it '非常に大きなtimeを処理できること' do
-      race_goal = build(:race_goal, time: 999999.99)
+      race_goal = build(:race_goal, user: user, attendance_event: attendance_event, style: style, time: 999999.99)
       expect(race_goal).to be_valid
     end
 
     it '非常に長いnoteを処理できること' do
-      race_goal = build(:race_goal, note: "a" * 1000)
+      race_goal = build(:race_goal, user: user, attendance_event: attendance_event, style: style, note: "a" * 1000)
       expect(race_goal).to be_valid
     end
 
     it '特殊文字を含むnoteを処理できること' do
-      race_goal = build(:race_goal, note: "目標：\n- 100m 1分以内\n- フォーム改善\n- スタートの精度向上")
+      race_goal = build(:race_goal, user: user, attendance_event: attendance_event, style: style, note: "目標：\n- 100m 1分以内\n- フォーム改善\n- スタートの精度向上")
       expect(race_goal).to be_valid
     end
   end

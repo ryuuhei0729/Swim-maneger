@@ -18,7 +18,7 @@ FactoryBot.define do
     end
 
     trait :with_short_note do
-      note { "短いレビュー" }
+      note { "短いレビューです。" }
     end
   end
 end

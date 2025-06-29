@@ -9,7 +9,7 @@ FactoryBot.define do
     end
 
     trait :with_short_note do
-      note { "短いフィードバック" }
+      note { "短いフィードバックです。" }
     end
   end
 end

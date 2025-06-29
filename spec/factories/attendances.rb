@@ -2,21 +2,21 @@ FactoryBot.define do
   factory :attendance do
     association :user
     association :attendance_event
-    status { "present" }
+    status { :present }
     note { "" }
 
     trait :present do
-      status { "present" }
+      status { :present }
       note { "" }
     end
 
     trait :absent do
-      status { "absent" }
+      status { :absent }
       note { "体調不良のため欠席" }
     end
 
     trait :other do
-      status { "other" }
+      status { :other }
       note { "遅刻予定" }
     end
 
