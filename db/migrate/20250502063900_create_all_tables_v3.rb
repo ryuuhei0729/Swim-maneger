@@ -1,12 +1,12 @@
-class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
+class CreateAllTablesV3 < ActiveRecord::Migration[7.0]
   def up
     # ユーザー関連のテーブル
     create_table :users do |t|
       t.integer :generation, null: false
       t.string :name, null: false
-      t.string :gender, null: false
+      t.integer :gender, null: false
       t.date :birthday, null: false
-      t.string :user_type, null: false
+      t.integer :user_type, null: false
       t.text :bio
       t.timestamps
     end
@@ -34,7 +34,7 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
     create_table :styles do |t|
       t.string :name_jp, null: false
       t.string :name, null: false
-      t.string :style, null: false
+      t.integer :style, null: false
       t.integer :distance, null: false
       t.timestamps
     end
@@ -53,7 +53,7 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
     create_table :attendance do |t|
       t.references :user, null: false, foreign_key: true
       t.references :attendance_event, null: false, foreign_key: true
-      t.string :status, null: false
+      t.integer :status, null: false
       t.text :note
       t.timestamps
     end
@@ -126,6 +126,38 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
       t.timestamps
     end
 
+    # イベントテーブル
+    create_table :events do |t|
+      t.string :title
+      t.date :date
+      t.string :place
+      t.text :note
+      t.timestamps
+    end
+
+    # 練習ログテーブル
+    create_table :practice_logs do |t|
+      t.references :attendance_event, null: false, foreign_key: true
+      t.json :tags
+      t.string :style
+      t.integer :rep_count, null: false
+      t.integer :set_count, null: false
+      t.integer :distance, null: false
+      t.decimal :circle, precision: 10, scale: 2, null: false
+      t.text :note
+      t.timestamps
+    end
+
+    # 練習タイムテーブル
+    create_table :practice_times do |t|
+      t.references :user, null: false, foreign_key: true
+      t.references :practice_log, null: false, foreign_key: true
+      t.integer :rep_number, null: false
+      t.integer :set_number, null: false
+      t.decimal :time, precision: 10, scale: 2, null: false
+      t.timestamps
+    end
+
     # インデックス
     add_index :user_auths, :email, unique: true
     add_index :user_auths, :reset_password_token, unique: true
@@ -134,53 +166,44 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
     add_index :attendance, [ :user_id, :attendance_event_id ], unique: true
     add_index :announcements, :published_at
     add_index :announcements, :is_active
+    add_index :practice_logs, :style
+    add_index :practice_times, [ :practice_log_id, :user_id, :rep_number, :set_number ], unique: true, name: 'index_practice_times_on_unique_combination'
 
     # 制約
-    execute <<-SQL
-      ALTER TABLE users
-      ADD CONSTRAINT check_gender
-      CHECK (gender IN ('male', 'female'));
-
-      ALTER TABLE users
-      ADD CONSTRAINT check_user_type
-      CHECK (user_type IN ('director', 'coach', 'player', 'manager'));
-
-      ALTER TABLE attendance
-      ADD CONSTRAINT check_status
-      CHECK (status IN ('present', 'absent', 'other'));
-
-      ALTER TABLE milestones
-      ADD CONSTRAINT check_milestone_type
-      CHECK (milestone_type IN ('quality', 'quantity'));
-    SQL
+    add_check_constraint :users, "gender IN (0, 1, 2)", name: "check_gender"
+    add_check_constraint :users, "user_type IN (0, 1, 2, 3)", name: "check_user_type"
+    add_check_constraint :attendance, "status IN (0, 1, 2)", name: "check_status"
+    add_check_constraint :styles, "style IN (0, 1, 2, 3, 4)", name: "check_style"
+    add_check_constraint :milestones, "milestone_type IN ('quality', 'quantity')", name: "check_milestone_type"
 
     # 種目の初期データ
     styles = [
-      { name_jp: "50m自由形", name: "50Fr", style: "fr", distance: 50 },
-      { name_jp: "100m自由形", name: "100Fr", style: "fr", distance: 100 },
-      { name_jp: "200m自由形", name: "200Fr", style: "fr", distance: 200 },
-      { name_jp: "400m自由形", name: "400Fr", style: "fr", distance: 400 },
-      { name_jp: "800m自由形", name: "800Fr", style: "fr", distance: 800 },
-      { name_jp: "50m平泳ぎ", name: "50Br", style: "br", distance: 50 },
-      { name_jp: "100m平泳ぎ", name: "100Br", style: "br", distance: 100 },
-      { name_jp: "200m平泳ぎ", name: "200Br", style: "br", distance: 200 },
-      { name_jp: "50m背泳ぎ", name: "50Ba", style: "ba", distance: 50 },
-      { name_jp: "100m背泳ぎ", name: "100Ba", style: "ba", distance: 100 },
-      { name_jp: "200m背泳ぎ", name: "200Ba", style: "ba", distance: 200 },
-      { name_jp: "50mバタフライ", name: "50Fly", style: "fly", distance: 50 },
-      { name_jp: "100mバタフライ", name: "100Fly", style: "fly", distance: 100 },
-      { name_jp: "200mバタフライ", name: "200Fly", style: "fly", distance: 200 },
-      { name_jp: "100m個人メドレー", name: "100IM", style: "im", distance: 100 },
-      { name_jp: "200m個人メドレー", name: "200IM", style: "im", distance: 200 },
-      { name_jp: "400m個人メドレー", name: "400IM", style: "im", distance: 400 }
+      { name_jp: "50m自由形", name: "50Fr", style: 0, distance: 50 },
+      { name_jp: "100m自由形", name: "100Fr", style: 0, distance: 100 },
+      { name_jp: "200m自由形", name: "200Fr", style: 0, distance: 200 },
+      { name_jp: "400m自由形", name: "400Fr", style: 0, distance: 400 },
+      { name_jp: "800m自由形", name: "800Fr", style: 0, distance: 800 },
+      { name_jp: "50m平泳ぎ", name: "50Br", style: 1, distance: 50 },
+      { name_jp: "100m平泳ぎ", name: "100Br", style: 1, distance: 100 },
+      { name_jp: "200m平泳ぎ", name: "200Br", style: 1, distance: 200 },
+      { name_jp: "50m背泳ぎ", name: "50Ba", style: 2, distance: 50 },
+      { name_jp: "100m背泳ぎ", name: "100Ba", style: 2, distance: 100 },
+      { name_jp: "200m背泳ぎ", name: "200Ba", style: 2, distance: 200 },
+      { name_jp: "50mバタフライ", name: "50Fly", style: 3, distance: 50 },
+      { name_jp: "100mバタフライ", name: "100Fly", style: 3, distance: 100 },
+      { name_jp: "200mバタフライ", name: "200Fly", style: 3, distance: 200 },
+      { name_jp: "100m個人メドレー", name: "100IM", style: 4, distance: 100 },
+      { name_jp: "200m個人メドレー", name: "200IM", style: 4, distance: 200 },
+      { name_jp: "400m個人メドレー", name: "400IM", style: 4, distance: 400 }
     ]
 
-    styles.each do |style_data|
-      Style.create!(style_data)
-    end
+    Style.create!(styles)
   end
 
   def down
+    drop_table :practice_times
+    drop_table :practice_logs
+    drop_table :events
     drop_table :race_feedbacks
     drop_table :race_reviews
     drop_table :race_goals
@@ -195,4 +218,4 @@ class CreateAllTablesV2 < ActiveRecord::Migration[7.0]
     drop_table :users
     drop_table :announcements
   end
-end
+end 
