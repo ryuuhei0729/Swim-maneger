@@ -11,10 +11,10 @@ class Style < ApplicationRecord
 
   # enum宣言（Rails 8.0対応）
   enum :style, {
-    freestyle: 0,
-    breaststroke: 1,
-    backstroke: 2,
-    butterfly: 3,
-    individual_medley: 4
+    fr: 0,
+    br: 1,
+    ba: 2,
+    fly: 3,
+    im: 4
   }
 end

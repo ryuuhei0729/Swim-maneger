@@ -22,9 +22,9 @@ class UserAuth < ApplicationRecord
     build_user(
       generation: 1,  # デフォルト値
       name: email.split("@").first,  # メールアドレスの@より前の部分を名前として使用
-      gender: "male",  # デフォルト値
+      gender: :male,  # enum対応
       birthday: Date.today,  # デフォルト値
-      user_type: "player"  # デフォルト値
+      user_type: :player  # enum対応
     )
   end
 end
