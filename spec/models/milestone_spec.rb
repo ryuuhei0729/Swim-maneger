@@ -20,7 +20,9 @@ RSpec.describe Milestone, type: :model do
 
     context 'milestone_typeが無効な値の場合' do
       it '無効であること' do
-        expect { milestone.milestone_type = "invalid" }.to raise_error(ArgumentError)
+        milestone.milestone_type = "invalid"
+        expect(milestone).not_to be_valid
+        expect(milestone.errors[:milestone_type]).to include("一覧にありません")
       end
     end
 
@@ -62,26 +64,20 @@ RSpec.describe Milestone, type: :model do
     end
   end
 
-  describe 'enum' do
-    it '正しいmilestone_type enum値を持つこと' do
-      expect(Milestone.milestone_types).to have_key("quality")
-      expect(Milestone.milestone_types).to have_key("quantity")
+  describe 'milestone_type バリデーション' do
+    it 'quality が有効であること' do
+      milestone = build(:milestone, milestone_type: "quality")
+      expect(milestone).to be_valid
     end
 
-    describe '#quality?' do
-      it 'quality milestone_typeの場合trueを返すこと' do
-        milestone = build(:milestone, milestone_type: "quality")
-        expect(milestone.quality?).to be true
-        expect(milestone.quantity?).to be false
-      end
+    it 'quantity が有効であること' do
+      milestone = build(:milestone, milestone_type: "quantity")
+      expect(milestone).to be_valid
     end
 
-    describe '#quantity?' do
-      it 'quantity milestone_typeの場合trueを返すこと' do
-        milestone = build(:milestone, milestone_type: "quantity")
-        expect(milestone.quantity?).to be true
-        expect(milestone.quality?).to be false
-      end
+    it '不正な値は無効であること' do
+      milestone = build(:milestone, milestone_type: "invalid")
+      expect(milestone).not_to be_valid
     end
   end
 
