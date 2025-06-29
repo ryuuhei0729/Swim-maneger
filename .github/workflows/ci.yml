@@ -85,6 +85,22 @@ jobs:
           ruby-version: .ruby-version
           bundler-cache: true
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install JavaScript dependencies
+        run: npm install
+
+      - name: Build Tailwind CSS
+        env:
+          RAILS_ENV: test
+        run: |
+          bundle exec rails tailwindcss:build
+          bundle exec rails assets:precompile
+
       - name: Run tests
         env:
           RAILS_ENV: test
