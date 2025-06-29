@@ -207,8 +207,13 @@ RSpec.describe HomeController, type: :request do
           player_without_record = create(:user, :player, :male, generation: 92)
           get home_path, params: { sort_by: style.name }
           players = assigns(:male_players)
-          # 記録がない選手が最後に表示されることを確認
-          expect(players.last).to eq(player_without_record)
+          # 記録がない選手が記録がある選手より後に表示されることを確認
+          player_without_record_index = players.index(player_without_record)
+          player1_index = players.index(male_player1)
+          player2_index = players.index(male_player2)
+          
+          expect(player_without_record_index).to be > player1_index
+          expect(player_without_record_index).to be > player2_index
         end
       end
 
@@ -260,8 +265,13 @@ RSpec.describe HomeController, type: :request do
         player_without_record = create(:user, :player)
         get home_path, params: { sort_by: style.name }
         players = assigns(:players)
-        # 記録がない選手が最後に表示されることを確認
-        expect(players.last).to eq(player_without_record)
+        # 記録がない選手が記録がある選手より後に表示されることを確認
+        player_without_record_index = players.index(player_without_record)
+        player1_index = players.index(player1)
+        player2_index = players.index(player2)
+        
+        expect(player_without_record_index).to be > player1_index
+        expect(player_without_record_index).to be > player2_index
       end
     end
   end

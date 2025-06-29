@@ -1,4 +1,6 @@
 class ErrorsController < ApplicationController
+  skip_before_action :authenticate_user_auth!
+
   def not_found
     render status: 404
   end

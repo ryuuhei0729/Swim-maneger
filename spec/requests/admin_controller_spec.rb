@@ -199,7 +199,7 @@ RSpec.describe AdminController, type: :request do
             title: '更新されたお知らせ',
             content: '更新された内容',
             is_active: true,
-            published_at: Date.current
+            published_at: 1.hour.from_now
           }
         }
       end
