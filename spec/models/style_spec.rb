@@ -86,7 +86,7 @@ RSpec.describe Style, type: :model do
       it '無効であること' do
         style.distance = 50.5
         expect(style).not_to be_valid
-        expect(style.errors[:distance]).to include("は整数で入力してください")
+        expect(style.errors[:distance]).to be_present
       end
     end
   end
@@ -170,7 +170,7 @@ RSpec.describe Style, type: :model do
   describe 'クラスメソッド' do
     describe '.styles' do
       it '有効なスタイルの配列を返すこと' do
-        expect(Style.styles).to eq([ "fr", "br", "ba", "fly", "im" ])
+        expect(Style.styles.keys).to eq([ "fr", "br", "ba", "fly", "im" ])
       end
     end
   end

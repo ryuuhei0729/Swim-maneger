@@ -102,9 +102,9 @@ RSpec.describe User, type: :model do
     end
 
     it 'race_feedbacksとの関連を持つこと' do
-      user = create(:user)
-      race_feedback = create(:race_feedback, user: user)
-      expect(user.race_feedbacks).to include(race_feedback)
+      coach_user = create(:user, user_type: :coach)
+      race_feedback = create(:race_feedback, user: coach_user)
+      expect(coach_user.race_feedbacks).to include(race_feedback)
     end
   end
 
@@ -260,21 +260,22 @@ RSpec.describe User, type: :model do
   end
 
   describe '定数' do
-    it 'USER_TYPESが正しく定義されていること' do
-      expect(User::USER_TYPES[:player]).to eq("player")
-      expect(User::USER_TYPES[:coach]).to eq("coach")
-      expect(User::USER_TYPES[:director]).to eq("director")
-      expect(User::USER_TYPES[:manager]).to eq("manager")
+    it 'user_typesが正しく定義されていること' do
+      expect(User.user_types[:player]).to eq(0)
+      expect(User.user_types[:manager]).to eq(1)
+      expect(User.user_types[:coach]).to eq(2)
+      expect(User.user_types[:director]).to eq(3)
     end
 
-    it 'GENDERSが正しく定義されていること' do
-      expect(User::GENDERS[:male]).to eq("male")
-      expect(User::GENDERS[:female]).to eq("female")
+    it 'gendersが正しく定義されていること' do
+      expect(User.genders[:male]).to eq(0)
+      expect(User.genders[:female]).to eq(1)
+      expect(User.genders[:other]).to eq(2)
     end
 
-    it 'ADMIN_TYPESが正しく定義されていること' do
-      expect(User::ADMIN_TYPES).to include("coach", "director", "manager")
-      expect(User::ADMIN_TYPES).not_to include("player")
+    it 'ADMIN_USER_TYPESが正しく定義されていること' do
+      expect(User::ADMIN_USER_TYPES).to include("coach", "director", "manager")
+      expect(User::ADMIN_USER_TYPES).not_to include("player")
     end
   end
 

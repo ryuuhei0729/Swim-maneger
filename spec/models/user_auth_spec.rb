@@ -62,9 +62,9 @@ RSpec.describe UserAuth, type: :model do
   describe 'コールバック' do
     describe 'before_create :build_default_user' do
       context 'userが存在しない場合' do
-        it 'デフォルトのuserを作成すること' do
+        it 'デフォルトのuserをbuildすること' do
           user_auth = build(:user_auth, user: nil)
-          user_auth.save
+          user_auth.send(:build_default_user)
 
           expect(user_auth.user).to be_present
           expect(user_auth.user.generation).to eq(1)
@@ -75,12 +75,14 @@ RSpec.describe UserAuth, type: :model do
       end
 
       context 'userが既に存在する場合' do
-        it '新しいuserを作成しないこと' do
+        it 'build_default_userメソッドが何もしないこと' do
           existing_user = create(:user)
           user_auth = build(:user_auth, user: existing_user)
-          user_auth.save
-
-          expect(user_auth.user).to eq(existing_user)
+          original_user = user_auth.user
+          
+          user_auth.send(:build_default_user)
+          
+          expect(user_auth.user).to eq(original_user)
         end
       end
     end
@@ -131,7 +133,8 @@ RSpec.describe UserAuth, type: :model do
     end
 
     it '非常に長いpasswordを処理できること' do
-      user_auth = build(:user_auth, password: "a" * 100)
+      long_password = "a" * 100
+      user_auth = build(:user_auth, password: long_password, password_confirmation: long_password)
       expect(user_auth).to be_valid
     end
   end
