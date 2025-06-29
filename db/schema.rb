@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_06_25_080820) do
+ActiveRecord::Schema[8.0].define(version: 2025_06_28_052534) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -56,14 +56,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_080820) do
   create_table "attendance", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "attendance_event_id", null: false
-    t.string "status", null: false
     t.text "note"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "status"
     t.index ["attendance_event_id"], name: "index_attendance_on_attendance_event_id"
     t.index ["user_id", "attendance_event_id"], name: "index_attendance_on_user_id_and_attendance_event_id", unique: true
     t.index ["user_id"], name: "index_attendance_on_user_id"
-    t.check_constraint "status::text = ANY (ARRAY['present'::character varying::text, 'absent'::character varying::text, 'other'::character varying::text])", name: "check_status"
+    t.check_constraint "status = ANY (ARRAY[0, 1, 2])", name: "check_status"
   end
 
   create_table "attendance_events", force: :cascade do |t|
@@ -200,11 +200,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_080820) do
   create_table "styles", force: :cascade do |t|
     t.string "name_jp", null: false
     t.string "name", null: false
-    t.string "style", null: false
     t.integer "distance", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["style", "distance"], name: "index_styles_on_style_and_distance", unique: true
+    t.integer "style"
+    t.check_constraint "style = ANY (ARRAY[0, 1, 2, 3, 4])", name: "check_style"
   end
 
   create_table "user_auths", force: :cascade do |t|
@@ -224,15 +224,14 @@ ActiveRecord::Schema[8.0].define(version: 2025_06_25_080820) do
   create_table "users", force: :cascade do |t|
     t.integer "generation", null: false
     t.string "name", null: false
-    t.string "gender", null: false
     t.date "birthday", null: false
-    t.string "user_type", null: false
     t.text "bio"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["user_type"], name: "index_users_on_user_type"
-    t.check_constraint "gender::text = ANY (ARRAY['male'::character varying::text, 'female'::character varying::text])", name: "check_gender"
-    t.check_constraint "user_type::text = ANY (ARRAY['director'::character varying::text, 'coach'::character varying::text, 'player'::character varying::text, 'manager'::character varying::text])", name: "check_user_type"
+    t.integer "gender"
+    t.integer "user_type"
+    t.check_constraint "gender = ANY (ARRAY[0, 1, 2])", name: "check_gender"
+    t.check_constraint "user_type = ANY (ARRAY[0, 1, 2, 3])", name: "check_user_type"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

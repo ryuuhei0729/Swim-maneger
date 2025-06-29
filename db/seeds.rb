@@ -56,8 +56,8 @@ def generate_random_time(event)
 end
 
 # ユーザータイプの定義
-USER_TYPES = [ 'director', 'coach', 'player', 'manager' ]
-GENDERS = [ 'male', 'female' ]
+USER_TYPES = [ :director, :coach, :player, :manager ]
+GENDERS = [ :male, :female, :other ]
 
 # データベースをクリア
 puts "データベースをクリアしています..."
@@ -80,23 +80,23 @@ Style.destroy_all rescue nil
 # 種目の作成
 puts "種目を作成中..."
 styles = [
-  { name_jp: "50m自由形", name: "50Fr", style: "fr", distance: 50 },
-  { name_jp: "100m自由形", name: "100Fr", style: "fr", distance: 100 },
-  { name_jp: "200m自由形", name: "200Fr", style: "fr", distance: 200 },
-  { name_jp: "400m自由形", name: "400Fr", style: "fr", distance: 400 },
-  { name_jp: "800m自由形", name: "800Fr", style: "fr", distance: 800 },
-  { name_jp: "50m平泳ぎ", name: "50Br", style: "br", distance: 50 },
-  { name_jp: "100m平泳ぎ", name: "100Br", style: "br", distance: 100 },
-  { name_jp: "200m平泳ぎ", name: "200Br", style: "br", distance: 200 },
-  { name_jp: "50m背泳ぎ", name: "50Ba", style: "ba", distance: 50 },
-  { name_jp: "100m背泳ぎ", name: "100Ba", style: "ba", distance: 100 },
-  { name_jp: "200m背泳ぎ", name: "200Ba", style: "ba", distance: 200 },
-  { name_jp: "50mバタフライ", name: "50Fly", style: "fly", distance: 50 },
-  { name_jp: "100mバタフライ", name: "100Fly", style: "fly", distance: 100 },
-  { name_jp: "200mバタフライ", name: "200Fly", style: "fly", distance: 200 },
-  { name_jp: "100m個人メドレー", name: "100IM", style: "im", distance: 100 },
-  { name_jp: "200m個人メドレー", name: "200IM", style: "im", distance: 200 },
-  { name_jp: "400m個人メドレー", name: "400IM", style: "im", distance: 400 }
+  { name_jp: "50m自由形", name: "50Fr", style: 0, distance: 50 },
+  { name_jp: "100m自由形", name: "100Fr", style: 0, distance: 100 },
+  { name_jp: "200m自由形", name: "200Fr", style: 0, distance: 200 },
+  { name_jp: "400m自由形", name: "400Fr", style: 0, distance: 400 },
+  { name_jp: "800m自由形", name: "800Fr", style: 0, distance: 800 },
+  { name_jp: "50m平泳ぎ", name: "50Br", style: 1, distance: 50 },
+  { name_jp: "100m平泳ぎ", name: "100Br", style: 1, distance: 100 },
+  { name_jp: "200m平泳ぎ", name: "200Br", style: 1, distance: 200 },
+  { name_jp: "50m背泳ぎ", name: "50Ba", style: 2, distance: 50 },
+  { name_jp: "100m背泳ぎ", name: "100Ba", style: 2, distance: 100 },
+  { name_jp: "200m背泳ぎ", name: "200Ba", style: 2, distance: 200 },
+  { name_jp: "50mバタフライ", name: "50Fly", style: 3, distance: 50 },
+  { name_jp: "100mバタフライ", name: "100Fly", style: 3, distance: 100 },
+  { name_jp: "200mバタフライ", name: "200Fly", style: 3, distance: 200 },
+  { name_jp: "100m個人メドレー", name: "100IM", style: 4, distance: 100 },
+  { name_jp: "200m個人メドレー", name: "200IM", style: 4, distance: 200 },
+  { name_jp: "400m個人メドレー", name: "400IM", style: 4, distance: 400 }
 ]
 
 styles.each do |style_data|
@@ -117,9 +117,9 @@ puts "Creating users..."
   user = User.create!(
     generation: 0,
     name: FFaker::NameJA.name,
-    gender: GENDERS.sample,
+    gender: GENDERS.sample.to_sym,
     birthday: birthday,
-    user_type: 'director',
+    user_type: :director,
     bio: "ディレクター#{i+1}の自己紹介文です。",
   )
 
@@ -143,9 +143,9 @@ end
   user = User.create!(
     generation: rand(73..77),
     name: FFaker::NameJA.name,
-    gender: GENDERS.sample,
+    gender: GENDERS.sample.to_sym,
     birthday: birthday,
-    user_type: 'coach',
+    user_type: :coach,
     bio: "コーチ#{i+1}の自己紹介文です。",
   )
 
@@ -169,9 +169,9 @@ end
   user = User.create!(
     generation: rand(78..84),
     name: FFaker::NameJA.name,
-    gender: GENDERS.sample,
+    gender: GENDERS.sample.to_sym,
     birthday: birthday,
-    user_type: 'player',
+    user_type: :player,
     bio: "プレイヤー#{i+1}の自己紹介文です。",
   )
 
@@ -361,45 +361,40 @@ puts "Creating records..."
 # is_competition: trueかつ、日付が今日より前のものを取得
 competition_events = AttendanceEvent.where(is_competition: true).where("date < ?", Date.current)
 
-# プレイヤーと過去の大会の組み合わせで記録を作成
-User.where(user_type: 'player').each do |user|
-  competition_events.each do |event|
-    # 各大会でランダムに1〜3種目の記録を作成
-    Style.all.sample(rand(1..3)).each do |style|
-      # 種目に応じたランダムなタイムを生成
-      time = case style.distance
-      when 50
-        rand(22.00..35.00).round(2)  # 50m: 22-35秒
-      when 100
-        rand(50.00..80.00).round(2)  # 100m: 50-80秒
-      when 200
-        rand(110.00..180.00).round(2) # 200m: 1:50-3:00
-      when 400
-        rand(240.00..360.00).round(2) # 400m: 4:00-6:00
-      when 800
-        rand(480.00..720.00).round(2) # 800m: 8:00-12:00
-      else
-        0
-      end
-
-      # 記録を作成（find_or_create_by!で重複を防ぐ）
-      Record.find_or_create_by!(
-        user: user,
-        style: style,
-        attendance_event: event
-      ) do |record|
-        record.time = time
-        # 記録の日付を大会の日付に合わせる
-        record.created_at = event.date
-        record.updated_at = event.date
-      end
+# プレイヤー全員に対して記録を作成
+User.where(user_type: :player).each do |user|
+  # 各選手にランダムに3〜8個の記録を作成
+  rand(3..8).times do
+    style = Style.all.sample
+    time = case style.distance
+    when 50
+      rand(22.00..35.00).round(2)  # 50m: 22-35秒
+    when 100
+      rand(50.00..80.00).round(2)  # 100m: 50-80秒
+    when 200
+      rand(110.00..180.00).round(2) # 200m: 1:50-3:00
+    when 400
+      rand(240.00..360.00).round(2)
+    when 800
+      rand(480.00..720.00).round(2)
+    else
+      0
     end
+
+    # 記録を作成
+    Record.create!(
+      user: user,
+      style: style,
+      time: time,
+      created_at: rand(1..365).days.ago
+      # attendance_event_id は nil になる
+    )
   end
 end
 
 # 記録がない種目に対してダミーの記録を作成
 puts "記録がない種目に対してダミーの記録を作成中..."
-User.where(user_type: 'player').each do |user|
+User.where(user_type: :player).each do |user|
   # ユーザーがすでに記録を持っている種目IDのリスト
   recorded_style_ids = user.records.pluck(:style_id)
   # 記録がない種目IDのリスト
@@ -447,12 +442,12 @@ AttendanceEvent.all.each do |event|
   User.all.each do |user|
     # 50%〜90%の確率で出席データを作成
     next unless rand < rand(0.5..0.9)
-    status = [ :present, :absent, :other ].sample
+    status = [0, 1, 2].sample
     note =
       case status
-      when :absent
+      when 1
         reasons_absent.sample
-      when :other
+      when 2
         reasons_other.sample
       else
         nil
@@ -479,7 +474,7 @@ next_month_start = Date.current.next_month.beginning_of_month
 next_month_end = Date.current.next_month.end_of_month
 
 # プレイヤー全員に対して大会関連データを作成
-User.where(user_type: 'player').each do |player|
+User.where(user_type: :player).each do |player|
   competition_events.each do |event|
     # プレイヤーの得意種目をランダムに2つ選択
     target_styles = Style.all.sample(2)
@@ -543,7 +538,7 @@ User.where(user_type: 'player').each do |player|
         )
 
         # ランダムに2人のコーチを選んでフィードバックを作成
-        User.where(user_type: 'coach').sample(2).each do |coach|
+        User.where(user_type: :coach).sample(2).each do |coach|
           RaceFeedback.create!(
             race_goal: race_goal,
             user: coach,
@@ -584,7 +579,7 @@ swim_events.each do |event|
   )
 
   # プレイヤー全員に対して練習タイムを作成
-  User.where(user_type: 'player').each do |player|
+  User.where(user_type: :player).each do |player|
     # セット数と本数の組み合わせで練習タイムを作成
     (1..practice_log.set_count).each do |set_number|
       (1..practice_log.rep_count).each do |rep_number|
