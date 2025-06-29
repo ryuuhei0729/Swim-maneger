@@ -89,6 +89,7 @@ jobs:
         env:
           RAILS_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432
+          TZ: Asia/Tokyo
           # REDIS_URL: redis://localhost:6379/0
         run: bin/rails db:test:prepare && bundle exec rspec
 
