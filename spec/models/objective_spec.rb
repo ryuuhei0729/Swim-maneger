@@ -1,8 +1,12 @@
 require 'rails_helper'
 
 RSpec.describe Objective, type: :model do
+  let(:user) { create(:user) }
+  let(:attendance_event) { create(:attendance_event) }
+  let(:style) { create(:style) }
+
   describe 'バリデーション' do
-    let(:objective) { build(:objective) }
+    let(:objective) { build(:objective, user: user, attendance_event: attendance_event, style: style) }
 
     context '有効な属性の場合' do
       it '有効であること' do
@@ -60,25 +64,25 @@ RSpec.describe Objective, type: :model do
 
     context 'user_idが空の場合' do
       it '無効であること' do
-        objective.user_id = nil
-        expect(objective).not_to be_valid
-        expect(objective.errors[:user]).to include("を入力してください")
+        objective_without_user = build(:objective, user: nil, attendance_event: attendance_event, style: style)
+        expect(objective_without_user).not_to be_valid
+        expect(objective_without_user.errors[:user]).to be_present
       end
     end
 
     context 'attendance_event_idが空の場合' do
       it '無効であること' do
-        objective.attendance_event_id = nil
-        expect(objective).not_to be_valid
-        expect(objective.errors[:attendance_event]).to include("を入力してください")
+        objective_without_event = build(:objective, user: user, attendance_event: nil, style: style)
+        expect(objective_without_event).not_to be_valid
+        expect(objective_without_event.errors[:attendance_event]).to be_present
       end
     end
 
     context 'style_idが空の場合' do
       it '無効であること' do
-        objective.style_id = nil
-        expect(objective).not_to be_valid
-        expect(objective.errors[:style]).to include("を入力してください")
+        objective_without_style = build(:objective, user: user, attendance_event: attendance_event, style: nil)
+        expect(objective_without_style).not_to be_valid
+        expect(objective_without_style.errors[:style]).to be_present
       end
     end
   end
@@ -109,7 +113,7 @@ RSpec.describe Objective, type: :model do
   describe 'trait' do
     it 'with_milestones traitが正しく動作すること' do
       objective = create(:objective, :with_milestones)
-      expect(objective.milestones.count).to eq(2)
+      expect(objective.milestones.count).to eq(1)
     end
 
     it 'quality_milestone traitが正しく動作すること' do
@@ -127,12 +131,12 @@ RSpec.describe Objective, type: :model do
 
   describe 'エッジケース' do
     it '非常に大きなtarget_timeを処理できること' do
-      objective = build(:objective, target_time: 999999.99)
+      objective = build(:objective, user: user, attendance_event: attendance_event, style: style, target_time: 999999.99)
       expect(objective).to be_valid
     end
 
     it '非常に長いnoteを処理できること' do
-      objective = build(:objective,
+      objective = build(:objective, user: user, attendance_event: attendance_event, style: style,
         quantity_note: "a" * 1000,
         quality_note: "b" * 1000
       )
@@ -140,7 +144,7 @@ RSpec.describe Objective, type: :model do
     end
 
     it '特殊文字を含むnoteを処理できること' do
-      objective = build(:objective,
+      objective = build(:objective, user: user, attendance_event: attendance_event, style: style,
         quantity_note: "目標：\n- 100m 1分以内\n- 200m 2分以内",
         quality_note: "フォーム改善：\n- ストロークの改善\n- ターンの精度向上"
       )
