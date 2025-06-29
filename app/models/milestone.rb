@@ -5,6 +5,4 @@ class Milestone < ApplicationRecord
   validates :milestone_type, presence: true, inclusion: { in: [ "quality", "quantity" ] }
   validates :limit_date, presence: true
   validates :note, presence: true
-
-  enum milestone_type: { quality: :quality, quantity: :quantity }
 end

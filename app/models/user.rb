@@ -16,15 +16,15 @@ class User < ApplicationRecord
 
   delegate :email, to: :user_auth, allow_nil: true
 
-  # enum宣言（DBの整数値との整合性を保つ）
-  enum user_type: {
+  # enum宣言（Rails 8.0対応）
+  enum :user_type, {
     player: 0,
     manager: 1,
     coach: 2,
     director: 3
   }
 
-  enum gender: {
+  enum :gender, {
     male: 0,
     female: 1,
     other: 2
