@@ -4,18 +4,23 @@ class Attendance < ApplicationRecord
   belongs_to :user
   belongs_to :attendance_event
 
-  enum :status, { present: "present", absent: "absent", other: "other" }
-
   validates :status, presence: true
   validates :user_id, presence: true
   validates :attendance_event_id, presence: true
   validates :user_id, uniqueness: { scope: :attendance_event_id }
   validate :note_required_for_absence_or_other
 
+  # enum宣言（DBの整数値との整合性を保つ）
+  enum status: {
+    present: 0,
+    absent: 1,
+    other: 2
+  }
+
   private
 
   def note_required_for_absence_or_other
-    if (absent? || other?) && note.blank?
+    if status.present? && (absent? || other?) && note.blank?
       errors.add(:note, :required_for_absence_or_other)
     end
   end

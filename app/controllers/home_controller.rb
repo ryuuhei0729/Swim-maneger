@@ -15,7 +15,7 @@ class HomeController < ApplicationController
 
     # 誕生日データを取得
     @birthdays_by_date = {}
-    User.where(user_type: "player").each do |user|
+    User.where(user_type: :player).each do |user|
       # その月の誕生日を取得（年は考慮しない）
       birthday_this_month = Date.new(@current_month.year, user.birthday.month, user.birthday.day)
       if birthday_this_month.month == @current_month.month
@@ -43,13 +43,13 @@ class HomeController < ApplicationController
     @announcements = Announcement.active.where("published_at <= ?", Time.current).order(published_at: :desc)
 
     today = Date.current
-    @birthday_users = User.where(birthday: today)
+    @birthday_users = User.where("EXTRACT(month FROM birthday) = ? AND EXTRACT(day FROM birthday) = ?", today.month, today.day)
 
     # ベストタイム表示で使うコントローラー
-    @players = User.where(user_type: "player").order(generation: :asc)
-    @male_players = @players.select { |p| p.gender == "male" }
-    @female_players = @players.select { |p| p.gender == "female" }
-    @default_tab = params[:tab] || (current_user_auth.user.gender == "male" ? "male" : "female")
+    @players = User.where(user_type: :player).order(generation: :asc)
+    @male_players = @players.select { |p| p.male? }
+    @female_players = @players.select { |p| p.female? }
+    @default_tab = params[:tab] || (current_user_auth.user.male? ? "male" : "female")
     @sort_by = params[:sort_by]
     @events = Style.all.map do |style|
       {

@@ -9,7 +9,6 @@ class PracticeLog < ApplicationRecord
   validates :circle, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :style, presence: true, inclusion: { in: %w[Fr Br Ba Fly IM S1] }
 
-  enum style: { Fr: :Fr, Br: :Br, Ba: :Ba, Fly: :Fly, IM: :IM, S1: :S1 }
 
   STYLE_OPTIONS = {
     "Fr" => "自由形",
