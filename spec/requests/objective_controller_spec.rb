@@ -41,14 +41,14 @@ RSpec.describe ObjectiveController, type: :request do
     end
   end
 
-  # describe 'GET #new' do
-  #   before { sign_in user_auth }
-  #   it '新規作成画面が表示される' do
-  #     get new_objective_path
-  #     expect(response).to have_http_status(:ok)
-  #     expect(response.body).to include('目標')
-  #   end
-  # end
+  describe 'GET #new' do
+    before { sign_in user_auth }
+    it '新規作成画面が表示される' do
+      get new_objective_path
+      expect(response).to have_http_status(:ok)
+      expect(response.body).to include('目標')
+    end
+  end
 
   describe 'POST #create' do
     before { sign_in user_auth }
@@ -77,18 +77,22 @@ RSpec.describe ObjectiveController, type: :request do
       expect(obj.user).to eq(user)
     end
 
-    # it '無効なパラメータでは作成できずエラー表示' do
-    #   expect {
-    #     post objective_index_path, params: { objective: { attendance_event_id: nil, style_id: nil } }
-    #   }.not_to change(Objective, :count)
-    #   expect(response).to have_http_status(:unprocessable_entity)
-    #   expect(response.body).to include('目標')
-    # end
+    it '無効なパラメータでは作成できずエラー表示' do
+      expect {
+        post objective_index_path, params: { objective: { attendance_event_id: nil, style_id: nil } }
+      }.not_to change(Objective, :count)
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.body).to include('目標')
+    end
 
-    # it '目標タイムが未入力の場合はtarget_timeがnilになる' do
-    #   post objective_index_path, params: { objective: valid_params[:objective].except(:minutes, :seconds) }
-    #   obj = Objective.last
-    #   expect(obj.target_time).to be_nil
-    # end
+    it '目標タイムが未入力の場合はバリデーションエラーで作成できない' do
+      params_without_time = { objective: valid_params[:objective].except(:minutes, :seconds) }
+      expect {
+        post objective_index_path, params: params_without_time
+      }.not_to change(Objective, :count)
+      
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response.body).to include('目標')
+    end
   end
 end
