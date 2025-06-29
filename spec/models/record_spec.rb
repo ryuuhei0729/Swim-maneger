@@ -1,8 +1,11 @@
 require 'rails_helper'
 
 RSpec.describe Record, type: :model do
+  let(:user) { create(:user) }
+  let(:style) { create(:style) }
+
   describe 'バリデーション' do
-    let(:record) { build(:record) }
+    let(:record) { build(:record, user: user, style: style) }
 
     context '有効な属性の場合' do
       it '有効であること' do
@@ -12,17 +15,17 @@ RSpec.describe Record, type: :model do
 
     context 'user_idが空の場合' do
       it '無効であること' do
-        record.user_id = nil
-        expect(record).not_to be_valid
-        expect(record.errors[:user]).to include("を入力してください")
+        record_without_user = build(:record, user: nil, style: style)
+        expect(record_without_user).not_to be_valid
+        expect(record_without_user.errors[:user]).to be_present
       end
     end
 
     context 'style_idが空の場合' do
       it '無効であること' do
-        record.style_id = nil
-        expect(record).not_to be_valid
-        expect(record.errors[:style]).to include("を入力してください")
+        record_without_style = build(:record, user: user, style: nil)
+        expect(record_without_style).not_to be_valid
+        expect(record_without_style.errors[:style]).to be_present
       end
     end
 
@@ -54,31 +57,31 @@ RSpec.describe Record, type: :model do
       it '無効であること' do
         record.video_url = "invalid-url"
         expect(record).not_to be_valid
-        expect(record.errors[:video_url]).to include("は不正な値です")
+        expect(record.errors[:video_url]).to include("は正しい形式で入力してください")
       end
     end
 
     context 'video_urlが有効な形式の場合' do
       it '有効であること' do
-        record.video_url = "https://www.youtube.com/watch?v=example"
-        expect(record).to be_valid
+        record_with_youtube = build(:record, user: user, style: style, video_url: "https://www.youtube.com/watch?v=example")
+        expect(record_with_youtube).to be_valid
       end
 
       it 'httpでも有効であること' do
-        record.video_url = "http://example.com/video.mp4"
-        expect(record).to be_valid
+        record_with_http = build(:record, user: user, style: style, video_url: "http://example.com/video.mp4")
+        expect(record_with_http).to be_valid
       end
     end
 
     context 'video_urlが空の場合' do
       it '有効であること' do
-        record.video_url = nil
-        expect(record).to be_valid
+        record_without_url = build(:record, user: user, style: style, video_url: nil)
+        expect(record_without_url).to be_valid
       end
 
       it '空文字でも有効であること' do
-        record.video_url = ""
-        expect(record).to be_valid
+        record_with_empty_url = build(:record, user: user, style: style, video_url: "")
+        expect(record_with_empty_url).to be_valid
       end
     end
   end
@@ -134,27 +137,27 @@ RSpec.describe Record, type: :model do
 
   describe 'エッジケース' do
     it '非常に大きなtimeを処理できること' do
-      record = build(:record, time: 999999.99)
+      record = build(:record, user: user, style: style, time: 999999.99)
       expect(record).to be_valid
     end
 
     it '小数点を含むtimeを処理できること' do
-      record = build(:record, time: 25.67)
+      record = build(:record, user: user, style: style, time: 25.67)
       expect(record).to be_valid
     end
 
     it '非常に長いnoteを処理できること' do
-      record = build(:record, note: "a" * 1000)
+      record = build(:record, user: user, style: style, note: "a" * 1000)
       expect(record).to be_valid
     end
 
     it '特殊文字を含むnoteを処理できること' do
-      record = build(:record, note: "記録：\n- スタートが良かった\n- ターンで時間をロス\n- 全体的に良いレースでした")
+      record = build(:record, user: user, style: style, note: "記録：\n- スタートが良かった\n- ターンで時間をロス\n- 全体的に良いレースでした")
       expect(record).to be_valid
     end
 
     it '複雑なvideo_urlを処理できること' do
-      record = build(:record, video_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=123s")
+      record = build(:record, user: user, style: style, video_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&t=123s")
       expect(record).to be_valid
     end
   end

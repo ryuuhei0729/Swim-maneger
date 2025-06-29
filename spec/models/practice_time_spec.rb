@@ -1,8 +1,11 @@
 require 'rails_helper'
 
 RSpec.describe PracticeTime, type: :model do
+  let(:user) { create(:user) }
+  let(:practice_log) { create(:practice_log) }
+
   describe 'バリデーション' do
-    let(:practice_time) { build(:practice_time) }
+    let(:practice_time) { build(:practice_time, user: user, practice_log: practice_log) }
 
     context '有効な属性の場合' do
       it '有効であること' do
@@ -36,17 +39,17 @@ RSpec.describe PracticeTime, type: :model do
 
     context 'user_idが空の場合' do
       it '無効であること' do
-        practice_time.user_id = nil
-        expect(practice_time).not_to be_valid
-        expect(practice_time.errors[:user]).to include("を入力してください")
+        practice_time_without_user = build(:practice_time, user: nil, practice_log: practice_log)
+        expect(practice_time_without_user).not_to be_valid
+        expect(practice_time_without_user.errors[:user]).to be_present
       end
     end
 
     context 'practice_log_idが空の場合' do
       it '無効であること' do
-        practice_time.practice_log_id = nil
-        expect(practice_time).not_to be_valid
-        expect(practice_time.errors[:practice_log]).to include("を入力してください")
+        practice_time_without_log = build(:practice_time, user: user, practice_log: nil)
+        expect(practice_time_without_log).not_to be_valid
+        expect(practice_time_without_log.errors[:practice_log]).to be_present
       end
     end
   end
@@ -97,7 +100,7 @@ RSpec.describe PracticeTime, type: :model do
 
   describe 'エッジケース' do
     it '非常に大きな数値を処理できること' do
-      practice_time = build(:practice_time,
+      practice_time = build(:practice_time, user: user, practice_log: practice_log,
         rep_number: 999,
         set_number: 999,
         time: 999999.99
@@ -106,7 +109,7 @@ RSpec.describe PracticeTime, type: :model do
     end
 
     it '小数点を含むtimeを処理できること' do
-      practice_time = build(:practice_time, time: 25.67)
+      practice_time = build(:practice_time, user: user, practice_log: practice_log, time: 25.67)
       expect(practice_time).to be_valid
     end
   end

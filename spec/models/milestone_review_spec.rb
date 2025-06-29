@@ -1,8 +1,10 @@
 require 'rails_helper'
 
 RSpec.describe MilestoneReview, type: :model do
+  let(:milestone) { create(:milestone) }
+
   describe 'バリデーション' do
-    let(:milestone_review) { build(:milestone_review) }
+    let(:milestone_review) { build(:milestone_review, milestone: milestone) }
 
     context '有効な属性の場合' do
       it '有効であること' do
@@ -52,7 +54,7 @@ RSpec.describe MilestoneReview, type: :model do
       it '無効であること' do
         milestone_review.milestone_id = nil
         expect(milestone_review).not_to be_valid
-        expect(milestone_review.errors[:milestone]).to include("を入力してください")
+        expect(milestone_review.errors[:milestone_id]).to include("を入力してください")
       end
     end
   end
@@ -84,17 +86,17 @@ RSpec.describe MilestoneReview, type: :model do
 
   describe 'エッジケース' do
     it 'achievement_rateが0の場合有効であること' do
-      milestone_review = build(:milestone_review, achievement_rate: 0)
+      milestone_review = build(:milestone_review, milestone: milestone, achievement_rate: 0)
       expect(milestone_review).to be_valid
     end
 
     it 'achievement_rateが100の場合有効であること' do
-      milestone_review = build(:milestone_review, achievement_rate: 100)
+      milestone_review = build(:milestone_review, milestone: milestone, achievement_rate: 100)
       expect(milestone_review).to be_valid
     end
 
     it '非常に長いnoteを処理できること' do
-      milestone_review = build(:milestone_review,
+      milestone_review = build(:milestone_review, milestone: milestone,
         positive_note: "a" * 1000,
         negative_note: "b" * 1000
       )
@@ -102,7 +104,7 @@ RSpec.describe MilestoneReview, type: :model do
     end
 
     it '特殊文字を含むnoteを処理できること' do
-      milestone_review = build(:milestone_review,
+      milestone_review = build(:milestone_review, milestone: milestone,
         positive_note: "良い点：\n- フォームが改善された\n- タイムが向上した\n- 継続性が良くなった",
         negative_note: "改善点：\n- スタートが遅い\n- ターンで時間をロス\n- 持久力が不足"
       )
