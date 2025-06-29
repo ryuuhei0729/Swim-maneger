@@ -10,8 +10,8 @@ class Attendance < ApplicationRecord
   validates :user_id, uniqueness: { scope: :attendance_event_id }
   validate :note_required_for_absence_or_other
 
-  # enum宣言（DBの整数値との整合性を保つ）
-  enum status: {
+  # enum宣言（Rails 8.0対応）
+  enum :status, {
     present: 0,
     absent: 1,
     other: 2

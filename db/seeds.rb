@@ -55,7 +55,7 @@ def generate_random_time(event)
   end
 end
 
-# ユーザータイプの定義
+# ユーザータイプとジェンダーの定義（enum対応）
 USER_TYPES = [ :director, :coach, :player, :manager ]
 GENDERS = [ :male, :female, :other ]
 
@@ -117,7 +117,7 @@ puts "Creating users..."
   user = User.create!(
     generation: 0,
     name: FFaker::NameJA.name,
-    gender: GENDERS.sample.to_sym,
+    gender: GENDERS.sample,
     birthday: birthday,
     user_type: :director,
     bio: "ディレクター#{i+1}の自己紹介文です。",
@@ -143,7 +143,7 @@ end
   user = User.create!(
     generation: rand(73..77),
     name: FFaker::NameJA.name,
-    gender: GENDERS.sample.to_sym,
+    gender: GENDERS.sample,
     birthday: birthday,
     user_type: :coach,
     bio: "コーチ#{i+1}の自己紹介文です。",
@@ -169,7 +169,7 @@ end
   user = User.create!(
     generation: rand(78..84),
     name: FFaker::NameJA.name,
-    gender: GENDERS.sample.to_sym,
+    gender: GENDERS.sample,
     birthday: birthday,
     user_type: :player,
     bio: "プレイヤー#{i+1}の自己紹介文です。",
