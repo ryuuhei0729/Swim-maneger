@@ -7,6 +7,7 @@ class UserAuth < ApplicationRecord
   belongs_to :user, optional: true
 
   before_create :build_default_user
+  before_create :generate_authentication_token
 
   # プロフィール画像のURLを返すメソッド
   def profile_image_url
@@ -15,7 +16,20 @@ class UserAuth < ApplicationRecord
     "https://www.gravatar.com/avatar/#{Digest::MD5.hexdigest(email.downcase)}?s=200&d=identicon"
   end
 
+  # API認証トークンを再生成
+  def regenerate_authentication_token
+    generate_authentication_token
+    save!
+  end
+
   private
+
+  def generate_authentication_token
+    loop do
+      self.authentication_token = SecureRandom.urlsafe_base64(32)
+      break unless UserAuth.exists?(authentication_token: authentication_token)
+    end
+  end
 
   def build_default_user
     return if user.present?
