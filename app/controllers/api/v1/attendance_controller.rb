@@ -1,6 +1,6 @@
 class Api::V1::AttendanceController < Api::V1::BaseController
   def show
-    current_month = params[:month].present? ? Date.parse(params[:month]) : Date.current
+    current_month = parse_month_param
     
     # 今月・来月のイベントを取得
     this_month = current_month
@@ -93,6 +93,18 @@ class Api::V1::AttendanceController < Api::V1::BaseController
 
   private
 
+  def parse_month_param
+    if params[:month].present?
+      begin
+        Date.parse(params[:month])
+      rescue Date::Error, ArgumentError
+        Date.current
+      end
+    else
+      Date.current
+    end
+  end
+
   def format_event(event)
     {
       id: event.id,
@@ -172,14 +184,22 @@ class Api::V1::AttendanceController < Api::V1::BaseController
     # 誕生日データを取得
     birthdays_by_date = {}
     User.where(user_type: "player").each do |user|
-      birthday_this_month = Date.new(current_month.year, user.birthday.month, user.birthday.day)
-      if birthday_this_month.month == current_month.month
-        birthdays_by_date[birthday_this_month.to_s] ||= []
-        birthdays_by_date[birthday_this_month.to_s] << {
-          id: user.id,
-          name: user.name,
-          generation: user.generation
-        }
+      # 誕生日がnilの場合はスキップ
+      next unless user.birthday
+      
+      begin
+        birthday_this_month = Date.new(current_month.year, user.birthday.month, user.birthday.day)
+        if birthday_this_month.month == current_month.month
+          birthdays_by_date[birthday_this_month.to_s] ||= []
+          birthdays_by_date[birthday_this_month.to_s] << {
+            id: user.id,
+            name: user.name,
+            generation: user.generation
+          }
+        end
+      rescue Date::Error, ArgumentError
+        # 無効な誕生日データの場合はスキップ
+        next
       end
     end
 

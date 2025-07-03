@@ -1,52 +1,34 @@
 class Api::V1::CalendarController < Api::V1::BaseController
   def show
+    render_success(build_calendar_response)
+  end
+
+  def update
+    render_success(build_calendar_response)
+  end
+
+  private
+
+  def build_calendar_response
     current_month = build_current_month
     
     # 指定月のイベントを取得
     attendance_events = AttendanceEvent.where(date: current_month.all_month).order(date: :asc)
     events = Event.where(date: current_month.all_month).order(date: :asc)
     
-    render_success({
+    {
       year: current_month.year,
       month: current_month.month,
       month_name: current_month.strftime("%Y年%m月"),
       events_by_date: build_events_by_date(events, attendance_events, current_month),
       birthdays_by_date: build_birthdays_by_date(current_month),
       statistics: build_monthly_statistics(attendance_events, events, current_month)
-    })
+    }
   end
-
-  def update
-    current_month = build_current_month_from_body
-    
-    # 指定月のイベントを取得
-    attendance_events = AttendanceEvent.where(date: current_month.all_month).order(date: :asc)
-    events = Event.where(date: current_month.all_month).order(date: :asc)
-    
-    render_success({
-      year: current_month.year,
-      month: current_month.month,
-      month_name: current_month.strftime("%Y年%m月"),
-      events_by_date: build_events_by_date(events, attendance_events, current_month),
-      birthdays_by_date: build_birthdays_by_date(current_month),
-      statistics: build_monthly_statistics(attendance_events, events, current_month)
-    })
-  end
-
-  private
 
   def build_current_month
     if params[:year].present? && params[:month].present?
       Date.new(params[:year].to_i, params[:month].to_i, 1)
-    else
-      Date.current.beginning_of_month
-    end
-  end
-
-  def build_current_month_from_body
-    request_body = JSON.parse(request.body.read)
-    if request_body["year"].present? && request_body["month"].present?
-      Date.new(request_body["year"].to_i, request_body["month"].to_i, 1)
     else
       Date.current.beginning_of_month
     end
