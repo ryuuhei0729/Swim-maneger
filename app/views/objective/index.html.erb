@@ -55,16 +55,17 @@
                       </div>
                       <div><%= milestone.note %></div>
                     </div>
-                    <% if milestone.milestone_review.present? %>
+                    <% if milestone.milestone_reviews.any? %>
+                      <% latest_review = milestone.milestone_reviews.order(created_at: :desc).first %>
                       <div class="text-right">
                         <div class="font-semibold">
-                          達成率: <%= milestone.milestone_review.achievement_rate %>%
+                          達成率: <%= latest_review.achievement_rate %>%
                         </div>
                         <div class="text-sm text-green-600">
-                          <%= milestone.milestone_review.positive_note %>
+                          <%= latest_review.positive_note %>
                         </div>
                         <div class="text-sm text-red-600">
-                          <%= milestone.milestone_review.negative_note %>
+                          <%= latest_review.negative_note %>
                         </div>
                       </div>
                     <% end %>
