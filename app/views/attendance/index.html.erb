@@ -15,42 +15,47 @@
 <div class="mb-8 bg-white rounded-lg shadow p-6">
   <h3 class="text-xl font-semibold mb-4">今月の出席管理（未回答のイベント）</h3>
   <% if @this_month_events.any? %>
-    <%= form_with(url: update_attendance_path, method: :post, class: "space-y-6") do |f| %>
+    <%= form_with(url: update_attendance_path, method: :post, class: "space-y-2") do |f| %>
 
       <% @this_month_events.each do |event| %>
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="flex items-center gap-2 mb-4">
-            <h4 class="text-lg font-semibold"><%= event.title %></h4>
-            <p class="text-gray-900">@<%= event.date.strftime("%Y年%m月%d日") %>(<%= japanese_weekday(event.date) %>)</p>
+        <div class="flex items-center gap-4 py-2 px-4 border border-gray-200 rounded-lg">
+          <!-- 日付・イベント名 -->
+          <div class="w-48 flex-shrink-0">
+            <div class="text-sm font-medium"><%= event.date.strftime("%m月%d日") %>(<%= japanese_weekday(event.date) %>)</div>
+            <div class="text-sm text-gray-600"><%= event.title %></div>
           </div>
 
+          <!-- 出席ステータス -->
           <% attendance = @attendance.find_by(attendance_event: event) %>
-          <div class="flex items-center space-x-20">
-            <div class="flex items-center space-x-1">
-              <%= f.radio_button "attendance[#{event.id}][status]", "present", checked: attendance&.status == "present", class: "form-radio cursor-pointer", data: { requires_note: false } %>
-              <%= f.label "attendance[#{event.id}][status]", "出席", value: "present", class: "ml-1 cursor-pointer" %>
+          <div class="flex items-center gap-6">
+            <div class="flex items-center gap-1">
+              <%= f.radio_button "attendance[#{event.id}][status]", "present", checked: attendance&.status == "present", class: "form-radio", data: { requires_note: false } %>
+              <%= f.label "attendance[#{event.id}][status]", "出席", value: "present", class: "text-sm cursor-pointer" %>
             </div>
 
-            <div class="flex items-center space-x-1">
-              <%= f.radio_button "attendance[#{event.id}][status]", "absent", checked: attendance&.status == "absent", class: "form-radio cursor-pointer", data: { requires_note: true } %>
-              <%= f.label "attendance[#{event.id}][status]", "欠席", value: "absent", class: "ml-1 cursor-pointer" %>
+            <div class="flex items-center gap-1">
+              <%= f.radio_button "attendance[#{event.id}][status]", "absent", checked: attendance&.status == "absent", class: "form-radio", data: { requires_note: true } %>
+              <%= f.label "attendance[#{event.id}][status]", "欠席", value: "absent", class: "text-sm cursor-pointer" %>
             </div>
 
-            <div class="flex items-center space-x-1">
-              <%= f.radio_button "attendance[#{event.id}][status]", "other", checked: attendance&.status == "other", class: "form-radio cursor-pointer", data: { requires_note: true } %>
-              <%= f.label "attendance[#{event.id}][status]", "その他(遅刻, 早退)", value: "other", class: "ml-1 cursor-pointer" %>
+            <div class="flex items-center gap-1">
+              <%= f.radio_button "attendance[#{event.id}][status]", "other", checked: attendance&.status == "other", class: "form-radio", data: { requires_note: true } %>
+              <%= f.label "attendance[#{event.id}][status]", "その他", value: "other", class: "text-sm cursor-pointer" %>
             </div>
           </div>
 
-          <div class="mt-4">
-            <%= f.label "attendance[#{event.id}][note]", "備考", class: "block text-sm font-medium text-gray-700" %>
-            <%= f.text_area "attendance[#{event.id}][note]", value: attendance&.note, class: "mt-1 block w-full rounded-md border border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2", rows: 1, required: false %>
-            <p class="mt-1 text-sm text-red-500">※欠席・その他の場合は必ず備考を入力してください。遅刻,早退の場合は時間も記載してください。</p>
+          <!-- 備考欄 -->
+          <div class="flex-1">
+            <%= f.text_area "attendance[#{event.id}][note]", 
+            value: attendance&.note,
+            class: "w-full text-sm rounded border border-gray-200 px-2 py-1 h-auto resize-none", 
+            rows: 1, required: false, 
+            placeholder: "欠席・その他の場合は理由を入力" %>
           </div>
         </div>
       <% end %>
 
-      <div class="mt-6 cursor-pointer">
+      <div class="mt-4">
         <%= f.submit "すべての回答を保存", class: "bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700" %>
       </div>
     <% end %>
@@ -63,41 +68,42 @@
 <div class="mb-8 bg-white rounded-lg shadow p-6">
   <h3 class="text-xl font-semibold mb-4">来月の出席管理（未回答のイベント）</h3>
   <% if @next_month_events.any? %>
-    <%= form_with(url: update_attendance_path, method: :post, class: "space-y-6") do |f| %>
+    <%= form_with(url: update_attendance_path, method: :post, class: "space-y-2") do |f| %>
       <% @next_month_events.each do |event| %>
-        <div class="bg-white rounded-lg shadow p-6">
-          <div class="flex items-center gap-2 mb-4">
-            <h4 class="text-lg font-semibold"><%= event.title %></h4>
-            <p class="text-gray-900">@<%= event.date.strftime("%Y年%m月%d日") %>(<%= japanese_weekday(event.date) %>)</p>
+        <div class="flex items-center gap-4 py-2 px-4 border border-gray-200 rounded-lg">
+          <!-- 日付・イベント名 -->
+          <div class="w-48 flex-shrink-0">
+            <div class="text-sm font-medium"><%= event.date.strftime("%m月%d日") %>(<%= japanese_weekday(event.date) %>)</div>
+            <div class="text-sm text-gray-600"><%= event.title %></div>
           </div>
 
+          <!-- 出席ステータス -->
           <% attendance = @attendance.find_by(attendance_event: event) %>
-          <div class="flex items-center space-x-20">
-            <div class="flex items-center space-x-1">
-              <%= f.radio_button "attendance[#{event.id}][status]", "present", checked: attendance&.status == "present", class: "form-radio cursor-pointer", data: { requires_note: false } %>
-              <%= f.label "attendance[#{event.id}][status]", "出席", value: "present", class: "ml-1 cursor-pointer" %>
+          <div class="flex items-center gap-6">
+            <div class="flex items-center gap-1">
+              <%= f.radio_button "attendance[#{event.id}][status]", "present", checked: attendance&.status == "present", class: "form-radio", data: { requires_note: false } %>
+              <%= f.label "attendance[#{event.id}][status]", "出席", value: "present", class: "text-sm cursor-pointer" %>
             </div>
 
-            <div class="flex items-center space-x-1">
-              <%= f.radio_button "attendance[#{event.id}][status]", "absent", checked: attendance&.status == "absent", class: "form-radio cursor-pointer", data: { requires_note: true } %>
-              <%= f.label "attendance[#{event.id}][status]", "欠席", value: "absent", class: "ml-1 cursor-pointer" %>
+            <div class="flex items-center gap-1">
+              <%= f.radio_button "attendance[#{event.id}][status]", "absent", checked: attendance&.status == "absent", class: "form-radio", data: { requires_note: true } %>
+              <%= f.label "attendance[#{event.id}][status]", "欠席", value: "absent", class: "text-sm cursor-pointer" %>
             </div>
 
-            <div class="flex items-center space-x-1">
-              <%= f.radio_button "attendance[#{event.id}][status]", "other", checked: attendance&.status == "other", class: "form-radio cursor-pointer", data: { requires_note: true } %>
-              <%= f.label "attendance[#{event.id}][status]", "その他(遅刻, 早退)", value: "other", class: "ml-1 cursor-pointer" %>
+            <div class="flex items-center gap-1">
+              <%= f.radio_button "attendance[#{event.id}][status]", "other", checked: attendance&.status == "other", class: "form-radio", data: { requires_note: true } %>
+              <%= f.label "attendance[#{event.id}][status]", "その他", value: "other", class: "text-sm cursor-pointer" %>
             </div>
           </div>
 
-          <div class="mt-4">
-            <%= f.label "attendance[#{event.id}][note]", "備考", class: "block text-sm font-medium text-gray-700" %>
-            <%= f.text_area "attendance[#{event.id}][note]", value: attendance&.note, class: "mt-1 block w-full rounded-md border border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2", rows: 1, required: false %>
-            <p class="mt-1 text-sm text-red-500">※欠席・その他の場合は必ず備考を入力してください。遅刻,早退の場合は時間も記載してください。</p>
+          <!-- 備考欄 -->
+          <div class="flex-1">
+            <%= f.text_area "attendance[#{event.id}][note]", value: attendance&.note, class: "w-full text-sm rounded border border-gray-200 px-2 py-1 h-8 leading-6 resize-none", rows: 1, required: false, placeholder: "欠席・その他の場合は理由を入力" %>
           </div>
         </div>
       <% end %>
 
-      <div class="mt-6 cursor-pointer">
+      <div class="mt-4">
         <%= f.submit "すべての回答を保存", class: "bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700" %>
       </div>
     <% end %>
@@ -118,13 +124,14 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const radioButtons = document.querySelectorAll('input[type="radio"]');
-  const textAreas = document.querySelectorAll('textarea');
 
   radioButtons.forEach(radio => {
     radio.addEventListener('change', function() {
       const requiresNote = this.dataset.requiresNote === 'true';
-      const textArea = this.closest('.bg-white').querySelector('textarea');
-      textArea.required = requiresNote;
+      const textArea = this.closest('.flex').querySelector('textarea');
+      if (textArea) {
+        textArea.required = requiresNote;
+      }
     });
   });
 });
