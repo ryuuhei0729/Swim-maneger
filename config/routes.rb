@@ -2,6 +2,65 @@ Rails.application.routes.draw do
   # ルートパス
   root to: "landing#index"
 
+  # API ルーティング
+  namespace :api do
+    namespace :v1 do
+      get '/', to: 'landing#index'
+      resources :auth, only: [] do
+        collection do
+          post 'login'
+          delete 'logout'
+        end
+      end
+      resources :members, only: [:index]
+      resources :records, only: [:index, :show]
+      resources :attendance, only: [] do
+        collection do
+          get '/', to: 'attendance#show'
+          patch '/', to: 'attendance#update'
+          get 'event_status/:event_id', to: 'attendance#event_status'
+        end
+      end
+      get 'calendar', to: 'calendar#show'
+      post 'calendar/update', to: 'calendar#update'
+      get 'home', to: 'home#index'
+      get 'mypage', to: 'mypage#show'
+      patch 'mypage', to: 'mypage#update'
+      resources :objectives, only: [:index, :show, :create, :update, :destroy], controller: 'objective'
+      
+      # 管理者機能
+      get 'admin', to: 'admin#index'
+      
+      # ユーザー管理
+      get 'admin/users', to: 'admin#users'
+      post 'admin/users', to: 'admin#create_user'
+      
+      # お知らせ管理
+      get 'admin/announcements', to: 'admin#announcements'
+      post 'admin/announcements', to: 'admin#create_announcement'
+      patch 'admin/announcements/:id', to: 'admin#update_announcement'
+      delete 'admin/announcements/:id', to: 'admin#destroy_announcement'
+      
+      # スケジュール管理
+      get 'admin/schedules', to: 'admin#schedules'
+      post 'admin/schedules', to: 'admin#create_schedule'
+      patch 'admin/schedules/:id', to: 'admin#update_schedule'
+      delete 'admin/schedules/:id', to: 'admin#destroy_schedule'
+      get 'admin/schedules/:id', to: 'admin#show_schedule'
+      
+      # 目標管理
+      get 'admin/objectives', to: 'admin#objectives'
+      
+      # 練習管理
+      get 'admin/practices', to: 'admin#practices'
+      get 'admin/practice_time_setup', to: 'admin#practice_time_setup'
+      post 'admin/practice_time_preview', to: 'admin#practice_time_preview'
+      post 'admin/practice_logs', to: 'admin#create_practice_log_and_times'
+      get 'admin/practice_register_setup', to: 'admin#practice_register_setup'
+      post 'admin/practice_register', to: 'admin#create_practice_register'
+    end
+  end
+
   # 認証関連
   devise_for :user_auths, controllers: {
     sessions: "user_auths/sessions"
