@@ -14,11 +14,8 @@ class Api::V1::ObjectiveController < Api::V1::BaseController
     objective = current_user_auth.user.objectives.build(objective_params)
 
     # 目標タイムを秒に変換
-    if params[:minutes].present? || params[:seconds].present?
-      minutes = params[:minutes].to_i
-      seconds = params[:seconds].to_f
-      objective.target_time = minutes * 60 + seconds
-    end
+    target_time = convert_time_to_seconds(params)
+    objective.target_time = target_time if target_time
 
     if objective.save
       render_success({
@@ -46,11 +43,8 @@ class Api::V1::ObjectiveController < Api::V1::BaseController
     objective = current_user_auth.user.objectives.find(params[:id])
 
     # 目標タイムを秒に変換
-    if params[:minutes].present? || params[:seconds].present?
-      minutes = params[:minutes].to_i
-      seconds = params[:seconds].to_f
-      objective.target_time = minutes * 60 + seconds
-    end
+    target_time = convert_time_to_seconds(params)
+    objective.target_time = target_time if target_time
 
     if objective.update(objective_params)
       render_success({
@@ -198,5 +192,14 @@ class Api::V1::ObjectiveController < Api::V1::BaseController
       :quality_note,
       milestones_attributes: [ :milestone_type, :limit_date, :note ]
     )
+  end
+
+  # 分と秒から総秒数に変換するプライベートメソッド
+  def convert_time_to_seconds(params)
+    return nil unless params[:minutes].present? || params[:seconds].present?
+    
+    minutes = params[:minutes].to_i
+    seconds = params[:seconds].to_f
+    minutes * 60 + seconds
   end
 end 
