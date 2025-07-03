@@ -2,6 +2,33 @@ Rails.application.routes.draw do
   # ルートパス
   root to: "landing#index"
 
+  # API ルーティング
+  namespace :api do
+    namespace :v1 do
+      get '/', to: 'landing#index'
+      resources :auth, only: [] do
+        collection do
+          post 'login'
+          delete 'logout'
+        end
+      end
+      resources :members, only: [:index]
+      resources :records, only: [:index, :show]
+      resources :attendance, only: [] do
+        collection do
+          get '/', to: 'attendance#show'
+          patch '/', to: 'attendance#update'
+          get 'event_status/:event_id', to: 'attendance#event_status'
+        end
+      end
+      get 'calendar', to: 'calendar#show'
+      post 'calendar/update', to: 'calendar#update'
+      get 'home', to: 'home#index'
+      get 'mypage', to: 'mypage#show'
+      patch 'mypage', to: 'mypage#update'
+    end
+  end
+
   # 認証関連
   devise_for :user_auths, controllers: {
     sessions: "user_auths/sessions"
