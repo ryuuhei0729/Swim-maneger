@@ -32,6 +32,15 @@ class AttendanceController < ApplicationController
       .where(date: @current_month.beginning_of_month..@current_month.end_of_month)
       .order(date: :asc)
 
+    # ログインユーザーの出席情報を取得（カレンダー表示用）
+    @user_attendance_by_event = {}
+    current_user_auth.user.attendance
+      .joins(:attendance_event)
+      .where(attendance_events: { date: @current_month.beginning_of_month..@current_month.end_of_month })
+      .each do |attendance|
+        @user_attendance_by_event[attendance.attendance_event_id] = attendance
+      end
+
     # 誕生日データを取得
     @birthdays_by_date = {}
     User.where(user_type: "player").each do |user|
@@ -64,7 +73,8 @@ class AttendanceController < ApplicationController
         render partial: "shared/calendar", locals: {
           current_month: @current_month,
           events_by_date: @events_by_date,
-          birthdays_by_date: @birthdays_by_date
+          birthdays_by_date: @birthdays_by_date,
+          user_attendance_by_event: @user_attendance_by_event
         }
       }
     end
