@@ -40,7 +40,7 @@
 
             <div class="flex items-center gap-1">
               <%= f.radio_button "attendance[#{event.id}][status]", "other", checked: attendance&.status == "other", class: "form-radio", data: { requires_note: true } %>
-              <%= f.label "attendance[#{event.id}][status]", "その他", value: "other", class: "text-sm cursor-pointer" %>
+              <%= f.label "attendance[#{event.id}][status]", "その他（遅刻・早退など）", value: "other", class: "text-sm cursor-pointer" %>
             </div>
           </div>
 
@@ -50,7 +50,7 @@
             value: attendance&.note,
             class: "w-full text-sm rounded border border-gray-200 px-2 py-1 h-auto resize-none", 
             rows: 1, required: false, 
-            placeholder: "欠席・その他の場合は理由を入力" %>
+            placeholder: "欠席・その他の場合は必ず理由を入力" %>
           </div>
         </div>
       <% end %>
@@ -92,13 +92,13 @@
 
             <div class="flex items-center gap-1">
               <%= f.radio_button "attendance[#{event.id}][status]", "other", checked: attendance&.status == "other", class: "form-radio", data: { requires_note: true } %>
-              <%= f.label "attendance[#{event.id}][status]", "その他", value: "other", class: "text-sm cursor-pointer" %>
+              <%= f.label "attendance[#{event.id}][status]", "その他（遅刻・早退など）", value: "other", class: "text-sm cursor-pointer" %>
             </div>
           </div>
 
           <!-- 備考欄 -->
           <div class="flex-1">
-            <%= f.text_area "attendance[#{event.id}][note]", value: attendance&.note, class: "w-full text-sm rounded border border-gray-200 px-2 py-1 h-8 leading-6 resize-none", rows: 1, required: false, placeholder: "欠席・その他の場合は理由を入力" %>
+            <%= f.text_area "attendance[#{event.id}][note]", value: attendance&.note, class: "w-full text-sm rounded border border-gray-200 px-2 py-1 h-8 leading-6 resize-none", rows: 1, required: false, placeholder: "欠席・その他の場合は必ず理由を入力" %>
           </div>
         </div>
       <% end %>
