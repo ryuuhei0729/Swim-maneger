@@ -9,6 +9,7 @@
 
   <div class="flex items-center justify-between mb-6">
     <h2 class="text-2xl font-bold text-gray-900">出席管理</h2>
+    <%= link_to "出欠情報を編集する", edit_attendance_path, class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200", data: { turbo: false } %>
   </div>
   
 <!-- 今月の出席管理フォーム -->
@@ -19,10 +20,13 @@
 
       <% @this_month_events.each do |event| %>
         <div class="flex items-center gap-4 py-2 px-4 border border-gray-200 rounded-lg">
-          <!-- 日付・イベント名 -->
+          <!-- 日付・イベント名・場所 -->
           <div class="w-48 flex-shrink-0">
             <div class="text-sm font-medium"><%= event.date.strftime("%m月%d日") %>(<%= japanese_weekday(event.date) %>)</div>
             <div class="text-sm text-gray-600"><%= event.title %></div>
+            <% if event.place.present? %>
+              <div class="text-xs text-gray-500">@<%= event.place %></div>
+            <% end %>
           </div>
 
           <!-- 出席ステータス -->
@@ -56,7 +60,7 @@
       <% end %>
 
       <div class="mt-4">
-        <%= f.submit "すべての回答を保存", class: "bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700" %>
+        <%= f.submit "すべての回答を保存", class: "bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" %>
       </div>
     <% end %>
   <% else %>
@@ -71,10 +75,13 @@
     <%= form_with(url: update_attendance_path, method: :post, class: "space-y-2") do |f| %>
       <% @next_month_events.each do |event| %>
         <div class="flex items-center gap-4 py-2 px-4 border border-gray-200 rounded-lg">
-          <!-- 日付・イベント名 -->
+          <!-- 日付・イベント名・場所 -->
           <div class="w-48 flex-shrink-0">
             <div class="text-sm font-medium"><%= event.date.strftime("%m月%d日") %>(<%= japanese_weekday(event.date) %>)</div>
             <div class="text-sm text-gray-600"><%= event.title %></div>
+            <% if event.place.present? %>
+              <div class="text-xs text-gray-500">@<%= event.place %></div>
+            <% end %>
           </div>
 
           <!-- 出席ステータス -->
@@ -104,7 +111,7 @@
       <% end %>
 
       <div class="mt-4">
-        <%= f.submit "すべての回答を保存", class: "bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700" %>
+        <%= f.submit "すべての回答を保存", class: "bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700" %>
       </div>
     <% end %>
   <% else %>
@@ -115,7 +122,7 @@
 <!-- カレンダー表示部分 -->
 <div class="overflow-x-auto">
   <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-    <h2 class="text-2xl font-bold">▼出欠変更はこちらから</h2>
+    <h2 class="text-2xl font-bold">練習カレンダー</h2>
     <%= render 'shared/calendar' %>
   </div>
 </div>

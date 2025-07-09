@@ -91,6 +91,9 @@ Rails.application.routes.draw do
 
   # 出席管理
   get "attendance", to: "attendance#index", as: :attendance
+  get "attendance/edit", to: "attendance#edit", as: :edit_attendance
+  patch "attendance", to: "attendance#update", as: :update_attendance_edit
+  post "attendance/save_individual", to: "attendance#save_individual", as: :save_individual_attendance
   post "attendance/update", to: "attendance#update_attendance", as: :update_attendance
   get "attendance/event_status/:event_id", to: "attendance#event_status", as: :event_status
 
