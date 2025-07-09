@@ -195,7 +195,25 @@ class AttendanceController < ApplicationController
       end
 
       attendance.status = params[:status]
-      attendance.note = params[:note]
+      
+      # 「出席」以外の場合のみ編集日時を備考欄に追加
+      if params[:status] != "present"
+        edit_timestamp = Time.current.strftime("（%m/%d %H:%M編集）")
+        note_content = params[:note].to_s.strip
+        
+        # 既存の編集日時を削除する（正規表現で（MM/DD HH:mm編集）のパターンを削除）
+        clean_note = note_content.gsub(/（\d{2}\/\d{2} \d{2}:\d{2}編集）/, '').strip
+        
+        # クリーンな備考がある場合は編集日時を追加
+        if clean_note.present?
+          attendance.note = "#{clean_note}#{edit_timestamp}"
+        else
+          attendance.note = edit_timestamp
+        end
+      else
+        # 「出席」の場合は入力された備考をそのまま保存
+        attendance.note = params[:note]
+      end
 
       if attendance.save
         render json: { 

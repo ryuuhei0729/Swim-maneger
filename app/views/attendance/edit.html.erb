@@ -1,10 +1,6 @@
 <% content_for :title, 'Edit Attendance' %>
 
-<%# 曜日の日本語変換用ヘルパー %>
-<% def japanese_weekday(date) %>
-  <% weekdays = { 'Sun' => '日', 'Mon' => '月', 'Tue' => '火', 'Wed' => '水', 'Thu' => '木', 'Fri' => '金', 'Sat' => '土' } %>
-  <% weekdays[date.strftime('%a')] %>
-<% end %>
+
 
 <div class="flex items-center justify-between mb-6">
   <h2 class="text-2xl font-bold text-gray-900">出欠情報の更新</h2>
@@ -195,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
       saveBtn.classList.remove('hidden');
       
       // divの背景色を編集中色に変更
-      eventDiv.classList.remove('bg-gray-100');
+      eventDiv.classList.remove('bg-gray-50');
       eventDiv.classList.add('bg-green-100', 'border-green-300');
     });
   });
@@ -246,34 +242,19 @@ document.addEventListener('DOMContentLoaded', function() {
       .then(response => response.json())
       .then(data => {
         if (data.success) {
-          // 成功：編集モード終了
-          radioButtons.forEach(radio => radio.disabled = true);
-          textArea.disabled = true;
-          
-          // ボタンの表示切り替え
-          this.classList.add('hidden');
-          editBtn.style.display = 'block';
-          
-          // divの背景色を元に戻す
-          eventDiv.classList.remove('bg-green-100', 'border-green-300');
-          eventDiv.classList.add('bg-gray-100');
-          
-          // 成功メッセージ
-          const statusBadge = eventDiv.querySelector('.flex-shrink-0:last-child span');
-          if (statusBadge) {
-            statusBadge.textContent = '回答済み';
-            statusBadge.className = 'inline-block px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800';
-          }
+          // 成功：ページをリロード
+          window.location.reload();
         } else {
           alert('保存に失敗しました: ' + (data.message || '不明なエラー'));
+          // エラーの場合のみボタンを再度有効化
+          this.disabled = false;
+          this.textContent = '保存';
         }
       })
       .catch(error => {
         console.error('Error:', error);
         alert('保存に失敗しました。');
-      })
-      .finally(() => {
-        // ボタンを再度有効化
+        // エラーの場合のみボタンを再度有効化
         this.disabled = false;
         this.textContent = '保存';
       });
