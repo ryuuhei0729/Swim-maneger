@@ -1,11 +1,18 @@
 <%# カレンダーのパーシャル %>
+<% 
+  # localsがある場合はそれを使用、ない場合はインスタンス変数を使用（下位互換性のため）
+  current_month = local_assigns[:current_month] || @current_month
+  events_by_date = local_assigns[:events_by_date] || @events_by_date
+  birthdays_by_date = local_assigns[:birthdays_by_date] || @birthdays_by_date
+  user_attendance_by_event = local_assigns[:user_attendance_by_event] || @user_attendance_by_event
+%>
 <div class="bg-white shadow-lg rounded-xl overflow-hidden" id="calendar" data-controller="calendar">
-  <%= hidden_field_tag :current_month, @current_month.strftime("%Y-%m-%d"), data: { calendar_target: "currentMonth" } %>
+  <%= hidden_field_tag :current_month, current_month.strftime("%Y-%m-%d"), data: { calendar_target: "currentMonth" } %>
   
   <%# カレンダーヘッダー %>
   <div class="bg-blue-800 p-4">
     <div class="flex items-center justify-between">
-      <h3 class="text-xl font-bold text-white" data-calendar-target="header"><%= "#{@current_month.year}年#{@current_month.month}月" %></h3>
+      <h3 class="text-xl font-bold text-white" data-calendar-target="header"><%= "#{current_month.year}年#{current_month.month}月" %></h3>
       <div class="flex space-x-2">
         <button type="button" data-action="click->calendar#prevMonth" class="p-2 bg-white/20 text-white rounded-full hover:bg-white/30 transition-colors duration-200 cursor-pointer">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -37,17 +44,17 @@
 
     <%# カレンダーの日付 %>
     <div class="grid grid-cols-7 gap-1">
-      <% calendar_start = @current_month.beginning_of_month.beginning_of_week(:sunday) %>
-      <% calendar_end = @current_month.end_of_month.end_of_week(:sunday) %>
+      <% calendar_start = current_month.beginning_of_month.beginning_of_week(:sunday) %>
+      <% calendar_end = current_month.end_of_month.end_of_week(:sunday) %>
       <% holidays = HolidayJp.between(calendar_start, calendar_end).index_by(&:date) %>
       <% (calendar_start..calendar_end).each do |date| %>
         <% is_today = date == Date.current %>
-        <% is_current_month = date.month == @current_month.month %>
+        <% is_current_month = date.month == current_month.month %>
         <% is_holiday = holidays[date].present? %>
         <% is_sunday = date.sunday? %>
         <% is_saturday = date.saturday? %>
-        <% events = @events_by_date&.dig(date) || [] %>
-        <% birthdays = @birthdays_by_date&.dig(date) || [] %>
+        <% events = events_by_date&.dig(date) || [] %>
+        <% birthdays = birthdays_by_date&.dig(date) || [] %>
         
         <%# 背景色の決定（優先順位: 祝日 > 日曜 > 土曜） %>
         <% bg_color = if is_current_month
@@ -108,17 +115,41 @@
                 <% if event.is_a?(AttendanceEvent) %>
                   <%# AttendanceEventの場合 - クリック可能で出席情報を表示 %>
                   <div class="group relative">
-                    <div class="bg-white/80 backdrop-blur-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                     <div
-                      class="p-2 rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
+                      class="p-2 rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer bg-white/80 backdrop-blur-sm"
                       data-action="click->calendar#showEventModal"
                       data-event-id="<%= event.id %>"
                     >
                       <div class="flex flex-col space-y-1">
                         <span class="text-xs font-medium text-gray-900"><%= event.title %></span>
-                        <span class="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded-full self-start">
-                          出席: <%= event.attendance.count %>人
-                        </span>
+                        <% if event.place.present? %>
+                          <span class="text-[10px] text-gray-600">@<%= event.place %></span>
+                        <% end %>
+                        <% user_attendance = user_attendance_by_event&.dig(event.id) %>
+                        <% if user_attendance %>
+                          <% case user_attendance.status %>
+                          <% when 'present', '出席' %>
+                            <span class="text-[10px] text-green-800 bg-green-100 px-1.5 py-0.5 rounded-full self-start font-semibold">
+                              出席
+                            </span>
+                          <% when 'absent', '欠席' %>
+                            <span class="text-[10px] text-red-800 bg-red-100 px-1.5 py-0.5 rounded-full self-start font-semibold">
+                              欠席
+                            </span>
+                          <% when 'other', 'その他' %>
+                            <span class="text-[10px] text-yellow-800 bg-yellow-100 px-1.5 py-0.5 rounded-full self-start font-semibold">
+                              その他
+                            </span>
+                          <% else %>
+                            <span class="text-[10px] text-gray-600 bg-gray-200 px-1.5 py-0.5 rounded-full self-start">
+                              <%= user_attendance.status %>
+                            </span>
+                          <% end %>
+                        <% else %>
+                          <span class="text-[10px] text-orange-700 bg-orange-100 px-1.5 py-0.5 rounded-full self-start">
+                            未回答
+                          </span>
+                        <% end %>
                       </div>
                     </div>
                     <% if event.note.present? %>
