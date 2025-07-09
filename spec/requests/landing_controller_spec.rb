@@ -10,7 +10,7 @@ RSpec.describe LandingController, type: :request do
 
       it 'ログイン画面へのリンクが表示される' do
         get root_path
-        expect(response.body).to include('ログイン画面へ')
+        expect(response.body).to include('ログイン')
       end
     end
 

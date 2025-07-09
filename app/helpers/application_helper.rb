@@ -25,4 +25,10 @@ module ApplicationHelper
       format("%.2f", seconds)
     end
   end
+
+  # 日付の曜日を日本語で取得するメソッド
+  def japanese_weekday(date)
+    weekdays = { 'Sun' => '日', 'Mon' => '月', 'Tue' => '火', 'Wed' => '水', 'Thu' => '木', 'Fri' => '金', 'Sat' => '土' }
+    weekdays[date.strftime('%a')]
+  end
 end
