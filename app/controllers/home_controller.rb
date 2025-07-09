@@ -13,6 +13,15 @@ class HomeController < ApplicationController
       .where(date: @current_month.beginning_of_month..@current_month.end_of_month)
       .order(date: :asc)
 
+    # ログインユーザーの出席情報を取得
+    @user_attendance_by_event = {}
+    current_user_auth.user.attendance
+      .joins(:attendance_event)
+      .where(attendance_events: { date: @current_month.beginning_of_month..@current_month.end_of_month })
+      .each do |attendance|
+        @user_attendance_by_event[attendance.attendance_event_id] = attendance
+      end
+
     # 誕生日データを取得
     @birthdays_by_date = {}
     User.where(user_type: :player).each do |user|
