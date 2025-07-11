@@ -139,6 +139,16 @@ Rails.application.routes.draw do
   get "admin/practice/register", to: "admin#practice_register", as: "admin_practice_register"
   post "admin/practice_register", to: "admin#create_practice_register", as: "admin_practice_register_create"
 
+  # [管理者]出欠管理
+  get "admin/attendance", to: "admin#attendance", as: "admin_attendance"
+  get "admin/attendance/check", to: "admin#attendance_check", as: "admin_attendance_check"
+  patch "admin/attendance/check", to: "admin#update_attendance_check", as: "update_admin_attendance_check"
+  patch "admin/attendance/save", to: "admin#save_attendance_check", as: "save_admin_attendance_check"
+
+  # [管理者]出席状況更新
+  get "admin/attendance/update", to: "admin#attendance_update", as: "admin_attendance_update"
+  patch "admin/attendance/update", to: "admin#save_attendance_update", as: "save_admin_attendance_update"
+
   # エラーページ
   match "/404", to: "errors#not_found", via: :all
   match "/500", to: "errors#internal_server_error", via: :all

@@ -1,0 +1,74 @@
+<% content_for :title, '未チェックユーザー出席状況更新' %>
+
+<div class="w-full pt-8">
+  <div class="text-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-3">未チェックユーザー出席状況更新</h1>
+    <p class="text-lg text-gray-600">実際に出席していない人の状況を変更してください</p>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
+    <div class="p-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">イベント情報</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <span class="text-sm text-gray-500">日付</span>
+          <p class="font-medium"><%= @attendance_event.date.strftime("%Y年%m月%d日") %>(<%= japanese_weekday(@attendance_event.date) %>)</p>
+        </div>
+        <div>
+          <span class="text-sm text-gray-500">イベント名</span>
+          <p class="font-medium"><%= @attendance_event.title %></p>
+        </div>
+        <div>
+          <span class="text-sm text-gray-500">場所</span>
+          <p class="font-medium"><%= @attendance_event.place.presence || "未設定" %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
+    <div class="p-6">
+      <%= form_with url: save_admin_attendance_update_path, method: :patch, local: true, class: "space-y-6" do |form| %>
+        <%= form.hidden_field :attendance_event_id, value: @attendance_event.id %>
+        <%# hiddenで未チェックユーザーIDを配列で渡す %>
+        <% @unchecked_users.each do |user| %>
+          <%= hidden_field_tag 'unchecked_user_ids[]', user.id %>
+        <% end %>
+        <% if @unchecked_users.any? %>
+          <div class="space-y-6">
+            <% @unchecked_users.each do |user| %>
+              <div class="border border-gray-200 rounded-lg p-4">
+                <div class="mb-3">
+                  <span class="font-medium"><%= user.name %></span>
+                  <span class="text-sm text-gray-500">(<%= user.generation %>期)</span>
+                </div>
+                <div class="space-y-2">
+                  <div class="flex items-center space-x-4">
+                    <label class="flex items-center">
+                      <input type="radio" name="status_<%= user.id %>" value="absent" class="form-radio" required>
+                      <span class="ml-2 text-sm">欠席</span>
+                    </label>
+                    <label class="flex items-center">
+                      <input type="radio" name="status_<%= user.id %>" value="other" class="form-radio" required>
+                      <span class="ml-2 text-sm">その他</span>
+                    </label>
+                  </div>
+                  <textarea name="note_<%= user.id %>" placeholder="理由を入力してください" class="w-full text-sm border border-gray-300 rounded-md px-3 py-2" rows="2" required></textarea>
+                </div>
+              </div>
+            <% end %>
+          </div>
+          <div class="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+            <%= link_to "戻る", admin_attendance_path, class: "bg-gray-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-600 transition-colors" %>
+            <%= form.submit "保存", class: "bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 transition-colors" %>
+          </div>
+        <% else %>
+          <div class="text-center py-8 text-gray-500">
+            <p>未チェックユーザーがいません。</p>
+            <%= link_to "戻る", admin_attendance_path, class: "mt-4 inline-block bg-gray-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-600 transition-colors" %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div> 
