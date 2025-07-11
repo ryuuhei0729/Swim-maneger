@@ -1,0 +1,198 @@
+<% content_for :title, '当日出席確認' %>
+
+<div class="w-full pt-8">
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-bold text-gray-900 mb-3">当日出席確認</h1>
+    <p class="text-lg text-gray-600">実際に出席している人をチェックしてください</p>
+  </div>
+
+  <!-- イベント情報 -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
+    <div class="p-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">イベント情報</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <span class="text-sm text-gray-500">日付</span>
+          <p class="font-medium"><%= @attendance_event.date.strftime("%Y年%m月%d日") %>(<%= japanese_weekday(@attendance_event.date) %>)</p>
+        </div>
+        <div>
+          <span class="text-sm text-gray-500">イベント名</span>
+          <p class="font-medium"><%= @attendance_event.title %></p>
+        </div>
+        <div>
+          <span class="text-sm text-gray-500">場所</span>
+          <p class="font-medium"><%= @attendance_event.place.presence || "未設定" %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 出席確認フォーム -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex items-center justify-between">
+        <h2 class="text-xl font-semibold text-gray-900">出席予定者一覧</h2>
+        <div class="text-sm text-gray-600">
+          <span class="font-medium"><%= @attendances.count %></span>人が出席予定
+        </div>
+      </div>
+      <div class="text-sm text-red-600 mt-2">
+        <p>※実際に出席している人にチェックをつけてください（デフォルトはすべてOFF）</p>
+      </div>
+    </div>
+
+    <div class="p-6">
+             <%= form_with url: update_admin_attendance_check_path, method: :patch, local: false, id: "attendance-check-form", class: "space-y-4", data: { turbo: false } do |form| %>
+                 <%= form.hidden_field :attendance_event_id, value: @attendance_event.id, id: "attendance_event_id_field" %>
+        
+        <% if @attendances.any? %>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <% @attendances.each do |attendance| %>
+              <div class="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer user-card" data-user-id="<%= attendance.user.id %>">
+                <input type="checkbox" 
+                       id="checked_user_<%= attendance.user.id %>" 
+                       name="checked_users[<%= attendance.user.id %>]" 
+                       value="true"
+                       class="form-checkbox h-5 w-5 text-green-600">
+                <div class="flex-1">
+                  <div class="font-medium text-sm"><%= attendance.user.name %></div>
+                  <div class="text-xs text-gray-500">
+                    <%= attendance.user.generation %>期 | 
+                    <span class="<%= attendance.status == 'present' ? 'text-green-600' : 'text-yellow-600' %>">
+                      <%= attendance.status == 'present' ? '出席予定' : 'その他' %>
+                    </span>
+                  </div>
+                  <% if attendance.note.present? %>
+                    <div class="text-xs text-gray-400 mt-1"><%= attendance.note %></div>
+                  <% end %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+
+          <div class="pt-6 border-t border-gray-200">
+            <div class="flex items-center justify-between">
+              <%= link_to "戻る", admin_attendance_path, class: "bg-gray-500 text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-gray-600 transition-colors" %>
+                             <%= form.submit "登録", id: "submit_attendance_check", class: "bg-blue-600 text-white px-6 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors" %>
+            </div>
+          </div>
+        <% else %>
+          <div class="text-center py-8 text-gray-500">
+            <p>出席予定者がいません。</p>
+            <%= link_to "戻る", admin_attendance_path, class: "mt-4 inline-block bg-gray-500 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-600 transition-colors" %>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const form = document.getElementById('attendance-check-form');
+  const modal = document.getElementById('absence-modal');
+  const uncheckedUsersList = document.getElementById('unchecked-users-list');
+  
+  if (!form) {
+    console.error('Form not found!');
+    return;
+  }
+
+  // カード全体をクリックしたときにチェックボックスをトグルする
+  const userCards = document.querySelectorAll('.user-card');
+  userCards.forEach(card => {
+    card.addEventListener('click', function(e) {
+      // チェックボックス自体をクリックした場合は何もしない
+      if (e.target.type === 'checkbox') {
+        return;
+      }
+      
+      const userId = this.dataset.userId;
+      const checkbox = document.getElementById(`checked_user_${userId}`);
+      if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+      }
+    });
+  });
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(form);
+    
+    fetch(form.action, {
+      method: 'PATCH',
+      body: formData,
+      headers: {
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+        'Accept': 'application/json'
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        if (data.redirect_url) {
+          window.location.href = data.redirect_url;
+          return;
+        }
+        if (data.show_modal && data.unchecked_users && data.unchecked_users.length > 0) {
+          showModal(data.unchecked_users);
+        } else {
+          alert(data.message || '処理が完了しました');
+          window.location.href = '/admin/attendance';
+        }
+      } else {
+        alert(data.message || 'エラーが発生しました');
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('エラーが発生しました: ' + error.message);
+    });
+  });
+
+  function showModal(uncheckedUsers) {
+    uncheckedUsersList.innerHTML = '';
+    
+    uncheckedUsers.forEach(user => {
+      const userDiv = document.createElement('div');
+      userDiv.className = 'border border-gray-200 rounded-lg p-4';
+      userDiv.innerHTML = `
+        <div class="mb-3">
+          <span class="font-medium">${user.name}</span>
+          <span class="text-sm text-gray-500">(${user.generation}期)</span>
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-center space-x-4">
+            <label class="flex items-center">
+              <input type="radio" id="status_absent_${user.id}" name="status_${user.id}" value="absent" class="form-radio" required>
+              <span class="ml-2 text-sm">欠席</span>
+            </label>
+            <label class="flex items-center">
+              <input type="radio" id="status_other_${user.id}" name="status_${user.id}" value="other" class="form-radio" required>
+              <span class="ml-2 text-sm">その他</span>
+            </label>
+          </div>
+          <textarea id="note_${user.id}" name="note_${user.id}" placeholder="理由を入力してください" 
+                    class="w-full text-sm border border-gray-300 rounded-md px-3 py-2" rows="2" required></textarea>
+        </div>
+      `;
+      uncheckedUsersList.appendChild(userDiv);
+    });
+    
+    // 既存のモーダルコントローラーを使用してモーダルを開く
+    const modalController = {
+      open: function() {
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      }
+    };
+    modalController.open();
+  }
+});
+</script> 

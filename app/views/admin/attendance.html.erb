@@ -1,0 +1,196 @@
+<% content_for :title, '出欠管理' %>
+
+<div class="w-full pt-8">
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-bold text-gray-900 mb-3">出欠管理</h1>
+    <p class="text-lg text-gray-600">部員の出欠状況を確認・管理できます</p>
+  </div>
+
+  <!-- 当日出席確認 -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">当日出席確認</h2>
+      <%= form_with url: admin_attendance_check_path, method: :get, local: true, class: "flex items-center space-x-4" do |form| %>
+        <div class="flex items-center space-x-2">
+          <label class="text-sm font-medium text-gray-700">イベント選択:</label>
+          <%= form.select :attendance_event_id, 
+              options_from_collection_for_select(
+                @check_events, 
+                :id, 
+                ->(event) { "#{event.date.strftime('%m/%d')} #{event.title}" },
+                @default_check_event&.id
+              ), 
+              { prompt: "イベントを選択してください" },
+              { class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" } %>
+        </div>
+        <%= form.submit "当日出席確認", class: "bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors" %>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- 月別出欠状況 -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
+    <div class="p-6 border-b border-gray-200">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-xl font-semibold text-gray-900">月別出欠状況</h2>
+          <div class="text-sm text-red-600 mt-1">
+            <p>※出席率をクリックすると、高い順に並び替えられます</p>
+          </div>
+        </div>
+        <!-- 月選択フォーム -->
+        <div class="mt-4 sm:mt-0">
+          <%= form_with url: admin_attendance_path, method: :get, local: true, class: "flex items-center space-x-2" do |form| %>
+            <%= form.month_field :month, value: @selected_month.strftime("%Y-%m"), 
+                class: "border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" %>
+            <%= form.submit "表示", class: "bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors" %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+      <div class="overflow-x-auto border border-gray-300">
+       <% if @monthly_events.any? %>
+         <table class="w-full min-w-full border-collapse">
+           <thead class="bg-gray-50">
+             <tr>
+               <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 w-24 border border-gray-300" style="z-index: 10;">
+                 部員名
+               </th>
+               <th class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky bg-gray-50 w-16 border border-gray-300" style="left: 96px; z-index: 10;">
+                 総出席日数
+               </th>
+               <th class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky bg-gray-50 w-16 border border-gray-300 cursor-pointer hover:bg-gray-200" style="left: 160px; z-index: 10;" data-sort-by="attendance_rate">
+                 出席率
+                 <% if @sort_by == 'attendance_rate' %>
+                   <span class="ml-1 text-xs">▼</span>
+                 <% end %>
+               </th>
+               <% @monthly_events.each do |event| %>
+                 <th class="px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-12 border border-gray-300">
+                   <div class="whitespace-nowrap text-xs">
+                     <%= event.date.strftime("%d") %>
+                   </div>
+                   <div class="text-xs text-gray-400 mt-1">
+                     <%= japanese_weekday(event.date) %>
+                   </div>
+                 </th>
+               <% end %>
+             </tr>
+           </thead>
+           <tbody class="bg-white">
+             <% @users.each do |user| %>
+               <% 
+                 present_count = @monthly_attendance_data[user.id].values.count('present')
+                 total_events = @monthly_events.count
+                 attendance_rate = total_events > 0 ? (present_count.to_f / total_events * 100).round(1) : 0
+               %>
+               <tr class="hover:bg-gray-50">
+                 <td class="px-2 py-2 whitespace-nowrap text-xs font-medium text-gray-900 sticky left-0 bg-white z-10 w-24 border border-gray-300">
+                   <div class="flex items-center">
+                     <div>
+                       <div class="font-medium text-xs"><%= user.name %></div>
+                       <div class="text-xs text-gray-500"><%= user.generation %>期</div>
+                     </div>
+                   </div>
+                 </td>
+                 <td class="px-2 py-2 whitespace-nowrap text-center text-xs sticky bg-white z-10 w-16 border border-gray-300" style="left: 96px;">
+                   <span class="font-semibold text-blue-600 text-xs"><%= present_count %></span>
+                   <span class="text-gray-500 text-xs">/<%= total_events %></span>
+                 </td>
+                 <td class="px-2 py-2 whitespace-nowrap text-center text-xs sticky bg-white z-10 w-16 border border-gray-300" style="left: 160px;">
+                   <span class="font-semibold text-xs <%= attendance_rate >= 80 ? 'text-green-600' : attendance_rate >= 60 ? 'text-yellow-600' : 'text-red-600' %>">
+                     <%= attendance_rate %>%
+                   </span>
+                 </td>
+                 <% @monthly_events.each do |event| %>
+                   <% status = @monthly_attendance_data[user.id][event.id] %>
+                   <td class="px-1 py-2 whitespace-nowrap text-center text-xs border border-gray-300">
+                     <% case status %>
+                     <% when 'present' %>
+                       <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-100 text-green-800 text-xs font-bold">
+                         ○
+                       </span>
+                     <% when 'absent' %>
+                       <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-100 text-red-800 text-xs font-bold">
+                         ×
+                       </span>
+                     <% when 'other' %>
+                       <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-yellow-100 text-yellow-800 text-xs font-bold">
+                         △
+                       </span>
+                     <% else %>
+                       <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-100 text-gray-500 text-xs">
+                         -
+                       </span>
+                     <% end %>
+                   </td>
+                 <% end %>
+               </tr>
+             <% end %>
+           </tbody>
+         </table>
+        
+        <!-- 凡例 -->
+        <div class="p-3 bg-gray-50 border-t border-gray-200">
+          <div class="flex flex-wrap items-center justify-center space-x-4 text-xs">
+            <div class="flex items-center space-x-1">
+              <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-100 text-green-800 text-xs font-bold">○</span>
+              <span class="text-gray-600">出席</span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-red-100 text-red-800 text-xs font-bold">×</span>
+              <span class="text-gray-600">欠席</span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-yellow-100 text-yellow-800 text-xs font-bold">△</span>
+              <span class="text-gray-600">その他</span>
+            </div>
+            <div class="flex items-center space-x-1">
+              <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-gray-100 text-gray-500 text-xs">-</span>
+              <span class="text-gray-600">未回答</span>
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <div class="p-12 text-center">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <h3 class="mt-2 text-sm font-medium text-gray-900">この月にイベントがありません</h3>
+          <p class="mt-1 text-sm text-gray-500"><%= @selected_month.strftime("%Y年%m月") %>にはイベントが登録されていません。</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const sortHeader = document.querySelector('th[data-sort-by]');
+    
+    if (sortHeader) {
+      sortHeader.addEventListener('click', () => {
+        const sortBy = sortHeader.dataset.sortBy;
+        const currentSortBy = new URLSearchParams(window.location.search).get('sort_by');
+        const currentMonth = new URLSearchParams(window.location.search).get('month') || '<%= Date.current.strftime("%Y-%m") %>';
+        
+        // URLパラメータを更新
+        const url = new URL(window.location.href);
+        
+        if (currentSortBy === sortBy) {
+          // 同じヘッダーを再度クリックした場合は並び替えを解除
+          url.searchParams.delete('sort_by');
+        } else {
+          // 新しいヘッダーをクリックした場合は並び替えを適用
+          url.searchParams.set('sort_by', sortBy);
+        }
+
+        // 現在の月を保持
+        url.searchParams.set('month', currentMonth);
+        
+        window.location.href = url.toString();
+      });
+    }
+  });
+</script> 
