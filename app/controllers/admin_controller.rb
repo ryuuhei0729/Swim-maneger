@@ -239,7 +239,13 @@ class AdminController < ApplicationController
     
     # 月別出欠状況用のデータ
     begin
-      @selected_month = params[:month].present? ? Date.parse(params[:month]).beginning_of_month : Date.current.beginning_of_month
+      if params[:month].present?
+        # "2025-12" 形式のパラメータを "2025-12-01" に変換してからパース
+        month_str = "#{params[:month]}-01"
+        @selected_month = Date.parse(month_str).beginning_of_month
+      else
+        @selected_month = Date.current.beginning_of_month
+      end
     rescue Date::Error
       @selected_month = Date.current.beginning_of_month
     end
