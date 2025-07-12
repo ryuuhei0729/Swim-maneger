@@ -154,6 +154,9 @@ Rails.application.routes.draw do
   get "admin/attendance/update", to: "admin#attendance_update", as: "admin_attendance_update"
   patch "admin/attendance/update", to: "admin#save_attendance_update", as: "save_admin_attendance_update"
 
+  # [管理者]大会管理
+  get "admin/competition", to: "admin#competition", as: "admin_competition"
+
   # エラーページ
   match "/404", to: "errors#not_found", via: :all
   match "/500", to: "errors#internal_server_error", via: :all

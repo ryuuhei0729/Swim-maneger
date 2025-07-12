@@ -638,6 +638,17 @@ class AdminController < ApplicationController
     redirect_to admin_attendance_path, notice: "#{update_count}人の出席状況を更新しました"
   end
 
+  def competition
+    # 大会一覧を取得（is_competitionがtrueのAttendanceEvent）
+    @competitions = AttendanceEvent.where(is_competition: true)
+                                 .order(date: :desc)
+                                 .limit(10)
+    
+    # 今後の開発予定：
+    # - エントリー管理機能
+    # - 大会結果入力機能
+  end
+
   private
 
   def check_admin_access
