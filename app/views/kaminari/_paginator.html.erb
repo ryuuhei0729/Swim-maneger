@@ -1,0 +1,31 @@
+<%# The container tag
+  - available local variables
+    current_page:  a page object for the currently displayed page
+    total_pages:   total number of pages
+    per_page:      number of items to fetch per page
+    remote:        data-remote
+    paginator:     the paginator that renders the pagination tags inside
+-%>
+<%= paginator.render do -%>
+  <nav class="flex items-center justify-center bg-white px-4 py-3" aria-label="Pagination">
+    <div class="flex space-x-1">
+      <% unless current_page.first? %>
+        <%= link_to "前へ", url_for(page: current_page.number - 1), class: "inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+      <% end %>
+      
+      <% (1..total_pages).each do |page_num| %>
+        <% if page_num == current_page.number %>
+          <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-md">
+            <%= page_num %>
+          </span>
+        <% else %>
+          <%= link_to page_num, url_for(page: page_num), class: "inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+        <% end %>
+      <% end %>
+      
+      <% unless current_page.last? %>
+        <%= link_to "次へ", url_for(page: current_page.number + 1), class: "inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" %>
+      <% end %>
+    </div>
+  </nav>
+<% end -%> 
