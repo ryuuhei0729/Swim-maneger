@@ -129,6 +129,10 @@ Rails.application.routes.draw do
   # [管理者]スケジュール管理
   get "admin/schedule", to: "admin#schedule", as: "admin_schedule"
   post "admin/schedule", to: "admin#create_schedule", as: "admin_create_schedule"
+  get "admin/schedule/import", to: "admin#schedule_import", as: "admin_schedule_import"
+  get "admin/schedule/import/template", to: "admin#schedule_import_template", as: "admin_schedule_import_template"
+  post "admin/schedule/import/preview", to: "admin#schedule_import_preview", as: "admin_schedule_import_preview"
+  post "admin/schedule/import/execute", to: "admin#schedule_import_execute", as: "admin_schedule_import_execute"
   get "admin/schedule/:id/edit", to: "admin#edit_schedule", as: "admin_edit_schedule"
   patch "admin/schedule/:id", to: "admin#update_schedule", as: "admin_update_schedule"
   delete "admin/schedule/:id", to: "admin#destroy_schedule", as: "admin_destroy_schedule"
