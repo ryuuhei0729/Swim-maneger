@@ -1,8 +1,6 @@
 <% content_for :title, 'Attendance' %>
 
-
-
-
+<div class="mt-2">
   <div class="flex items-center justify-between mb-6">
     <h2 class="text-2xl font-bold text-gray-900">出席管理</h2>
     <%= link_to "出欠情報を編集する", edit_attendance_path, class: "bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200", data: { turbo: false } %>
@@ -138,4 +136,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
-</script> 
+</script>
+</div> 

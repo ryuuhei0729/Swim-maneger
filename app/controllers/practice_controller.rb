@@ -1,10 +1,10 @@
-class RecordController < ApplicationController
+class PracticeController < ApplicationController
   def index
     @practice_logs = PracticeLog.includes(:practice_times, :attendance_event)
                               .where(practice_times: { user_id: current_user_auth.user.id })
                               .order(created_at: :desc)
                               .page(params[:page])
-                              .per(5)
+                              .per(10)
   end
 
   def practice_times
