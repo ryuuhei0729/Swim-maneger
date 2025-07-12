@@ -653,7 +653,7 @@ class AdminController < ApplicationController
 
   def check_admin_access
     unless current_user_auth.user.user_type.in?([ "coach", "director" ])
-      redirect_to root_path, alert: "このページにアクセスする権限がありません。"
+      redirect_to home_path, alert: "このページにアクセスする権限がありません。"
     end
   end
 
