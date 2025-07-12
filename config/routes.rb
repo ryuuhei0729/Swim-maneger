@@ -83,6 +83,7 @@ Rails.application.routes.draw do
   patch "mypage", to: "mypage#update"
   get "member", to: "member#index", as: :member
   get "practice", to: "practice#index", as: :practice
+  get "records", to: "records#index", as: :records
 
   # 目標管理
   get "objective", to: "objective#index", as: :objective_index
