@@ -36,24 +36,76 @@
   <% avg = times.sum / times.size %>
   <% max = times.max %>
   <% min = times.min %>
-  <div class="mt-4 text-left text-sm text-gray-700">
-    平均値:
-    <% if avg >= 60 %>
-      <%= format("%d:%05.2f", avg / 60, avg % 60) %>
-    <% else %>
-      <%= format("%.2f", avg) %>
-    <% end %>
-    ／ 最遅値:
-    <% if max >= 60 %>
-      <%= format("%d:%05.2f", max / 60, max % 60) %>
-    <% else %>
-      <%= format("%.2f", max) %>
-    <% end %>
-    ／ 最速値:
-    <% if min >= 60 %>
-      <%= format("%d:%05.2f", min / 60, min % 60) %>
-    <% else %>
-      <%= format("%.2f", min) %>
-    <% end %>
+  
+  <!-- タイム統計カード -->
+  <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- 最速値 -->
+    <div class="bg-gradient-to-r from-emerald-50 to-green-50 border border-emerald-200 rounded-xl p-4 hover:shadow-md transition-all duration-300">
+      <div class="flex items-center space-x-3">
+        <div class="flex-shrink-0">
+          <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-emerald-800">最速値</p>
+          <p class="text-lg font-bold text-emerald-900">
+            <% if min >= 60 %>
+              <%= format("%d:%05.2f", min / 60, min % 60) %>
+            <% else %>
+              <%= format("%.2f", min) %>
+            <% end %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 平均値 -->
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 hover:shadow-md transition-all duration-300">
+      <div class="flex items-center space-x-3">
+        <div class="flex-shrink-0">
+          <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-blue-800">平均値</p>
+          <p class="text-lg font-bold text-blue-900">
+            <% if avg >= 60 %>
+              <%= format("%d:%05.2f", avg / 60, avg % 60) %>
+            <% else %>
+              <%= format("%.2f", avg) %>
+            <% end %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 最遅値 -->
+    <div class="bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl p-4 hover:shadow-md transition-all duration-300">
+      <div class="flex items-center space-x-3">
+        <div class="flex-shrink-0">
+          <div class="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-sm font-medium text-red-800">最遅値</p>
+          <p class="text-lg font-bold text-red-900">
+            <% if max >= 60 %>
+              <%= format("%d:%05.2f", max / 60, max % 60) %>
+            <% else %>
+              <%= format("%.2f", max) %>
+            <% end %>
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
 <% end %> 
