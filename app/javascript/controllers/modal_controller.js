@@ -10,7 +10,7 @@ export default class extends Controller {
       modal.classList.remove("hidden");
       // 練習タイム用のfetchのみ、logIdとcontentが存在する場合のみ実行
       if (logId && content) {
-        fetch(`/record/practice_times/${logId}`)
+        fetch(`/practice/practice_times/${logId}`)
           .then(response => response.text())
           .then(html => {
             content.innerHTML = html;

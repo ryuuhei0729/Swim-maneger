@@ -82,7 +82,8 @@ Rails.application.routes.draw do
   get "mypage", to: "mypage#index", as: :mypage
   patch "mypage", to: "mypage#update"
   get "member", to: "member#index", as: :member
-  get "record", to: "record#index", as: :record
+  get "practice", to: "practice#index", as: :practice
+  get "records", to: "records#index", as: :records
 
   # 目標管理
   get "objective", to: "objective#index", as: :objective_index
@@ -98,7 +99,7 @@ Rails.application.routes.draw do
   get "attendance/event_status/:event_id", to: "attendance#event_status", as: :event_status
 
   # 練習記録
-  get "record/practice_times/:id", to: "record#practice_times"
+  get "practice/practice_times/:id", to: "practice#practice_times"
 
   # イベント管理
   resources :events do
