@@ -81,7 +81,28 @@ class AdminController < ApplicationController
   end
 
   def create_schedule
-    @event = AttendanceEvent.new(schedule_params)
+    # 大会の場合は無条件でAttendanceEventテーブルに保存
+    is_competition = params[:attendance_event][:is_competition] == "1"
+    requires_attendance = params[:requires_attendance] == "1"
+    
+    # 大会の場合は無条件でAttendanceEventテーブルに保存
+    # そうでない場合は、出欠管理チェックボックスの状態に応じて決定
+    use_attendance_event = is_competition || requires_attendance
+    
+    if use_attendance_event
+      # AttendanceEventテーブルに保存
+      @event = AttendanceEvent.new(schedule_params)
+    else
+      # Eventテーブルに保存
+      event_params = {
+        title: params[:attendance_event][:title],
+        date: params[:attendance_event][:date],
+        place: params[:attendance_event][:place],
+        note: params[:attendance_event][:note]
+      }
+      @event = Event.new(event_params)
+    end
+    
     if @event.save
       redirect_to admin_schedule_path, notice: "スケジュールを登録しました。"
     else
