@@ -1,6 +1,6 @@
 <% content_for :title, 'Admin' %>
 
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-2 px-4 sm:px-2 lg:px-2">
   <div class="max-w-7xl mx-auto">
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
       <div class="px-8 py-6 border-b border-gray-200">
@@ -115,9 +115,15 @@
           placeholder: "練習や大会のタイトルを入力",
           required: true %>
     </div>
-    <div class="flex items-center">
-      <%= f.check_box :is_competition, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
-      <%= f.label :is_competition, "大会の場合はチェック", class: "ml-2 block text-sm text-gray-900" %>
+    <div class="flex items-center space-x-6">
+      <div class="flex items-center">
+        <%= f.check_box :is_competition, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+        <%= f.label :is_competition, "大会の場合はチェック", class: "ml-2 block text-sm text-gray-900" %>
+      </div>
+      <div class="flex items-center">
+        <%= check_box_tag :requires_attendance, "1", true, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
+        <%= label_tag :requires_attendance, "出欠管理をしない場合はチェックを外す", class: "ml-2 block text-sm text-gray-900" %>
+      </div>
     </div>
 
     <div>
