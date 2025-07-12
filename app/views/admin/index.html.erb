@@ -112,5 +112,23 @@
         <% end %>
       </div>
     </div>
+
+    <!-- 大会管理カード -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+      <div class="p-6">
+        <div class="flex items-center mb-4">
+          <div class="rounded-full bg-orange-100 p-3">
+            <svg class="h-6 w-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+            </svg>
+          </div>
+          <h3 class="ml-4 text-xl font-semibold text-gray-900">大会管理</h3>
+        </div>
+        <p class="text-gray-600 mb-4">大会の確認と管理、エントリー・結果入力（開発予定）</p>
+        <%= link_to admin_competition_path, class: "w-full bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition-colors duration-300 inline-block text-center", data: { turbo: false } do %>
+          大会管理画面へ
+        <% end %>
+      </div>
+    </div>
   </div>
 </div>

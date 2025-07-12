@@ -114,6 +114,13 @@
               </svg>
               練習管理
             <% end %>
+            
+            <%= link_to admin_competition_path, class: "flex items-center px-4 py-2 text-sm text-blue-100 hover:bg-blue-800 transition-colors duration-150", data: { turbo: false } do %>
+              <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              大会管理
+            <% end %>
           </div>
         </div>
       </div>
