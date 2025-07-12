@@ -27,6 +27,9 @@ gem "ffaker"
 # ページネーション用のgem
 gem "kaminari"
 
+# Excel操作用のgem
+gem "rubyXL"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
