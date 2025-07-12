@@ -361,34 +361,59 @@ puts "Creating records..."
 # is_competition: trueかつ、日付が今日より前のものを取得
 competition_events = AttendanceEvent.where(is_competition: true).where("date < ?", Date.current)
 
+# 大会イベントが存在しない場合、ダミーの大会イベントを作成
+if competition_events.empty?
+  puts "大会イベントが存在しないため、ダミーの大会イベントを作成します..."
+  3.times do |i|
+    AttendanceEvent.create!(
+      title: "第#{i + 1}回大会",
+      date: rand(30..365).days.ago,
+      place: 'アクアティクスセンター',
+      note: "大会です。全員参加必須です。",
+      is_competition: true
+    )
+  end
+  competition_events = AttendanceEvent.where(is_competition: true).where("date < ?", Date.current)
+end
+
 # プレイヤー全員に対して記録を作成
 User.where(user_type: :player).each do |user|
-  # 各選手にランダムに3〜8個の記録を作成
-  rand(3..8).times do
-    style = Style.all.sample
-    time = case style.distance
-    when 50
-      rand(22.00..35.00).round(2)  # 50m: 22-35秒
-    when 100
-      rand(50.00..80.00).round(2)  # 100m: 50-80秒
-    when 200
-      rand(110.00..180.00).round(2) # 200m: 1:50-3:00
-    when 400
-      rand(240.00..360.00).round(2)
-    when 800
-      rand(480.00..720.00).round(2)
-    else
-      0
-    end
+  # 各大会に対して最大2種目まで出場
+  competition_events.each do |competition_event|
+    # この大会に参加するかどうかを80%の確率で決定
+    next unless rand < 0.8
+    
+    # この大会で出場する種目数を1〜2種目で決定
+    event_count = rand(1..2)
+    
+    # ランダムに種目を選択
+    selected_styles = Style.all.sample(event_count)
+    
+    selected_styles.each do |style|
+      time = case style.distance
+      when 50
+        rand(22.00..35.00).round(2)  # 50m: 22-35秒
+      when 100
+        rand(50.00..80.00).round(2)  # 100m: 50-80秒
+      when 200
+        rand(110.00..180.00).round(2) # 200m: 1:50-3:00
+      when 400
+        rand(240.00..360.00).round(2)
+      when 800
+        rand(480.00..720.00).round(2)
+      else
+        0
+      end
 
-    # 記録を作成
-    Record.create!(
-      user: user,
-      style: style,
-      time: time,
-      created_at: rand(1..365).days.ago
-      # attendance_event_id は nil になる
-    )
+      # 記録を作成（大会イベントと関連付け）
+      Record.create!(
+        user: user,
+        style: style,
+        time: time,
+        attendance_event: competition_event,
+        created_at: competition_event.date + rand(0..5).hours
+      )
+    end
   end
 end
 
@@ -400,7 +425,31 @@ User.where(user_type: :player).each do |user|
   # 記録がない種目IDのリスト
   unrecorded_styles = Style.where.not(id: recorded_style_ids)
 
-  unrecorded_styles.each do |style|
+  # 未記録の種目が多い場合は、一部の種目のみに記録を作成
+  styles_to_create = unrecorded_styles.sample([unrecorded_styles.count, 5].min)
+  
+  styles_to_create.each do |style|
+    # ランダムに大会イベントを選択
+    competition_event = competition_events.sample
+    
+    # その大会でのその選手の種目数を確認
+    existing_events_count = user.records.where(attendance_event: competition_event).count
+    
+    # その大会で既に2種目以上出場している場合は別の大会を選択
+    if existing_events_count >= 2
+      # 2種目未満の大会を探す
+      available_events = competition_events.select do |event|
+        user.records.where(attendance_event: event).count < 2
+      end
+      
+      if available_events.any?
+        competition_event = available_events.sample
+      else
+        # 全ての大会で2種目以上出場している場合はスキップ
+        next
+      end
+    end
+    
     # 種目に応じたランダムなタイムを生成
     time = case style.distance
     when 50
@@ -417,13 +466,13 @@ User.where(user_type: :player).each do |user|
       0
     end
 
-    # 記録を作成
+    # 記録を作成（大会イベントと関連付け）
     Record.create!(
       user: user,
       style: style,
       time: time,
-      created_at: rand(1..365).days.ago
-      # attendance_event_id は nil になる
+      attendance_event: competition_event,
+      created_at: competition_event.date + rand(0..5).hours
     )
   end
 end
