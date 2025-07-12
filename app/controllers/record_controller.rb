@@ -4,7 +4,7 @@ class RecordController < ApplicationController
                               .where(practice_times: { user_id: current_user_auth.user.id })
                               .order(created_at: :desc)
                               .page(params[:page])
-                              .per(10)
+                              .per(5)
   end
 
   def practice_times

@@ -16,12 +16,12 @@
       <p class="text-gray-600">現在、登録されているRecordはありません。</p>
     </div>
   <% else %>
-    <div class="grid gap-4 ">
+    <div class="grid gap-1 ">
       <% @practice_logs.each do |log| %>
         <% circle_min = log.circle.to_i / 60 %>
         <% circle_sec = log.circle.to_i % 60 %>
         <% circle_str = "#{circle_min}'#{format('%02d', circle_sec)}\"" %>
-        <div class="border rounded-lg p-4 hover:bg-gray-50 cursor-pointer bg-white" 
+        <div class="border rounded-lg px-4 py-1 hover:bg-gray-50 cursor-pointer bg-white" 
               data-controller="modal"
               data-action="click->modal#open"
               data-modal-target="practice-times-modal"
