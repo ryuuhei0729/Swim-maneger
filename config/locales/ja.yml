@@ -370,3 +370,12 @@ ja:
           player: 選手
           coach: コーチ
           director: 顧問、外部指導員
+
+  views:
+    pagination:
+      displaying: "%{first}-%{last}件を表示中（全%{total}件）"
+      first: "最初"
+      last: "最後"
+      previous: "前へ"
+      next: "次へ"
+      truncate: "…"

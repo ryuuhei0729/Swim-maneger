@@ -3,7 +3,14 @@
 
 <!-- 練習ログ一覧 -->
 <div class="mt-8">
-  <h3 class="text-xl font-semibold text-gray-900 mb-4">練習ログ</h3>
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-xl font-semibold text-gray-900">練習ログ</h3>
+    <% if @practice_logs.respond_to?(:total_count) && @practice_logs.total_count > 0 %>
+      <p class="text-sm text-gray-600">
+        <%= "#{@practice_logs.offset_value + 1}-#{[@practice_logs.offset_value + @practice_logs.limit_value, @practice_logs.total_count].min}件を表示中（全#{@practice_logs.total_count}件）" %>
+      </p>
+    <% end %>
+  </div>
   <% if @practice_logs.empty? %>
     <div class="bg-gray-100 rounded-lg p-6 text-center">
       <p class="text-gray-600">現在、登録されているRecordはありません。</p>
@@ -37,6 +44,11 @@
           </div>
         </div>
       <% end %>
+    </div>
+    
+    <!-- ページネーション -->
+    <div class="flex justify-center mt-8">
+      <%= paginate @practice_logs %>
     </div>
   <% end %>
 </div>
