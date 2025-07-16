@@ -43,7 +43,11 @@
                   <%= competition.note %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <span class="text-gray-400">準備中</span>
+                  <%= form_with url: admin_start_entry_collection_path, method: :post, local: true, class: "inline" do |form| %>
+                    <%= form.hidden_field :event_id, value: competition.id %>
+                    <%= form.submit "エントリーを集める", 
+                        class: "bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-3 rounded text-sm transition duration-200" %>
+                  <% end %>
                 </td>
               </tr>
             <% end %>
@@ -54,6 +58,50 @@
       <div class="text-center py-8">
         <p class="text-gray-500">登録されている大会がありません。</p>
         <p class="text-sm text-gray-400 mt-2">大会は「スケジュール管理」で「大会」として登録できます。</p>
+      </div>
+    <% end %>
+  </div>
+
+  <!-- エントリー受付中の大会 -->
+  <div class="mb-8">
+    <h3 class="text-lg font-semibold mb-4 text-gray-700">エントリー受付中...</h3>
+    
+    <% if @collecting_entries.any? %>
+      <div class="space-y-4">
+        <% @collecting_entries.each do |event| %>
+          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 hover:bg-yellow-100 transition-colors">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="font-semibold text-gray-900"><%= event.title %></h4>
+                <p class="text-sm text-gray-600">
+                  <%= event.date.strftime("%Y年%m月%d日") %>
+                  <% if event.place.present? %>
+                    at <%= event.place %>
+                  <% end %>
+                </p>
+              </div>
+                <div class="flex items-center space-x-3">
+                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                   <%= event.entries.count %>件のエントリー
+                 </span>
+                 <div data-controller="modal">
+                   <button data-action="click->modal#open" 
+                           data-modal-id="entriesModal"
+                           data-event-id="<%= event.id %>"
+                           onclick="loadEntriesData(<%= event.id %>)"
+                           class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
+                     詳細を見る
+                   </button>
+                 </div>
+               </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+        <p class="text-gray-500">現在、エントリー受付中の大会はありません。</p>
+        <p class="text-sm text-gray-400 mt-2">「エントリーを集める」ボタンをクリックして受付を開始してください。</p>
       </div>
     <% end %>
   </div>
@@ -107,4 +155,79 @@
         class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200",
         title: "スケジュール管理画面で「大会」として新規作成できます" %>
   </div>
-</div> 
+</div>
+
+<!-- エントリー詳細モーダル -->
+<%= render 'shared/modal', modal_id: 'entriesModal', title: 'エントリー詳細' do %>
+  <div id="entriesContent" class="space-y-6">
+    <!-- エントリー内容がここに動的に追加される -->
+  </div>
+<% end %>
+
+<script>
+function loadEntriesData(eventId) {
+  fetch(`/admin/competition/entry/${eventId}`, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json',
+      'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.error) {
+      alert(data.error);
+      return;
+    }
+    
+    // エントリー内容を生成
+    let content = '';
+    
+    if (data.entries.length === 0) {
+      content = '<div class="text-center py-8"><p class="text-gray-500">まだエントリーがありません。</p></div>';
+    } else {
+      // 種目別に表示
+      Object.keys(data.entries_by_style).forEach(styleId => {
+        const styleEntries = data.entries_by_style[styleId];
+        if (styleEntries.length > 0) {
+          const styleName = styleEntries[0].style_name || 'Unknown Style';
+          
+          content += `
+            <div class="mb-6">
+              <h4 class="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-2">${styleName}</h4>
+              <div class="space-y-2">
+          `;
+          
+          styleEntries.forEach(entry => {
+            content += `
+              <div class="flex items-center justify-between py-2 px-4 bg-gray-50 rounded-lg">
+                <div class="flex items-center space-x-3">
+                  <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    ${entry.user_generation}期
+                  </span>
+                  <span class="font-medium text-gray-900">${entry.user_name}</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-lg font-semibold text-gray-900">${entry.entry_time}</span>
+                  ${entry.note ? `<div class="text-sm text-gray-500">${entry.note}</div>` : ''}
+                </div>
+              </div>
+            `;
+          });
+          
+          content += `
+              </div>
+            </div>
+          `;
+        }
+      });
+    }
+    
+    document.getElementById('entriesContent').innerHTML = content;
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('エントリー情報の取得に失敗しました。');
+  });
+}
+</script> 

@@ -84,6 +84,9 @@ Rails.application.routes.draw do
   get "member", to: "member#index", as: :member
   get "practice", to: "practice#index", as: :practice
   get "records", to: "records#index", as: :records
+  
+  # エントリー提出
+  post "records/entry", to: "records#submit_entry", as: "submit_entry"
 
   # 目標管理
   get "objective", to: "objective#index", as: :objective_index
@@ -156,6 +159,10 @@ Rails.application.routes.draw do
 
   # [管理者]大会管理
   get "admin/competition", to: "admin#competition", as: "admin_competition"
+  
+  # [管理者]エントリー管理
+  post "admin/competition/entry/start", to: "admin#start_entry_collection", as: "admin_start_entry_collection"
+  get "admin/competition/entry/:event_id", to: "admin#show_entries", as: "admin_show_entries"
 
   # エラーページ
   match "/404", to: "errors#not_found", via: :all
