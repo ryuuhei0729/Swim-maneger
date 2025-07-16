@@ -7,6 +7,7 @@ class User < ApplicationRecord
   has_many :objectives, dependent: :destroy
   has_many :race_goals, dependent: :destroy
   has_many :race_feedbacks, dependent: :destroy
+  has_many :entries, dependent: :destroy
 
   validates :generation, presence: true
   validates :name, presence: true
