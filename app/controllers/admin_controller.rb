@@ -747,6 +747,6 @@ class AdminController < ApplicationController
   end
 
   def practice_log_get_params
-    params.permit(:attendance_event_id, :rep_count, :set_count, :circle)
+    params.fetch(:practice_log, {}).permit(:attendance_event_id, :rep_count, :set_count, :circle)
   end
 end
