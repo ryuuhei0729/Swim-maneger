@@ -21,6 +21,9 @@ gem "jbuilder"
 gem "devise"
 gem "bcrypt", "~> 3.1.7"
 
+# セッションストア用のgem
+gem "activerecord-session_store"
+
 # データ生成用のgem
 gem "ffaker"
 
