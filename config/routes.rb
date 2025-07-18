@@ -13,7 +13,7 @@ Rails.application.routes.draw do
         end
       end
       resources :members, only: [:index]
-      resources :records, only: [:index, :show]
+      resources :races, only: [:index, :show]
       resources :attendance, only: [] do
         collection do
           get '/', to: 'attendance#show'
@@ -83,7 +83,10 @@ Rails.application.routes.draw do
   patch "mypage", to: "mypage#update"
   get "member", to: "member#index", as: :member
   get "practice", to: "practice#index", as: :practice
-  get "records", to: "records#index", as: :records
+  get "races", to: "races#index", as: :races
+  
+  # エントリー提出
+  post "races/entry", to: "races#submit_entry", as: "submit_entry"
 
   # 目標管理
   get "objective", to: "objective#index", as: :objective_index
@@ -153,6 +156,13 @@ Rails.application.routes.draw do
   # [管理者]出席状況更新
   get "admin/attendance/update", to: "admin#attendance_update", as: "admin_attendance_update"
   patch "admin/attendance/update", to: "admin#save_attendance_update", as: "save_admin_attendance_update"
+
+  # [管理者]大会管理
+  get "admin/competition", to: "admin#competition", as: "admin_competition"
+  
+  # [管理者]エントリー管理
+  post "admin/competition/entry/start", to: "admin#start_entry_collection", as: "admin_start_entry_collection"
+  get "admin/competition/entry/:event_id", to: "admin#show_entries", as: "admin_show_entries"
 
   # エラーページ
   match "/404", to: "errors#not_found", via: :all
