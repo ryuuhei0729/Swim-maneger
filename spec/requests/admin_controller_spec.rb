@@ -24,7 +24,7 @@ RSpec.describe AdminController, type: :request do
 
       it '管理者ページにアクセスすると権限エラーでリダイレクトされる' do
         get admin_path
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(home_path)
         expect(flash[:alert]).to eq('このページにアクセスする権限がありません。')
       end
     end
@@ -34,7 +34,7 @@ RSpec.describe AdminController, type: :request do
 
       it '管理者ページにアクセスすると権限エラーでリダイレクトされる' do
         get admin_path
-        expect(response).to redirect_to(root_path)
+        expect(response).to redirect_to(home_path)
         expect(flash[:alert]).to eq('このページにアクセスする権限がありません。')
       end
     end
@@ -250,7 +250,8 @@ RSpec.describe AdminController, type: :request do
             is_competition: false,
             note: 'テストメモ',
             place: 'プール'
-          }
+          },
+          requires_attendance: "1"
         }
       end
 
