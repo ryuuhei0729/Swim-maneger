@@ -119,6 +119,10 @@ Rails.application.routes.draw do
   get "admin/create_user", to: "admin#create_user", as: "admin_create_user"
   post "admin/users", to: "admin#create_user", as: "admin_users"
   patch "admin/users", to: "admin#create_user"
+  get "admin/create_user/import", to: "admin#create_user_import", as: "admin_create_user_import"
+  get "admin/create_user/import/template", to: "admin#create_user_import_template", as: "admin_create_user_import_template"
+  post "admin/create_user/import/preview", to: "admin#create_user_import_preview", as: "admin_create_user_import_preview"
+  post "admin/create_user/import/execute", to: "admin#create_user_import_execute", as: "admin_create_user_import_execute"
 
   # [管理者]目標管理
   get "admin/objective", to: "admin#objective", as: "admin_objective"
