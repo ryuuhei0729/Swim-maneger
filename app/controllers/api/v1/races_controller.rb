@@ -1,4 +1,4 @@
-class Api::V1::RecordsController < Api::V1::BaseController
+class Api::V1::RacesController < Api::V1::BaseController
   def index
     practice_logs = PracticeLog.includes(:practice_times, :attendance_event)
                               .where(practice_times: { user_id: current_user_auth.user.id })
