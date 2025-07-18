@@ -861,12 +861,6 @@ class AdminController < ApplicationController
         temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.json")
         File.write(temp_file_path, @preview_data.to_json)
         
-        Rails.logger.info "=== ユーザープレビューデータ保存 ==="
-        Rails.logger.info "Session ID: #{session.id}"
-        Rails.logger.info "Temp file path: #{temp_file_path}"
-        Rails.logger.info "Preview data size: #{@preview_data.size}"
-        Rails.logger.info "File write successful: #{File.exist?(temp_file_path)}"
-        
       rescue => e
         @errors = ["Excelファイルの読み込みに失敗しました: #{e.message}"]
         @preview_data = []
@@ -882,17 +876,10 @@ class AdminController < ApplicationController
   def create_user_import_execute
     temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.json")
     
-    Rails.logger.info "=== ユーザー一括登録実行 ==="
-    Rails.logger.info "Session ID: #{session.id}"
-    Rails.logger.info "Temp file path: #{temp_file_path}"
-    Rails.logger.info "File exists: #{File.exist?(temp_file_path)}"
-    
     if File.exist?(temp_file_path)
       preview_data = JSON.parse(File.read(temp_file_path))
-      Rails.logger.info "Preview data size: #{preview_data.size}"
     else
       preview_data = nil
-      Rails.logger.info "Preview data size: 0"
     end
     
     if preview_data.blank?
