@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_03_031741) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_16_142027) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -74,6 +74,20 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_031741) do
     t.boolean "is_competition", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "entries", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "attendance_event_id", null: false
+    t.integer "style_id", null: false
+    t.decimal "entry_time", precision: 8, scale: 2, null: false
+    t.text "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["attendance_event_id", "user_id", "style_id"], name: "index_entries_unique_combination", unique: true
+    t.index ["attendance_event_id"], name: "index_entries_on_attendance_event_id"
+    t.index ["style_id"], name: "index_entries_on_style_id"
+    t.index ["user_id"], name: "index_entries_on_user_id"
   end
 
   create_table "events", force: :cascade do |t|
@@ -240,6 +254,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_031741) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "attendance", "attendance_events"
   add_foreign_key "attendance", "users"
+  add_foreign_key "entries", "attendance_events"
+  add_foreign_key "entries", "styles"
+  add_foreign_key "entries", "users"
   add_foreign_key "milestone_reviews", "milestones"
   add_foreign_key "milestones", "objectives"
   add_foreign_key "objectives", "attendance_events"
