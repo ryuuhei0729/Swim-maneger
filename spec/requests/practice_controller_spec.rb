@@ -56,9 +56,8 @@ RSpec.describe PracticeController, type: :request do
     end
 
     it '存在しないPracticeLogの場合は404エラーが返される' do
-      expect {
-        get "/practice/practice_times/999999"
-      }.to raise_error(ActiveRecord::RecordNotFound)
+      get "/practice/practice_times/999999"
+      expect(response).to have_http_status(:not_found)
     end
   end
 end
