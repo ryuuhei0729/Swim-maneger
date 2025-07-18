@@ -1,4 +1,4 @@
-class RecordsController < ApplicationController
+class RacesController < ApplicationController
   before_action :authenticate_user_auth!
 
   def index
