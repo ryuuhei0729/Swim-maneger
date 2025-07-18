@@ -173,6 +173,32 @@ class AdminController < ApplicationController
         @preview_data = []
         @errors = []
         
+        # ファイルバリデーション: content_typeとファイル拡張子をチェック
+        valid_content_types = [
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',  # .xlsx
+          'application/vnd.ms-excel',  # .xls
+          'application/excel',
+          'application/x-excel',
+          'application/x-msexcel'
+        ]
+        
+        valid_extensions = ['.xlsx', '.xls']
+        file_extension = File.extname(excel_file.original_filename).downcase
+        
+        # content_typeのバリデーション
+        unless valid_content_types.include?(excel_file.content_type)
+          @errors << "無効なファイル形式です。Excelファイル（.xlsx または .xls）をアップロードしてください。（検出されたタイプ: #{excel_file.content_type}）"
+          render :schedule_import
+          return
+        end
+        
+        # ファイル拡張子のバリデーション
+        unless valid_extensions.include?(file_extension)
+          @errors << "無効なファイル拡張子です。.xlsx または .xls ファイルをアップロードしてください。（検出された拡張子: #{file_extension}）"
+          render :schedule_import
+          return
+        end
+        
         # Excelファイルを読み込み
         workbook = RubyXL::Parser.parse(excel_file.path)
         current_year = Date.current.year
@@ -713,13 +739,23 @@ class AdminController < ApplicationController
   def create_user_import
     # 一括登録画面を表示
     if params[:clear_preview]
-      temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.json")
-      File.delete(temp_file_path) if File.exist?(temp_file_path)
+      # 新旧両方の一時ファイルを削除
+      temp_file_path_new = Rails.root.join('tmp', "user_import_preview_#{session.id}.enc")
+      temp_file_path_old = Rails.root.join('tmp', "user_import_preview_#{session.id}.json")
+      File.delete(temp_file_path_new) if File.exist?(temp_file_path_new)
+      File.delete(temp_file_path_old) if File.exist?(temp_file_path_old)
       @preview_data = nil
     else
-      temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.json")
+      temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.enc")
       if File.exist?(temp_file_path)
-        @preview_data = JSON.parse(File.read(temp_file_path))
+        begin
+          encrypted_data = File.read(temp_file_path)
+          decrypted_json = decrypt_preview_data(encrypted_data)
+          @preview_data = JSON.parse(decrypted_json)
+        rescue => e
+          Rails.logger.error "Failed to decrypt preview data: #{e.message}"
+          @preview_data = nil
+        end
       else
         @preview_data = nil
       end
@@ -748,6 +784,32 @@ class AdminController < ApplicationController
         excel_file = params[:csv_file]
         @preview_data = []
         @errors = []
+        
+        # ファイルバリデーション: content_typeとファイル拡張子をチェック
+        valid_content_types = [
+          'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',  # .xlsx
+          'application/vnd.ms-excel',  # .xls
+          'application/excel',
+          'application/x-excel',
+          'application/x-msexcel'
+        ]
+        
+        valid_extensions = ['.xlsx', '.xls']
+        file_extension = File.extname(excel_file.original_filename).downcase
+        
+        # content_typeのバリデーション
+        unless valid_content_types.include?(excel_file.content_type)
+          @errors << "無効なファイル形式です。Excelファイル（.xlsx または .xls）をアップロードしてください。（検出されたタイプ: #{excel_file.content_type}）"
+          render :create_user_import
+          return
+        end
+        
+        # ファイル拡張子のバリデーション
+        unless valid_extensions.include?(file_extension)
+          @errors << "無効なファイル拡張子です。.xlsx または .xls ファイルをアップロードしてください。（検出された拡張子: #{file_extension}）"
+          render :create_user_import
+          return
+        end
         
         # Excelファイルを読み込み
         workbook = RubyXL::Parser.parse(excel_file.path)
@@ -857,9 +919,10 @@ class AdminController < ApplicationController
           }
         end
         
-        # プレビューデータを一時ファイルに保存
-        temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.json")
-        File.write(temp_file_path, @preview_data.to_json)
+        # プレビューデータを暗号化して一時ファイルに保存
+        temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.enc")
+        encrypted_data = encrypt_preview_data(@preview_data.to_json)
+        File.write(temp_file_path, encrypted_data)
         
       rescue => e
         @errors = ["Excelファイルの読み込みに失敗しました: #{e.message}"]
@@ -874,10 +937,17 @@ class AdminController < ApplicationController
   end
 
   def create_user_import_execute
-    temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.json")
+    temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.enc")
     
     if File.exist?(temp_file_path)
-      preview_data = JSON.parse(File.read(temp_file_path))
+      begin
+        encrypted_data = File.read(temp_file_path)
+        decrypted_json = decrypt_preview_data(encrypted_data)
+        preview_data = JSON.parse(decrypted_json)
+      rescue => e
+        Rails.logger.error "Failed to decrypt preview data: #{e.message}"
+        preview_data = nil
+      end
     else
       preview_data = nil
     end
@@ -926,9 +996,11 @@ class AdminController < ApplicationController
       end
     end
     
-    # 一時ファイルをクリア
-    temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.json")
-    File.delete(temp_file_path) if File.exist?(temp_file_path)
+    # 一時ファイルをクリア（新旧両方）
+    temp_file_path_new = Rails.root.join('tmp', "user_import_preview_#{session.id}.enc")
+    temp_file_path_old = Rails.root.join('tmp', "user_import_preview_#{session.id}.json")
+    File.delete(temp_file_path_new) if File.exist?(temp_file_path_new)
+    File.delete(temp_file_path_old) if File.exist?(temp_file_path_old)
     
     if errors.any?
       redirect_to admin_create_user_import_path, alert: "一括登録に失敗しました: #{errors.join('; ')}"
@@ -976,5 +1048,21 @@ class AdminController < ApplicationController
 
   def practice_log_get_params
     params.fetch(:practice_log, {}).permit(:attendance_event_id, :rep_count, :set_count, :circle)
+  end
+
+  # セキュアな暗号化・復号化メソッド
+  def encrypt_preview_data(data)
+    encryptor = ActiveSupport::MessageEncryptor.new(encryption_key)
+    encryptor.encrypt_and_sign(data)
+  end
+
+  def decrypt_preview_data(encrypted_data)
+    encryptor = ActiveSupport::MessageEncryptor.new(encryption_key)
+    encryptor.decrypt_and_verify(encrypted_data)
+  end
+
+  def encryption_key
+    # 本番環境では環境変数から取得することを推奨
+    Rails.application.secret_key_base[0, 32]
   end
 end
