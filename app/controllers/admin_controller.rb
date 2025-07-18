@@ -709,6 +709,247 @@ class AdminController < ApplicationController
     end
   end
 
+  # ユーザー一括登録関連メソッド
+  def create_user_import
+    # 一括登録画面を表示
+    if params[:clear_preview]
+      temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.json")
+      File.delete(temp_file_path) if File.exist?(temp_file_path)
+      @preview_data = nil
+    else
+      temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.json")
+      if File.exist?(temp_file_path)
+        @preview_data = JSON.parse(File.read(temp_file_path))
+      else
+        @preview_data = nil
+      end
+    end
+  end
+
+  def create_user_import_template
+    # テンプレートファイルをダウンロード
+    template_path = Rails.root.join('public', 'templates', 'create_user_template.xlsx')
+    
+    unless File.exist?(template_path)
+      redirect_to admin_create_user_import_path, alert: "テンプレートファイルが見つかりません。"
+      return
+    end
+    
+    send_file template_path, 
+              filename: "user_template_#{Date.current.year}.xlsx", 
+              type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  end
+
+  def create_user_import_preview
+    if params[:csv_file].present?
+      require 'rubyXL'
+      
+      begin
+        excel_file = params[:csv_file]
+        @preview_data = []
+        @errors = []
+        
+        # Excelファイルを読み込み
+        workbook = RubyXL::Parser.parse(excel_file.path)
+        worksheet = workbook['登録シート'] # 「登録シート」という名前のシートを取得
+        
+        unless worksheet
+          @errors << "「登録シート」という名前のシートが見つかりません。テンプレートファイルを使用してください。"
+          @preview_data = []
+          render :create_user_import
+          return
+        end
+        
+        # シート内の各行を処理（ヘッダー行をスキップ）
+        worksheet.each_with_index do |row, row_index|
+          next if row_index == 0  # ヘッダー行をスキップ
+          next unless row
+          
+          # セルの値を取得
+          name_cell = row[0]
+          email_cell = row[1] 
+          password_cell = row[2]
+          user_type_cell = row[3]
+          generation_cell = row[4]
+          gender_cell = row[5]
+          birthday_cell = row[6]
+          
+          # 名前とメールアドレスが空白の場合はスキップ
+          next if name_cell.nil? || email_cell.nil? || name_cell.value.blank? || email_cell.value.blank?
+          
+          name = name_cell.value.to_s.strip
+          email = email_cell.value.to_s.strip
+          password = password_cell&.value.to_s.strip || "password"
+          user_type = user_type_cell&.value.to_s.strip
+          generation = generation_cell&.value
+          gender = gender_cell&.value.to_s.strip
+          birthday_value = birthday_cell&.value
+          
+          # 名前とメールアドレスが空白の場合はスキップ
+          next if name.blank? || email.blank?
+          
+          # バリデーション
+          user_type_mapping = {
+            "選手" => "player",
+            "コーチ" => "coach", 
+            "顧問・監督" => "director",
+            "マネージャー" => "manager",
+            "player" => "player",
+            "coach" => "coach",
+            "director" => "director", 
+            "manager" => "manager"
+          }
+          
+          mapped_user_type = user_type_mapping[user_type] || user_type
+          unless ["player", "coach", "director", "manager"].include?(mapped_user_type)
+            @errors << "行#{row_index + 1}: 無効なユーザータイプです: #{user_type}"
+            next
+          end
+          
+          gender_mapping = {
+            "男性" => "male",
+            "女性" => "female", 
+            "male" => "male",
+            "female" => "female"
+          }
+          
+          mapped_gender = gender_mapping[gender] || gender
+          unless ["male", "female"].include?(mapped_gender)
+            @errors << "行#{row_index + 1}: 無効な性別です: #{gender}"
+            next
+          end
+          
+          # 生年月日の処理
+          birthday = nil
+          if birthday_value.present?
+            begin
+              if birthday_value.is_a?(Date)
+                birthday = birthday_value
+              elsif birthday_value.is_a?(DateTime)
+                birthday = birthday_value.to_date
+              elsif birthday_value.is_a?(Numeric)
+                # Excelの日付シリアル値の場合
+                birthday = Date.new(1900, 1, 1) + (birthday_value - 2).days
+              else
+                birthday = Date.parse(birthday_value.to_s)
+              end
+            rescue => e
+              @errors << "行#{row_index + 1}: 無効な生年月日です: #{birthday_value} (#{e.message})"
+              next
+            end
+          end
+          
+          # 期数の処理
+          generation_num = generation.to_i if generation.present?
+          if generation_num.nil? || generation_num <= 0
+            @errors << "行#{row_index + 1}: 有効な期数を入力してください: #{generation}"
+            next
+          end
+          
+          @preview_data << {
+            name: name,
+            email: email,
+            password: password,
+            user_type: mapped_user_type,
+            generation: generation_num,
+            gender: mapped_gender,
+            birthday: birthday
+          }
+        end
+        
+        # プレビューデータを一時ファイルに保存
+        temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.json")
+        File.write(temp_file_path, @preview_data.to_json)
+        
+        Rails.logger.info "=== ユーザープレビューデータ保存 ==="
+        Rails.logger.info "Session ID: #{session.id}"
+        Rails.logger.info "Temp file path: #{temp_file_path}"
+        Rails.logger.info "Preview data size: #{@preview_data.size}"
+        Rails.logger.info "File write successful: #{File.exist?(temp_file_path)}"
+        
+      rescue => e
+        @errors = ["Excelファイルの読み込みに失敗しました: #{e.message}"]
+        @preview_data = []
+      end
+    else
+      @errors = ["ファイルが選択されていません"]
+      @preview_data = []
+    end
+    
+    render :create_user_import
+  end
+
+  def create_user_import_execute
+    temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.json")
+    
+    Rails.logger.info "=== ユーザー一括登録実行 ==="
+    Rails.logger.info "Session ID: #{session.id}"
+    Rails.logger.info "Temp file path: #{temp_file_path}"
+    Rails.logger.info "File exists: #{File.exist?(temp_file_path)}"
+    
+    if File.exist?(temp_file_path)
+      preview_data = JSON.parse(File.read(temp_file_path))
+      Rails.logger.info "Preview data size: #{preview_data.size}"
+    else
+      preview_data = nil
+      Rails.logger.info "Preview data size: 0"
+    end
+    
+    if preview_data.blank?
+      redirect_to admin_create_user_import_path, alert: "プレビューデータが見つかりません。Excelファイルを再度アップロードしてください。"
+      return
+    end
+    
+    success_count = 0
+    errors = []
+    
+    ActiveRecord::Base.transaction do
+      preview_data.each_with_index do |data, index|
+        user = User.new(
+          name: data["name"],
+          user_type: data["user_type"],
+          generation: data["generation"], 
+          gender: data["gender"],
+          birthday: data["birthday"]
+        )
+        
+        user_auth = UserAuth.new(
+          email: data["email"],
+          password: data["password"],
+          password_confirmation: data["password"]
+        )
+        
+        if user.save
+          user_auth.user = user
+          if user_auth.save
+            success_count += 1
+          else
+            user.destroy
+            error_msg = "#{data["name"]} (#{data["email"]}): #{user_auth.errors.full_messages.join(', ')}"
+            errors << error_msg
+          end
+        else
+          error_msg = "#{data["name"]} (#{data["email"]}): #{user.errors.full_messages.join(', ')}"
+          errors << error_msg
+        end
+      end
+      
+      if errors.any?
+        raise ActiveRecord::Rollback
+      end
+    end
+    
+    # 一時ファイルをクリア
+    temp_file_path = Rails.root.join('tmp', "user_import_preview_#{session.id}.json")
+    File.delete(temp_file_path) if File.exist?(temp_file_path)
+    
+    if errors.any?
+      redirect_to admin_create_user_import_path, alert: "一括登録に失敗しました: #{errors.join('; ')}"
+    else
+      redirect_to admin_create_user_path, notice: "#{success_count}人のユーザーを一括登録しました。"
+    end
+  end
+
   private
 
   def check_admin_access
