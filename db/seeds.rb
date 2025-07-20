@@ -71,6 +71,8 @@ Milestone.destroy_all rescue nil
 Objective.destroy_all rescue nil
 Attendance.destroy_all rescue nil
 Record.destroy_all rescue nil
+Entry.destroy_all rescue nil
+Competition.destroy_all rescue nil
 AttendanceEvent.destroy_all rescue nil
 Event.destroy_all rescue nil
 UserAuth.destroy_all rescue nil
@@ -185,8 +187,8 @@ end
   puts "Created player: #{user.name}"
 end
 
-# イベントの作成
-puts "イベントを作成中..."
+# イベントの作成（学校行事）
+puts "学校行事を作成中..."
 
 # 2ヶ月に1回、月末にテスト期間がある（4日間、平日）
 current_year = Date.current.year
@@ -253,20 +255,16 @@ grades.each do |grade|
   end
 end
 
-puts "イベントの作成が完了しました"
-puts "作成されたイベント数: #{Event.count}"
+puts "学校行事の作成が完了しました"
+puts "作成された学校行事数: #{Event.count}"
 
-
-# 出席イベントの作成
-puts "出席イベントを作成中..."
+# 練習・ミーティングイベントの作成
+puts "練習・ミーティングイベントを作成中..."
 
 # 過去1ヶ月、今月、来月の日付を生成
 last_month_dates = (Date.current.prev_month.beginning_of_month..Date.current.prev_month.end_of_month).to_a
 current_month_dates = (Date.current.beginning_of_month..Date.current.end_of_month).to_a
 next_month_dates = (Date.current.next_month.beginning_of_month..Date.current.next_month.end_of_month).to_a
-
-# タイトル
-titles = [ "陸トレ", "水泳練", "MTG", "大会" ]
 
 # 3ヶ月分のイベント作成
 [ last_month_dates, current_month_dates, next_month_dates ].each do |dates|
@@ -278,8 +276,7 @@ titles = [ "陸トレ", "水泳練", "MTG", "大会" ]
           title: "陸トレ",
           date: date,
           place: '小石川5階',
-          note: "陸上の練習です。基礎体力向上を目指します。",
-          is_competition: false
+          note: "陸上の練習です。基礎体力向上を目指します。"
         )
       end
     when 2 # 火曜日
@@ -288,8 +285,7 @@ titles = [ "陸トレ", "水泳練", "MTG", "大会" ]
           title: "水泳練",
           date: date,
           place: 'コズミック',
-          note: "水泳の練習です。フォーム改善に重点を置きます。",
-          is_competition: false
+          note: "水泳の練習です。フォーム改善に重点を置きます。"
         )
       end
     when 3 # 水曜日
@@ -298,8 +294,7 @@ titles = [ "陸トレ", "水泳練", "MTG", "大会" ]
           title: "全体MTG",
           date: date,
           place: 'オンライン',
-          note: "今週の予定と目標の確認を行います。",
-          is_competition: false
+          note: "今週の予定と目標の確認を行います。"
         )
       end
     when 4 # 木曜日
@@ -308,8 +303,7 @@ titles = [ "陸トレ", "水泳練", "MTG", "大会" ]
           title: "水泳練",
           date: date,
           place: 'コズミック',
-          note: "水泳の練習です。スピード練習を行います。",
-          is_competition: false
+          note: "水泳の練習です。スピード練習を行います。"
         )
       end
     when 5 # 金曜日
@@ -318,8 +312,7 @@ titles = [ "陸トレ", "水泳練", "MTG", "大会" ]
           title: "陸トレ",
           date: date,
           place: '小石川5階',
-          note: "陸上の練習です。筋力トレーニングを行います。",
-          is_competition: false
+          note: "陸上の練習です。筋力トレーニングを行います。"
         )
       end
     when 6 # 土曜日
@@ -328,8 +321,7 @@ titles = [ "陸トレ", "水泳練", "MTG", "大会" ]
           title: [ "水泳練", "合同練習" ].sample,
           date: date,
           place: 'Bumb',
-          note: "週末練習です。実践的な練習を行います。",
-          is_competition: false
+          note: "週末練習です。実践的な練習を行います。"
         )
       end
     end
@@ -343,37 +335,36 @@ next_month_weekends = next_month_dates.select { |d| [ 6, 0 ].include?(d.wday) }
 
 [ last_month_weekends, current_month_weekends, next_month_weekends ].each do |weekends|
   date = weekends.sample
-  AttendanceEvent.create!(
+  Competition.create!(
     title: "大会",
     date: date,
     place: 'アクアティクスセンター',
-    note: "大会です。全員参加必須です。応援も含めてチーム一丸となって頑張りましょう。",
-    is_competition: true
+    note: "大会です。全員参加必須です。応援も含めてチーム一丸となって頑張りましょう。"
   )
 end
 
-puts "出席イベントの作成が完了しました"
+puts "練習・ミーティングイベントの作成が完了しました"
+puts "作成された練習・ミーティング数: #{AttendanceEvent.count}"
+puts "作成された大会数: #{Competition.count}"
 
 # 記録の作成
 puts "Creating records..."
 
 # 過去の大会イベントを取得
-# is_competition: trueかつ、日付が今日より前のものを取得
-competition_events = AttendanceEvent.where(is_competition: true).where("date < ?", Date.current)
+competition_events = Competition.where("date < ?", Date.current)
 
 # 大会イベントが存在しない場合、ダミーの大会イベントを作成
 if competition_events.empty?
   puts "大会イベントが存在しないため、ダミーの大会イベントを作成します..."
   3.times do |i|
-    AttendanceEvent.create!(
+    Competition.create!(
       title: "第#{i + 1}回大会",
       date: rand(30..365).days.ago,
       place: 'アクアティクスセンター',
-      note: "大会です。全員参加必須です。",
-      is_competition: true
+      note: "大会です。全員参加必須です。"
     )
   end
-  competition_events = AttendanceEvent.where(is_competition: true).where("date < ?", Date.current)
+  competition_events = Competition.where("date < ?", Date.current)
 end
 
 # プレイヤー全員に対して記録を作成
@@ -487,6 +478,7 @@ puts "出席データを作成中..."
 reasons_absent = [ "体調不良", "家庭の事情", "学業の都合", "用事があるため", "怪我のため" ]
 reasons_other = [ "電車遅延", "寝坊", "授業が長引いた", "バスが遅れた", "準備に時間がかかった" ]
 
+# 練習・ミーティングイベントの出席データ
 AttendanceEvent.all.each do |event|
   User.all.each do |user|
     # 50%〜90%の確率で出席データを作成
@@ -502,12 +494,43 @@ AttendanceEvent.all.each do |event|
         nil
       end
 
-    Attendance.create!(
-      user: user,
-      attendance_event: event,
-      status: status,
-      note: note
-    )
+    # 既存の出席データがない場合のみ作成
+    unless Attendance.exists?(user: user, attendance_event: event)
+      Attendance.create!(
+        user: user,
+        attendance_event: event,
+        status: status,
+        note: note
+      )
+    end
+  end
+end
+
+# 大会の出席データ
+Competition.all.each do |competition|
+  User.all.each do |user|
+    # 大会は90%〜100%の確率で出席データを作成
+    next unless rand < rand(0.9..1.0)
+    status = [0, 1, 2].sample
+    note =
+      case status
+      when 1
+        reasons_absent.sample
+      when 2
+        reasons_other.sample
+      else
+        nil
+      end
+
+    # 既存の出席データがない場合のみ作成
+    unless Attendance.exists?(user: user, attendance_event: competition)
+      Attendance.create!(
+        user: user,
+        attendance_event: competition,
+        status: status,
+        note: note
+      )
+    end
   end
 end
 
@@ -517,7 +540,7 @@ puts "出席データの作成が完了しました"
 puts "大会関連の目標、反省データを作成中..."
 
 # 大会イベントを取得
-competition_events = AttendanceEvent.where(is_competition: true).order(:date)
+competition_events = Competition.order(:date)
 today = Date.current
 next_month_start = Date.current.next_month.beginning_of_month
 next_month_end = Date.current.next_month.end_of_month
@@ -657,3 +680,65 @@ end
 puts "練習記録の作成が完了しました"
 puts "作成された練習ログ数: #{PracticeLog.count}"
 puts "作成された練習タイム数: #{PracticeTime.count}"
+
+# エントリーデータの作成
+puts "エントリーデータを作成中..."
+
+# 今後の大会イベントを取得（エントリー期間中またはこれからエントリーが始まる大会）
+future_competitions = Competition.where("date >= ?", Date.current)
+
+# プレイヤー全員に対してエントリーデータを作成
+User.where(user_type: :player).each do |player|
+  future_competitions.each do |competition|
+    # この大会にエントリーするかどうかを70%の確率で決定
+    next unless rand < 0.7
+    
+    # この大会でエントリーする種目数を1〜3種目で決定
+    entry_count = rand(1..3)
+    
+    # ランダムに種目を選択（重複しないように）
+    selected_styles = Style.all.sample(entry_count)
+    
+    selected_styles.each do |style|
+      # 種目に応じたエントリータイムを生成（記録より少し遅いタイム）
+      entry_time = case style.distance
+      when 50
+        rand(25.00..40.00).round(2)  # 50m: 25-40秒
+      when 100
+        rand(55.00..90.00).round(2)  # 100m: 55-90秒
+      when 200
+        rand(120.00..200.00).round(2) # 200m: 2:00-3:20
+      when 400
+        rand(260.00..400.00).round(2) # 400m: 4:20-6:40
+      when 800
+        rand(520.00..780.00).round(2) # 800m: 8:40-13:00
+      else
+        rand(30.00..60.00).round(2)
+      end
+
+      # エントリーノートを生成
+      entry_notes = [
+        "ベストタイムを目指します",
+        "安定した泳ぎで完泳を目指します",
+        "フォームを意識して泳ぎます",
+        "ペース配分を意識します",
+        "スタートダッシュを決めます",
+        "ラストスパートを意識します",
+        "ターンを改善します",
+        "呼吸のタイミングを安定させます"
+      ]
+
+      # エントリーを作成
+      Entry.create!(
+        user: player,
+        attendance_event: competition,
+        style: style,
+        entry_time: entry_time,
+        note: entry_notes.sample
+      )
+    end
+  end
+end
+
+puts "エントリーデータの作成が完了しました"
+puts "作成されたエントリー数: #{Entry.count}"
