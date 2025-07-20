@@ -1,23 +1,29 @@
-class AttendanceEvent < ApplicationRecord
+class AttendanceEvent < Event
+  # 練習、ミーティング、大会など出欠管理が必要なイベント
   has_one_attached :menu_image
-  has_many :attendance, dependent: :destroy
-  has_many :users, through: :attendance
-  has_many :records, dependent: :destroy
-  has_many :objectives, dependent: :destroy
-  has_many :race_goals, dependent: :destroy
-  has_many :practice_logs, dependent: :destroy
-  has_many :entries, dependent: :destroy
+  has_many :attendances, dependent: :destroy, foreign_key: 'attendance_event_id'
+  has_many :users, through: :attendances
+  has_many :practice_logs, dependent: :destroy, foreign_key: 'attendance_event_id'
 
-  validates :title, presence: true
-  validates :date, presence: true
-  validates :is_competition, inclusion: { in: [ true, false ] }
+  validates :is_attendance, inclusion: { in: [true] } # 必ずtrue
   validates :menu_image, content_type: {
     in: %w[image/jpeg image/png application/pdf],
     message: "はJPEG、PNG、またはPDF形式でアップロードしてください"
   }, allow_blank: true
 
-  scope :competitions, -> { where(is_competition: true) }
-  scope :upcoming, -> { where("date >= ?", Date.current) }
-  scope :past, -> { where("date < ?", Date.current) }
-  scope :future, -> { competitions.upcoming.order(:date) }
+  enum :attendance_status, {
+    before: 0,  # 出欠集計前
+    open: 1,    # 集計中
+    closed: 2   # 集計済み
+  }, prefix: :attendance
+
+  # デフォルト値設定
+  after_initialize :set_defaults, if: :new_record?
+  
+  private
+  
+  def set_defaults
+    self.is_attendance = true if is_attendance.nil?
+    self.attendance_status = :before if attendance_status.nil?
+  end
 end
