@@ -18,9 +18,9 @@ class Admin::CompetitionsController < Admin::BaseController
     # 既にエントリー受付中かチェック（実際にはフラグ等で管理することもできますが、
     # 今回はエントリーが1件でもあれば受付中とします）
     
-    redirect_to admin_competitions_path, notice: "#{@event.title}のエントリー受付を開始しました。"
+    redirect_to admin_competition_path, notice: "#{@event.title}のエントリー受付を開始しました。"
   rescue ActiveRecord::RecordNotFound
-    redirect_to admin_competitions_path, alert: "大会が見つかりません。"
+    redirect_to admin_competition_path, alert: "大会が見つかりません。"
   end
 
   def show_entries

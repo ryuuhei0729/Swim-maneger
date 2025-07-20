@@ -1,4 +1,9 @@
 class Admin::UsersController < Admin::BaseController
+  def index
+    # API用（既存のビューファイルはcreateアクションを使用）
+    redirect_to admin_create_user_path
+  end
+
   def create
     if request.post?
       @user = User.new(user_params)
@@ -305,7 +310,7 @@ class Admin::UsersController < Admin::BaseController
     if errors.any?
       redirect_to admin_users_import_path, alert: "一括登録に失敗しました: #{errors.join('; ')}"
     else
-      redirect_to admin_users_create_path, notice: "#{success_count}人のユーザーを一括登録しました。"
+      redirect_to admin_create_user_path, notice: "#{success_count}人のユーザーを一括登録しました。"
     end
   end
 
