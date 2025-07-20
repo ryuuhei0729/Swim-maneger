@@ -81,8 +81,8 @@ class Api::V1::CalendarController < Api::V1::BaseController
     {
       total_events: events.count,
       total_attendance_events: attendance_events.count,
-      competitions: attendance_events.where(is_competition: true).count,
-      practices: attendance_events.where(is_competition: false).count,
+      competitions: attendance_events.where(type: 'Competition').count,
+      practices: attendance_events.where(type: 'AttendanceEvent').count,
       my_attendance_stats: {
         answered: user_attendance.count,
         present: user_attendance.where(status: "present").count,
