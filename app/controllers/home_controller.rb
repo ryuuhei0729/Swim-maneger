@@ -17,7 +17,7 @@ class HomeController < ApplicationController
     @user_attendance_by_event = {}
     current_user_auth.user.attendance
       .joins(:attendance_event)
-      .where(attendance_events: { date: @current_month.beginning_of_month..@current_month.end_of_month })
+      .where(events: { date: @current_month.beginning_of_month..@current_month.end_of_month })
       .each do |attendance|
         @user_attendance_by_event[attendance.attendance_event_id] = attendance
       end
