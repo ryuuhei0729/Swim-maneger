@@ -63,8 +63,8 @@ class Admin::AttendancesController < Admin::BaseController
                                   .joins(:user)
                                   .where(users: { user_type: 'player' })
                                   .order('users.generation', 'users.name')
-  rescue ActiveRecord::RecordNotFound
-    redirect_to admin_attendances_path, alert: "イベントが見つかりません"
+      rescue ActiveRecord::RecordNotFound
+    redirect_to admin_attendance_path, alert: "イベントが見つかりません"
   end
 
   def update_check
@@ -89,7 +89,7 @@ class Admin::AttendancesController < Admin::BaseController
       # 画面遷移でattendance_updateへリダイレクト（パラメータで渡す）
       render json: {
         success: true,
-        redirect_url: admin_attendances_update_path(attendance_event_id: @attendance_event.id, unchecked_user_ids: unchecked_user_ids)
+        redirect_url: admin_attendance_update_path(attendance_event_id: @attendance_event.id, unchecked_user_ids: unchecked_user_ids)
       }
       return
     else
@@ -139,7 +139,7 @@ class Admin::AttendancesController < Admin::BaseController
         render json: {
           success: true,
           message: "#{update_count}人の出席状況を更新しました",
-          redirect_url: admin_attendances_path
+          redirect_url: admin_attendance_path
         }
       end
     rescue => e
@@ -153,7 +153,7 @@ class Admin::AttendancesController < Admin::BaseController
   def update
     # パラメータから未チェックユーザー情報を取得
     unless params[:attendance_event_id] && params[:unchecked_user_ids]
-      redirect_to admin_attendances_path, alert: "未チェックユーザー情報がありません。"
+      redirect_to admin_attendance_path, alert: "未チェックユーザー情報がありません。"
       return
     end
     @attendance_event = AttendanceEvent.find(params[:attendance_event_id])
@@ -163,7 +163,7 @@ class Admin::AttendancesController < Admin::BaseController
 
   def save_update
     unless params[:attendance_event_id] && params[:unchecked_user_ids]
-      redirect_to admin_attendances_path, alert: "未チェックユーザー情報がありません。"
+      redirect_to admin_attendance_path, alert: "未チェックユーザー情報がありません。"
       return
     end
     attendance_event = AttendanceEvent.find(params[:attendance_event_id])
@@ -182,6 +182,6 @@ class Admin::AttendancesController < Admin::BaseController
         update_count += 1
       end
     end
-    redirect_to admin_attendances_path, notice: "#{update_count}人の出席状況を更新しました"
+    redirect_to admin_attendance_path, notice: "#{update_count}人の出席状況を更新しました"
   end
 end 

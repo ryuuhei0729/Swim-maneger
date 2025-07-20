@@ -28,7 +28,7 @@ class Admin::SchedulesController < Admin::BaseController
     end
     
     if @event.save
-      redirect_to admin_schedules_path, notice: "スケジュールを登録しました。"
+      redirect_to admin_schedule_path, notice: "スケジュールを登録しました。"
     else
       @events = AttendanceEvent.order(date: :desc).page(params[:page]).per(10)
       render :index, status: :unprocessable_entity
@@ -38,7 +38,7 @@ class Admin::SchedulesController < Admin::BaseController
   def update
     @event = AttendanceEvent.find(params[:id])
     if @event.update(schedule_params)
-      redirect_to admin_schedules_path, notice: "スケジュールを更新しました。"
+      redirect_to admin_schedule_path, notice: "スケジュールを更新しました。"
     else
       @events = AttendanceEvent.order(date: :desc).page(params[:page]).per(10)
       render :index, status: :unprocessable_entity
@@ -48,7 +48,7 @@ class Admin::SchedulesController < Admin::BaseController
   def destroy
     @event = AttendanceEvent.find(params[:id])
     @event.destroy
-    redirect_to admin_schedules_path, notice: "スケジュールを削除しました。"
+    redirect_to admin_schedule_path, notice: "スケジュールを削除しました。"
   end
 
   def edit
@@ -80,7 +80,7 @@ class Admin::SchedulesController < Admin::BaseController
     template_path = Rails.root.join('public', 'templates', 'schedule_template_2025.xlsx')
     
     unless File.exist?(template_path)
-      redirect_to admin_schedules_import_path, alert: "テンプレートファイルが見つかりません。"
+      redirect_to admin_schedule_import_path, alert: "テンプレートファイルが見つかりません。"
       return
     end
     
@@ -222,7 +222,7 @@ class Admin::SchedulesController < Admin::BaseController
     preview_data = session[:schedule_import_preview]
     
     if preview_data.blank?
-      redirect_to admin_schedules_import_path, alert: "プレビューデータが見つかりません。CSVファイルを再度アップロードしてください。"
+      redirect_to admin_schedule_import_path, alert: "プレビューデータが見つかりません。CSVファイルを再度アップロードしてください。"
       return
     end
     
@@ -271,9 +271,9 @@ class Admin::SchedulesController < Admin::BaseController
     session.delete(:schedule_import_preview)
     
     if errors.any?
-      redirect_to admin_schedules_import_path, alert: "一括登録に失敗しました: #{errors.join('; ')}"
+      redirect_to admin_schedule_import_path, alert: "一括登録に失敗しました: #{errors.join('; ')}"
     else
-      redirect_to admin_schedules_path, notice: "#{success_count}件のスケジュールを一括登録しました。"
+      redirect_to admin_schedule_path, notice: "#{success_count}件のスケジュールを一括登録しました。"
     end
   end
 

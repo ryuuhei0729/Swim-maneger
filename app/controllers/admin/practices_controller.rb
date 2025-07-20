@@ -69,7 +69,7 @@ class Admin::PracticesController < Admin::BaseController
         end
       end
 
-      redirect_to admin_practices_path, notice: "練習タイムとメニューを保存しました。"
+      redirect_to admin_practice_path, notice: "練習タイムとメニューを保存しました。"
     rescue ActiveRecord::RecordInvalid => e
       # 失敗した場合、必要なインスタンス変数を再設定して元のページをレンダリング
       @styles = PracticeLog::STYLE_OPTIONS
@@ -105,7 +105,7 @@ class Admin::PracticesController < Admin::BaseController
   def create_register
     @attendance_event = AttendanceEvent.find(params[:attendance_event][:id])
     if @attendance_event.update(attendance_event_image_params)
-      redirect_to admin_practices_path, notice: "練習メニュー画像を更新しました"
+      redirect_to admin_practice_path, notice: "練習メニュー画像を更新しました"
     else
       today = Date.today
       @attendance_events = AttendanceEvent.order(date: :desc)
