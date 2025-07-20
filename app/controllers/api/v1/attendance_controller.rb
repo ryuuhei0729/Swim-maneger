@@ -82,7 +82,7 @@ class Api::V1::AttendanceController < Api::V1::BaseController
 
   def event_status
     event = AttendanceEvent.find(params[:event_id])
-    attendance_list = event.attendance.includes(:user)
+    attendance_list = event.attendances.includes(:user)
 
     render_success({
       event: format_event_detail(event),
@@ -143,7 +143,7 @@ class Api::V1::AttendanceController < Api::V1::BaseController
       note: event.note,
       is_competition: event.is_competition,
       type_label: event.is_competition? ? "大会" : "練習",
-      total_participants: event.attendance.count
+      total_participants: event.attendances.count
     }
   end
 

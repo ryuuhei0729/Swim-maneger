@@ -9,9 +9,9 @@
         <div class="grid grid-cols-1 gap-6">
           <div>
             <%= f.label :attendance_event_id, "大会", class: "block text-sm font-medium text-gray-700" %>
-            <% future_events = AttendanceEvent.future %>
-            <% if future_events.exists? %>
-              <%= f.collection_select :attendance_event_id, future_events, :id, :title, {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
+            <% future_competitions = Competition.where("date >= ?", Date.current).order(:date) %>
+            <% if future_competitions.exists? %>
+              <%= f.collection_select :attendance_event_id, future_competitions, :id, :title, {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" %>
             <% else %>
               <p class="mt-1 text-sm text-red-600">予定されている大会がありません。先に大会を登録してください。</p>
             <% end %>
