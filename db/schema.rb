@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_18_151704) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_20_060044) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -80,7 +80,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_18_151704) do
     t.integer "user_id", null: false
     t.integer "attendance_event_id", null: false
     t.integer "style_id", null: false
-    t.decimal "entry_time", precision: 8, scale: 2, null: false
+    t.decimal "entry_time", precision: 10, scale: 2, null: false
     t.text "note"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -220,6 +220,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_18_151704) do
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
   end
 
+  create_table "split_times", force: :cascade do |t|
+    t.bigint "record_id", null: false
+    t.bigint "race_goal_id", null: false
+    t.integer "distance", null: false
+    t.decimal "split_time", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["race_goal_id"], name: "index_split_times_on_race_goal_id"
+    t.index ["record_id"], name: "index_split_times_on_record_id"
+  end
+
   create_table "styles", force: :cascade do |t|
     t.string "name_jp", null: false
     t.string "name", null: false
@@ -284,5 +295,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_18_151704) do
   add_foreign_key "records", "attendance_events"
   add_foreign_key "records", "styles"
   add_foreign_key "records", "users"
+  add_foreign_key "split_times", "race_goals"
+  add_foreign_key "split_times", "records"
   add_foreign_key "user_auths", "users"
 end
