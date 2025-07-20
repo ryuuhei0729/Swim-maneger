@@ -1,63 +1,56 @@
 class Admin::SchedulesController < Admin::BaseController
   def index
-    @events = AttendanceEvent.order(date: :desc).page(params[:page]).per(10)
+    @events = Event.order(date: :desc).page(params[:page]).per(10)
     @event = AttendanceEvent.new
   end
 
   def create
-    # 大会の場合は無条件でAttendanceEventテーブルに保存
-    is_competition = params[:attendance_event][:is_competition] == "1"
-    requires_attendance = params[:requires_attendance] == "1"
+    event_type = params[:attendance_event][:event_type]
     
-    # 大会の場合は無条件でAttendanceEventテーブルに保存
-    # そうでない場合は、出欠管理チェックボックスの状態に応じて決定
-    use_attendance_event = is_competition || requires_attendance
-    
-    if use_attendance_event
-      # AttendanceEventテーブルに保存
+    case event_type
+    when "Competition"
+      @event = Competition.new(schedule_params)
+    when "AttendanceEvent"
       @event = AttendanceEvent.new(schedule_params)
+    when "Event", nil
+      # 何も選択されていない場合もEventとして保存
+      @event = Event.new(schedule_params)
     else
-      # Eventテーブルに保存
-      event_params = {
-        title: params[:attendance_event][:title],
-        date: params[:attendance_event][:date],
-        place: params[:attendance_event][:place],
-        note: params[:attendance_event][:note]
-      }
-      @event = Event.new(event_params)
+      # 無効な値の場合はEventとして保存
+      @event = Event.new(schedule_params)
     end
     
     if @event.save
       redirect_to admin_schedule_path, notice: "スケジュールを登録しました。"
     else
-      @events = AttendanceEvent.order(date: :desc).page(params[:page]).per(10)
+      @events = Event.order(date: :desc).page(params[:page]).per(10)
       render :index, status: :unprocessable_entity
     end
   end
 
   def update
-    @event = AttendanceEvent.find(params[:id])
+    @event = Event.find(params[:id])
     if @event.update(schedule_params)
       redirect_to admin_schedule_path, notice: "スケジュールを更新しました。"
     else
-      @events = AttendanceEvent.order(date: :desc).page(params[:page]).per(10)
+      @events = Event.order(date: :desc).page(params[:page]).per(10)
       render :index, status: :unprocessable_entity
     end
   end
 
   def destroy
-    @event = AttendanceEvent.find(params[:id])
+    @event = Event.find(params[:id])
     @event.destroy
     redirect_to admin_schedule_path, notice: "スケジュールを削除しました。"
   end
 
   def edit
-    @event = AttendanceEvent.find(params[:id])
+    @event = Event.find(params[:id])
     respond_to do |format|
       format.json { render json: {
         title: @event.title,
         date: @event.date.strftime("%Y-%m-%d"),
-        is_competition: @event.is_competition,
+        type: @event.class.name,
         note: @event.note,
         place: @event.place
       }}
@@ -280,6 +273,6 @@ class Admin::SchedulesController < Admin::BaseController
   private
 
   def schedule_params
-    params.require(:attendance_event).permit(:title, :date, :is_competition, :note, :place)
+    params.require(:attendance_event).permit(:title, :date, :note, :place)
   end
 end 
