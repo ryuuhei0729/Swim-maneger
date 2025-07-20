@@ -23,12 +23,8 @@ class AttendanceController < ApplicationController
     @next_month_events = next_month_events.where.not(id: answered_event_ids)
     @attendance = current_user_auth.user.attendance.where(attendance_event: @this_month_events + @next_month_events)
 
-    # カレンダー表示用のデータ
-    attendance_events = AttendanceEvent
-      .where(date: @current_month.beginning_of_month..@current_month.end_of_month)
-      .order(date: :asc)
-
-    events = Event
+    # カレンダー表示用のデータ（STI構造では全てのイベントをEventテーブルから取得）
+    all_events = Event
       .where(date: @current_month.beginning_of_month..@current_month.end_of_month)
       .order(date: :asc)
 
@@ -52,17 +48,9 @@ class AttendanceController < ApplicationController
       end
     end
 
-    # 両方のイベントを日付ごとにグループ化してマージ
+    # イベントを日付ごとにグループ化
     @events_by_date = {}
-
-    # Eventを先に追加（上に表示される）
-    events.each do |event|
-      @events_by_date[event.date] ||= []
-      @events_by_date[event.date] << event
-    end
-
-    # AttendanceEventを後から追加（下に表示される）
-    attendance_events.each do |event|
+    all_events.each do |event|
       @events_by_date[event.date] ||= []
       @events_by_date[event.date] << event
     end
