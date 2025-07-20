@@ -36,7 +36,7 @@ class AttendanceController < ApplicationController
     @user_attendance_by_event = {}
     current_user_auth.user.attendance
       .joins(:attendance_event)
-      .where(attendance_events: { date: @current_month.beginning_of_month..@current_month.end_of_month })
+      .where(events: { date: @current_month.beginning_of_month..@current_month.end_of_month })
       .each do |attendance|
         @user_attendance_by_event[attendance.attendance_event_id] = attendance
       end
@@ -136,7 +136,7 @@ class AttendanceController < ApplicationController
     @user_attendance = {}
     current_user_auth.user.attendance
       .joins(:attendance_event)
-      .where(attendance_events: { date: this_month.beginning_of_month..next_month.end_of_month })
+      .where(events: { date: this_month.beginning_of_month..next_month.end_of_month })
       .each do |attendance|
         @user_attendance[attendance.attendance_event_id] = attendance
       end
@@ -239,7 +239,7 @@ class AttendanceController < ApplicationController
 
   def event_status
     @event = AttendanceEvent.find(params[:event_id])
-    @attendance = @event.attendance.includes(:user)
+    @attendance = @event.attendances.includes(:user)
     render partial: "shared/event_attendance_status", locals: { event: @event, attendance: @attendance }
   end
 

@@ -1,7 +1,7 @@
 class Admin::PracticesController < Admin::BaseController
   def index
     @practice_logs = PracticeLog.includes(:attendance_event)
-                               .order("attendance_events.date DESC")
+                               .order("events.date DESC")
                                .limit(5)
   end
 
@@ -27,7 +27,7 @@ class Admin::PracticesController < Admin::BaseController
       event_id = @practice_log.attendance_event_id.presence || params.dig(:practice_log, :attendance_event_id).presence || @default_event&.id
       if event_id.present?
         @event = AttendanceEvent.find(event_id)
-        @attendees = @event.attendance.includes(:user)
+        @attendees = @event.attendances.includes(:user)
                           .where(status: [ "present", "other" ])
                           .joins(:user)
                           .where(users: { user_type: "player" })
@@ -82,7 +82,7 @@ class Admin::PracticesController < Admin::BaseController
       @show_modal = true
       if practice_log_params[:attendance_event_id].present?
         @event = AttendanceEvent.find(practice_log_params[:attendance_event_id])
-        @attendees = @event.attendance.includes(:user)
+        @attendees = @event.attendances.includes(:user)
                           .where(status: [ "present", "other" ])
                           .joins(:user)
                           .where(users: { user_type: "player" })
