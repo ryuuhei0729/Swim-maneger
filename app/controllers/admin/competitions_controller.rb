@@ -1,19 +1,16 @@
 class Admin::CompetitionsController < Admin::BaseController
   def index
-    # 大会一覧を取得（is_competitionがtrueのAttendanceEvent）
-    @competitions = AttendanceEvent.where(is_competition: true)
-                                 .order(date: :desc)
-                                 .limit(10)
+    # 大会一覧を取得（STI構造を活用）
+    @competitions = Competition.order(date: :desc).limit(10)
     
     # エントリー受付中の大会を取得
-    @collecting_entries = AttendanceEvent.where(is_competition: true)
-                                       .joins(:entries)
-                                       .distinct
-                                       .order(date: :desc)
+    @collecting_entries = Competition.joins(:entries)
+                                   .distinct
+                                   .order(date: :desc)
   end
 
   def start_entry_collection
-    @event = AttendanceEvent.find(params[:event_id])
+    @event = Competition.find(params[:event_id])
     
     # 既にエントリー受付中かチェック（実際にはフラグ等で管理することもできますが、
     # 今回はエントリーが1件でもあれば受付中とします）
@@ -24,7 +21,7 @@ class Admin::CompetitionsController < Admin::BaseController
   end
 
   def show_entries
-    @event = AttendanceEvent.find(params[:event_id])
+    @event = Competition.find(params[:event_id])
     @entries = @event.entries
                     .includes(:user, :style)
                     .order('users.generation, users.name, styles.style, styles.distance')
