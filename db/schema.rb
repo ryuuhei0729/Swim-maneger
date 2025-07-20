@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_20_060044) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_20_073235) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -118,6 +118,25 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_20_060044) do
     t.datetime "updated_at", null: false
     t.index ["objective_id"], name: "index_milestones_on_objective_id"
     t.check_constraint "milestone_type::text = ANY (ARRAY['quality'::character varying::text, 'quantity'::character varying::text])", name: "check_milestone_type"
+  end
+
+  create_table "new_events", force: :cascade do |t|
+    t.string "title", null: false
+    t.date "date", null: false
+    t.string "place"
+    t.text "note"
+    t.string "type", default: "Event", null: false
+    t.boolean "is_attendance", default: false, null: false
+    t.integer "attendance_status", default: 0
+    t.boolean "is_competition", default: false
+    t.integer "entry_status", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["date"], name: "index_new_events_on_date"
+    t.index ["is_attendance"], name: "index_new_events_on_is_attendance"
+    t.index ["is_competition"], name: "index_new_events_on_is_competition"
+    t.index ["type", "date"], name: "index_new_events_on_type_and_date"
+    t.index ["type"], name: "index_new_events_on_type"
   end
 
   create_table "objectives", force: :cascade do |t|
