@@ -4,6 +4,7 @@ class RaceGoal < ApplicationRecord
   belongs_to :style
   has_one :race_review, dependent: :destroy
   has_many :race_feedbacks, dependent: :destroy
+  has_many :split_times, dependent: :destroy
 
   validates :user_id, presence: true
   validates :attendance_event_id, presence: true
