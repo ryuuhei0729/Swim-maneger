@@ -5,7 +5,6 @@ class AttendanceEvent < Event
   has_many :users, through: :attendances
   has_many :practice_logs, dependent: :destroy, foreign_key: 'attendance_event_id'
 
-  validates :is_attendance, inclusion: { in: [true] } # 必ずtrue
   validates :menu_image, content_type: {
     in: %w[image/jpeg image/png application/pdf],
     message: "はJPEG、PNG、またはPDF形式でアップロードしてください"
@@ -17,13 +16,13 @@ class AttendanceEvent < Event
     closed: 2   # 集計済み
   }, prefix: :attendance
 
-  # デフォルト値設定
-  after_initialize :set_defaults, if: :new_record?
+  # デフォルト値設定（バリデーション前）
+  before_validation :set_defaults
   
   private
   
   def set_defaults
-    self.is_attendance = true if is_attendance.nil?
+    self.is_attendance = true unless is_attendance
     self.attendance_status = :before if attendance_status.nil?
   end
 end
