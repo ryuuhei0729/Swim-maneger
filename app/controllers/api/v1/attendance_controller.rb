@@ -172,12 +172,8 @@ class Api::V1::AttendanceController < Api::V1::BaseController
   end
 
   def build_calendar_data(current_month)
-    # カレンダー表示用のデータ
-    attendance_events = AttendanceEvent
-      .where(date: current_month.beginning_of_month..current_month.end_of_month)
-      .order(date: :asc)
-
-    events = Event
+    # カレンダー表示用のデータ（STI構造では全てのイベントをEventテーブルから取得）
+    all_events = Event
       .where(date: current_month.beginning_of_month..current_month.end_of_month)
       .order(date: :asc)
 
@@ -206,27 +202,27 @@ class Api::V1::AttendanceController < Api::V1::BaseController
     # イベントを日付ごとにグループ化
     events_by_date = {}
 
-    events.each do |event|
+    all_events.each do |event|
       events_by_date[event.date.to_s] ||= []
-      events_by_date[event.date.to_s] << {
-        id: event.id,
-        title: event.title,
-        type: "general_event",
-        place: event.place,
-        note: event.note
-      }
-    end
-
-    attendance_events.each do |event|
-      events_by_date[event.date.to_s] ||= []
-      events_by_date[event.date.to_s] << {
-        id: event.id,
-        title: event.title,
-        type: "attendance_event",
-        place: event.place,
-        note: event.note,
-        is_competition: event.is_competition
-      }
+      
+      if event.is_a?(AttendanceEvent) || event.is_a?(Competition)
+        events_by_date[event.date.to_s] << {
+          id: event.id,
+          title: event.title,
+          type: "attendance_event",
+          place: event.place,
+          note: event.note,
+          is_competition: event.is_competition
+        }
+      else
+        events_by_date[event.date.to_s] << {
+          id: event.id,
+          title: event.title,
+          type: "general_event",
+          place: event.place,
+          note: event.note
+        }
+      end
     end
 
     {

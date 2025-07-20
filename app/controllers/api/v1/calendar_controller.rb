@@ -12,17 +12,16 @@ class Api::V1::CalendarController < Api::V1::BaseController
   def build_calendar_response
     current_month = build_current_month
     
-    # 指定月のイベントを取得
-    attendance_events = AttendanceEvent.where(date: current_month.all_month).order(date: :asc)
-    events = Event.where(date: current_month.all_month).order(date: :asc)
+    # STI構造では全てのイベントをEventテーブルから取得
+    all_events = Event.where(date: current_month.all_month).order(date: :asc)
     
     {
       year: current_month.year,
       month: current_month.month,
       month_name: current_month.strftime("%Y年%m月"),
-      events_by_date: build_events_by_date(events, attendance_events, current_month),
+      events_by_date: build_events_by_date(all_events, current_month),
       birthdays_by_date: build_birthdays_by_date(current_month),
-      statistics: build_monthly_statistics(attendance_events, events, current_month)
+      statistics: build_monthly_statistics(all_events, current_month)
     }
   end
 
@@ -34,21 +33,18 @@ class Api::V1::CalendarController < Api::V1::BaseController
     end
   end
 
-  def build_events_by_date(events, attendance_events, current_month)
+  def build_events_by_date(all_events, current_month)
     events_by_date = {}
 
-    # 一般イベントを追加
-    events.each do |event|
+    all_events.each do |event|
       date_key = event.date.to_s
       events_by_date[date_key] ||= []
-      events_by_date[date_key] << format_general_event(event)
-    end
-
-    # 出席イベントを追加
-    attendance_events.each do |event|
-      date_key = event.date.to_s
-      events_by_date[date_key] ||= []
-      events_by_date[date_key] << format_attendance_event(event)
+      
+      if event.is_a?(AttendanceEvent) || event.is_a?(Competition)
+        events_by_date[date_key] << format_attendance_event(event)
+      else
+        events_by_date[date_key] << format_general_event(event)
+      end
     end
 
     events_by_date
@@ -73,16 +69,21 @@ class Api::V1::CalendarController < Api::V1::BaseController
     birthdays_by_date
   end
 
-  def build_monthly_statistics(attendance_events, events, current_month)
+  def build_monthly_statistics(all_events, current_month)
     # 現在のユーザーの出席状況統計
     user_attendance = current_user_auth.user.attendance.joins(:attendance_event)
                         .where(events: { date: current_month.all_month })
 
+    # イベントタイプ別の統計
+    attendance_events = all_events.select { |event| event.is_a?(AttendanceEvent) || event.is_a?(Competition) }
+    competitions = all_events.select { |event| event.is_a?(Competition) }
+    practices = all_events.select { |event| event.is_a?(AttendanceEvent) }
+
     {
-      total_events: events.count,
+      total_events: all_events.count,
       total_attendance_events: attendance_events.count,
-      competitions: attendance_events.where(type: 'Competition').count,
-      practices: attendance_events.where(type: 'AttendanceEvent').count,
+      competitions: competitions.count,
+      practices: practices.count,
       my_attendance_stats: {
         answered: user_attendance.count,
         present: user_attendance.where(status: "present").count,
