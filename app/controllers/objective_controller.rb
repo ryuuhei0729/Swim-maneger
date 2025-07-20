@@ -4,7 +4,7 @@ class ObjectiveController < ApplicationController
   def index
     @objective = current_user_auth.user.objectives
                                 .includes(:attendance_event, :style, :milestones)
-                                .order("attendance_events.date DESC")
+                                .order("events.date DESC")
   end
 
   def new

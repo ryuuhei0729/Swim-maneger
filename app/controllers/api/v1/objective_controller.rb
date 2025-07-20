@@ -2,7 +2,7 @@ class Api::V1::ObjectiveController < Api::V1::BaseController
   def index
     objectives = current_user_auth.user.objectives
                                 .includes(:attendance_event, :style, :milestones)
-                                .order("attendance_events.date DESC")
+                                .order("events.date DESC")
 
     render_success({
       objectives: build_objectives_data(objectives),
@@ -128,9 +128,9 @@ class Api::V1::ObjectiveController < Api::V1::BaseController
   def build_objectives_statistics(objectives)
     total_objectives = objectives.count
     active_objectives = objectives.joins(:attendance_event)
-                                 .where("attendance_events.date >= ?", Date.current)
+                                 .where("events.date >= ?", Date.current)
     past_objectives = objectives.joins(:attendance_event)
-                                .where("attendance_events.date < ?", Date.current)
+                                .where("events.date < ?", Date.current)
     
     milestones = Milestone.joins(:objective)
                          .where(objective: objectives)

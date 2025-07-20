@@ -117,7 +117,7 @@ class Api::V1::MypageController < Api::V1::BaseController
     
     recent_records = records.where('created_at >= ?', 30.days.ago)
     competition_records = records.joins(:attendance_event)
-                                .where(attendance_events: { type: 'Competition' })
+                                .where(events: { type: 'Competition' })
 
     {
       total_records: total_records,
