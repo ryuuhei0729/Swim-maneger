@@ -72,14 +72,6 @@
                       <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                         大会
                       </span>
-                    <% elsif event.is_a?(AttendanceEvent) %>
-                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        練習・MTG
-                      </span>
-                    <% else %>
-                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                        学校行事
-                      </span>
                     <% end %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -126,18 +118,18 @@
     <div>
       <%= f.label :event_type, "イベントタイプ", class: "block text-sm font-medium text-gray-700" %>
       <div class="mt-1 space-y-2">
-        <div class="flex items-center">
+        <label class="flex items-center cursor-pointer">
           <%= f.radio_button :event_type, "Event", class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" %>
-          <%= f.label :event_type_Event, "学校行事", class: "ml-2 block text-sm text-gray-900" %>
-        </div>
-        <div class="flex items-center">
+          <span class="ml-2 block text-sm text-gray-900">通常イベント（出欠管理なし）</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
           <%= f.radio_button :event_type, "AttendanceEvent", class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" %>
-          <%= f.label :event_type_AttendanceEvent, "練習・ミーティング", class: "ml-2 block text-sm text-gray-900" %>
-        </div>
-        <div class="flex items-center">
+          <span class="ml-2 block text-sm text-gray-900">出欠管理あり</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
           <%= f.radio_button :event_type, "Competition", class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" %>
-          <%= f.label :event_type_Competition, "大会", class: "ml-2 block text-sm text-gray-900" %>
-        </div>
+          <span class="ml-2 block text-sm text-gray-900">大会</span>
+        </label>
       </div>
     </div>
 
@@ -192,27 +184,27 @@
     <div>
       <%= f.label :event_type, "イベントタイプ", class: "block text-sm font-medium text-gray-700" %>
       <div class="mt-1 space-y-2">
-        <div class="flex items-center">
+        <label class="flex items-center cursor-pointer">
           <%= f.radio_button :event_type, "Event", 
               class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300", 
               name: 'attendance_event[event_type]', 
               id: 'attendance_event_event_type_Event' %>
-          <%= f.label :event_type_Event, "学校行事", class: "ml-2 block text-sm text-gray-900" %>
-        </div>
-        <div class="flex items-center">
+          <span class="ml-2 block text-sm text-gray-900">通常イベント（出欠管理なし）</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
           <%= f.radio_button :event_type, "AttendanceEvent", 
               class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300", 
               name: 'attendance_event[event_type]', 
               id: 'attendance_event_event_type_AttendanceEvent' %>
-          <%= f.label :event_type_AttendanceEvent, "練習・ミーティング", class: "ml-2 block text-sm text-gray-900" %>
-        </div>
-        <div class="flex items-center">
+          <span class="ml-2 block text-sm text-gray-900">出欠管理あり</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
           <%= f.radio_button :event_type, "Competition", 
               class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300", 
               name: 'attendance_event[event_type]', 
               id: 'attendance_event_event_type_Competition' %>
-          <%= f.label :event_type_Competition, "大会", class: "ml-2 block text-sm text-gray-900" %>
-        </div>
+          <span class="ml-2 block text-sm text-gray-900">大会</span>
+        </label>
       </div>
     </div>
 
