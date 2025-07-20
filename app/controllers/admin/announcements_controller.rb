@@ -8,7 +8,7 @@ class Admin::AnnouncementsController < Admin::BaseController
     @announcement = Announcement.new(announcement_params)
 
     if @announcement.save
-      redirect_to admin_announcements_path, notice: "お知らせを作成しました。"
+      redirect_to admin_announcement_path, notice: "お知らせを作成しました。"
     else
       @announcements = Announcement.all.order(published_at: :desc)
       render :index, status: :unprocessable_entity
@@ -19,7 +19,7 @@ class Admin::AnnouncementsController < Admin::BaseController
     @announcement = Announcement.find(params[:id])
 
     if @announcement.update(announcement_params)
-      redirect_to admin_announcements_path, notice: "お知らせを更新しました。"
+      redirect_to admin_announcement_path, notice: "お知らせを更新しました。"
     else
       @announcements = Announcement.all.order(published_at: :desc)
       render :index, status: :unprocessable_entity
@@ -30,7 +30,7 @@ class Admin::AnnouncementsController < Admin::BaseController
     @announcement = Announcement.find(params[:id])
     @announcement.destroy
 
-    redirect_to admin_announcements_path, notice: "お知らせを削除しました。"
+    redirect_to admin_announcement_path, notice: "お知らせを削除しました。"
   end
 
   private
