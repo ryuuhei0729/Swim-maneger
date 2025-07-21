@@ -114,7 +114,7 @@
                       <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">日付</th>
                       <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">場所</th>
                       <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">備考</th>
-                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">大会</th>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">大会管理</th>
                       <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">出欠管理</th>
                     </tr>
                   </thead>
@@ -133,28 +133,24 @@
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= data[:place] %></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= data[:note] %></td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <% if data[:event_type] == 'Competition' %>
+                          <% if data[:is_competition] %>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                              大会
-                            </span>
-                          <% elsif data[:event_type] == 'AttendanceEvent' %>
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              出欠管理あり
+                              あり
                             </span>
                           <% else %>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              通常イベント（出欠管理なし）
+                              なし
                             </span>
                           <% end %>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                           <% if data[:requires_attendance] %>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              出欠管理あり
+                              あり
                             </span>
                           <% else %>
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                              出欠管理なし
+                              なし
                             </span>
                           <% end %>
                         </td>
