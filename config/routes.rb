@@ -155,6 +155,8 @@ Rails.application.routes.draw do
   get "admin/attendance/check", to: "admin/attendances#check", as: "admin_attendance_check"
   patch "admin/attendance/check", to: "admin/attendances#update_check", as: "update_admin_attendance_check"
   patch "admin/attendance/save", to: "admin/attendances#save_check", as: "save_admin_attendance_check"
+  get "admin/attendance/status", to: "admin/attendances#status", as: "admin_attendance_status"
+  patch "admin/attendance/status", to: "admin/attendances#update_status", as: "update_admin_attendance_status"
 
   # [管理者]出席状況更新
   get "admin/attendance/update", to: "admin/attendances#update", as: "admin_attendance_update"

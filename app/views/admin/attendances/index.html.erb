@@ -28,6 +28,17 @@
     </div>
   </div>
 
+  <!-- 出欠受付管理 -->
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">出欠受付管理</h2>
+      <p class="text-sm text-gray-600 mb-4">イベントの出欠受付状況を管理できます</p>
+      <%= link_to admin_attendance_status_path, class: "bg-blue-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors" do %>
+        出欠受付管理
+      <% end %>
+    </div>
+  </div>
+
   <!-- 月別出欠状況 -->
   <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-8">
     <div class="p-6 border-b border-gray-200">
@@ -49,25 +60,25 @@
       </div>
     </div>
 
-      <div class="overflow-x-auto border border-gray-300">
+      <div class="overflow-x-auto border border-gray-300" style="max-width: 100%;">
        <% if @monthly_events.any? %>
-         <table class="w-full min-w-full border-collapse">
+         <table class="border-collapse" style="min-width: max-content;">
            <thead class="bg-gray-50">
              <tr>
-               <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 w-24 border border-gray-300" style="z-index: 10;">
+               <th class="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky left-0 bg-gray-50 border border-gray-300" style="z-index: 20; width: 100px; min-width: 100px;">
                  部員名
                </th>
-               <th class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky bg-gray-50 w-16 border border-gray-300" style="left: 96px; z-index: 10;">
+               <th class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky bg-gray-50 border border-gray-300" style="left: 100px; z-index: 20; width: 70px; min-width: 70px;">
                  総出席日数
                </th>
-               <th class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky bg-gray-50 w-16 border border-gray-300 cursor-pointer hover:bg-gray-200" style="left: 160px; z-index: 10;" data-sort-by="attendance_rate">
+               <th class="px-2 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider sticky bg-gray-50 border border-gray-300 cursor-pointer hover:bg-gray-200" style="left: 170px; z-index: 20; width: 70px; min-width: 70px;" data-sort-by="attendance_rate">
                  出席率
                  <% if @sort_by == 'attendance_rate' %>
                    <span class="ml-1 text-xs">▼</span>
                  <% end %>
                </th>
                <% @monthly_events.each do |event| %>
-                 <th class="px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-12 border border-gray-300">
+                 <th class="px-1 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border border-gray-300" style="z-index: 10; width: 40px; min-width: 40px;">
                    <div class="whitespace-nowrap text-xs">
                      <%= event.date.strftime("%d") %>
                    </div>
@@ -86,7 +97,7 @@
                  attendance_rate = total_events > 0 ? (present_count.to_f / total_events * 100).round(1) : 0
                %>
                <tr class="hover:bg-gray-50">
-                 <td class="px-2 py-2 whitespace-nowrap text-xs font-medium text-gray-900 sticky left-0 bg-white z-10 w-24 border border-gray-300">
+                 <td class="px-2 py-2 whitespace-nowrap text-xs font-medium text-gray-900 sticky left-0 bg-white z-20 border border-gray-300" style="width: 100px; min-width: 100px;">
                    <div class="flex items-center">
                      <div>
                        <div class="font-medium text-xs"><%= user.name %></div>
@@ -94,18 +105,18 @@
                      </div>
                    </div>
                  </td>
-                 <td class="px-2 py-2 whitespace-nowrap text-center text-xs sticky bg-white z-10 w-16 border border-gray-300" style="left: 96px;">
+                 <td class="px-2 py-2 whitespace-nowrap text-center text-xs sticky bg-white z-20 border border-gray-300" style="left: 100px; width: 70px; min-width: 70px;">
                    <span class="font-semibold text-blue-600 text-xs"><%= present_count %></span>
                    <span class="text-gray-500 text-xs">/<%= total_events %></span>
                  </td>
-                 <td class="px-2 py-2 whitespace-nowrap text-center text-xs sticky bg-white z-10 w-16 border border-gray-300" style="left: 160px;">
+                 <td class="px-2 py-2 whitespace-nowrap text-center text-xs sticky bg-white z-20 border border-gray-300" style="left: 170px; width: 70px; min-width: 70px;">
                    <span class="font-semibold text-xs <%= attendance_rate >= 80 ? 'text-green-600' : attendance_rate >= 60 ? 'text-yellow-600' : 'text-red-600' %>">
                      <%= attendance_rate %>%
                    </span>
                  </td>
                  <% @monthly_events.each do |event| %>
                    <% status = @monthly_attendance_data[user.id][event.id] %>
-                   <td class="px-1 py-2 whitespace-nowrap text-center text-xs border border-gray-300">
+                   <td class="px-1 py-2 whitespace-nowrap text-center text-xs border border-gray-300" style="z-index: 10; width: 40px; min-width: 40px;">
                      <% case status %>
                      <% when 'present' %>
                        <span class="inline-flex items-center justify-center w-4 h-4 rounded-full bg-green-100 text-green-800 text-xs font-bold">
