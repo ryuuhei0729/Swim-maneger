@@ -37,6 +37,7 @@ class AttendanceController < ApplicationController
     @birthdays_by_date = {}
     User.where(user_type: "player").each do |user|
       # その月の誕生日を取得（年は考慮しない）
+      next unless user.birthday.present?
       birthday_this_month = Date.new(@current_month.year, user.birthday.month, user.birthday.day)
       if birthday_this_month.month == @current_month.month
         @birthdays_by_date[birthday_this_month] ||= []
