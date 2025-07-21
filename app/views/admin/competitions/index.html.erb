@@ -20,10 +20,13 @@
                 開催場所
               </th>
               <th class="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                備考
+                エントリー受付状況
               </th>
               <th class="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                操作
+                エントリー確認
+              </th>
+              <th class="px-6 py-3 border-b border-gray-200 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                結果入力
               </th>
             </tr>
           </thead>
@@ -40,14 +43,28 @@
                   <%= competition.place %>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <%= competition.note %>
+                  <select class="entry-status-select border border-gray-300 rounded px-2 py-1 text-sm" 
+                          data-competition-id="<%= competition.id %>"
+                          data-current-status="<%= competition.entry_status %>">
+                    <option value="before" <%= 'selected' if competition.entry_status == 'before' %>>受付前</option>
+                    <option value="open" <%= 'selected' if competition.entry_status == 'open' %>>受付中</option>
+                    <option value="closed" <%= 'selected' if competition.entry_status == 'closed' %>>締切済</option>
+                  </select>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  <%= form_with url: admin_start_entry_collection_path, method: :post, local: true, class: "inline" do |form| %>
-                    <%= form.hidden_field :event_id, value: competition.id %>
-                    <%= form.submit "エントリーを集める", 
-                        class: "bg-green-600 hover:bg-green-700 text-white font-medium py-1 px-3 rounded text-sm transition duration-200" %>
-                  <% end %>
+                  <div data-controller="modal">
+                    <button data-action="click->modal#open"
+                            data-modal-id="entriesModal"
+                            data-event-id="<%= competition.id %>"
+                            onclick="loadEntriesData(<%= competition.id %>)"
+                            class="bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded text-sm transition duration-200">
+                      確認
+                    </button>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  <%= link_to "結果入力", admin_competition_result_path(competition), 
+                      class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-1 px-3 rounded text-sm transition duration-200" %>
                 </td>
               </tr>
             <% end %>
@@ -58,50 +75,6 @@
       <div class="text-center py-8">
         <p class="text-gray-500">登録されている大会がありません。</p>
         <p class="text-sm text-gray-400 mt-2">大会は「スケジュール管理」で「大会」として登録できます。</p>
-      </div>
-    <% end %>
-  </div>
-
-  <!-- エントリー受付中の大会 -->
-  <div class="mb-8">
-    <h3 class="text-lg font-semibold mb-4 text-gray-700">エントリー受付中...</h3>
-    
-    <% if @collecting_entries.any? %>
-      <div class="space-y-4">
-        <% @collecting_entries.each do |event| %>
-          <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 hover:bg-yellow-100 transition-colors">
-            <div class="flex items-center justify-between">
-              <div>
-                <h4 class="font-semibold text-gray-900"><%= event.title %></h4>
-                <p class="text-sm text-gray-600">
-                  <%= event.date.strftime("%Y年%m月%d日") %>
-                  <% if event.place.present? %>
-                    at <%= event.place %>
-                  <% end %>
-                </p>
-              </div>
-                <div class="flex items-center space-x-3">
-                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                   <%= event.entries.count %>件のエントリー
-                 </span>
-                 <div data-controller="modal">
-                   <button data-action="click->modal#open" 
-                           data-modal-id="entriesModal"
-                           data-event-id="<%= event.id %>"
-                           onclick="loadEntriesData(<%= event.id %>)"
-                           class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200">
-                     詳細を見る
-                   </button>
-                 </div>
-               </div>
-            </div>
-          </div>
-        <% end %>
-      </div>
-    <% else %>
-      <div class="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
-        <p class="text-gray-500">現在、エントリー受付中の大会はありません。</p>
-        <p class="text-sm text-gray-400 mt-2">「エントリーを集める」ボタンをクリックして受付を開始してください。</p>
       </div>
     <% end %>
   </div>
@@ -165,6 +138,56 @@
 <% end %>
 
 <script>
+// エントリー受付状況の更新
+document.addEventListener('DOMContentLoaded', function() {
+  const statusSelects = document.querySelectorAll('.entry-status-select');
+  
+  statusSelects.forEach(select => {
+    select.addEventListener('change', function() {
+      const competitionId = this.getAttribute('data-competition-id');
+      const newStatus = this.value;
+      const currentStatus = this.getAttribute('data-current-status');
+      
+      if (newStatus === currentStatus) {
+        return; // 変更がない場合は何もしない
+      }
+      
+      // 確認ダイアログ
+      if (!confirm('エントリー受付状況を変更しますか？')) {
+        this.value = currentStatus; // 元の値に戻す
+        return;
+      }
+      
+      // AJAXで更新
+      fetch(`/admin/competition/${competitionId}/entry_status`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ entry_status: newStatus })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // 成功時は現在の値を更新
+          this.setAttribute('data-current-status', newStatus);
+          alert(data.message);
+        } else {
+          // 失敗時は元の値に戻す
+          this.value = currentStatus;
+          alert(data.message || '更新に失敗しました');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        this.value = currentStatus; // 元の値に戻す
+        alert('更新中にエラーが発生しました');
+      });
+    });
+  });
+});
+
 function loadEntriesData(eventId) {
   fetch(`/admin/competition/entry/${eventId}`, {
     method: 'GET',

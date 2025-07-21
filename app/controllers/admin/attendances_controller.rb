@@ -193,7 +193,8 @@ class Admin::AttendancesController < Admin::BaseController
 
   def update_status
     begin
-      ActiveRecord::Base.transaction         # Strong Parametersで許可されたパラメータのみを取得
+      ActiveRecord::Base.transaction do
+        # Strong Parametersで許可されたパラメータのみを取得
         permitted_attendance_events = attendance_events_params
         permitted_competitions = competitions_params
 
