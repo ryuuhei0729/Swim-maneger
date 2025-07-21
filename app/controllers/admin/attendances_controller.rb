@@ -1,7 +1,7 @@
 class Admin::AttendancesController < Admin::BaseController
   def index
     # 出欠管理画面用のデータを取得
-    @events = AttendanceEvent.includes(:attendance)
+    @events = AttendanceEvent.includes(:attendances)
                            .order(date: :desc)
                            .limit(20)
     
@@ -27,7 +27,7 @@ class Admin::AttendancesController < Admin::BaseController
     rescue Date::Error
       @selected_month = Date.current.beginning_of_month
     end
-    @monthly_events = AttendanceEvent.includes(:attendance)
+    @monthly_events = AttendanceEvent.includes(:attendances)
                                    .where(date: @selected_month..@selected_month.end_of_month)
                                    .order(:date)
     
@@ -36,7 +36,7 @@ class Admin::AttendancesController < Admin::BaseController
     @users.each do |user|
       @monthly_attendance_data[user.id] = {}
       @monthly_events.each do |event|
-        attendance = event.attendance.find_by(user: user)
+        attendance = event.attendances.find_by(user: user)
         @monthly_attendance_data[user.id][event.id] = attendance&.status || 'no_response'
       end
     end
@@ -57,7 +57,7 @@ class Admin::AttendancesController < Admin::BaseController
   def check
     @attendance_event = AttendanceEvent.find(params[:attendance_event_id])
     # 「出席」「その他」で登録済みの人を取得
-    @attendances = @attendance_event.attendance
+    @attendances = @attendance_event.attendances
                                   .includes(:user)
                                   .where(status: ['present', 'other'])
                                   .joins(:user)
@@ -71,7 +71,7 @@ class Admin::AttendancesController < Admin::BaseController
     @attendance_event = AttendanceEvent.find(params[:attendance_event_id])
     
     # 出席予定者の全ユーザーID
-    all_present_user_ids = @attendance_event.attendance
+    all_present_user_ids = @attendance_event.attendances
                                            .where(status: ['present', 'other'])
                                            .joins(:user)
                                            .where(users: { user_type: 'player' })

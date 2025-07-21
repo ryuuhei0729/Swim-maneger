@@ -68,7 +68,7 @@
                     <% end %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-gray-900">
-                    <% if event.is_competition %>
+                    <% if event.is_a?(Competition) %>
                       <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                         大会
                       </span>
@@ -115,14 +115,21 @@
           placeholder: "練習や大会のタイトルを入力",
           required: true %>
     </div>
-    <div class="flex items-center space-x-6">
-      <div class="flex items-center">
-        <%= f.check_box :is_competition, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
-        <%= f.label :is_competition, "大会の場合はチェック", class: "ml-2 block text-sm text-gray-900" %>
-      </div>
-      <div class="flex items-center">
-        <%= check_box_tag :requires_attendance, "1", true, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
-        <%= label_tag :requires_attendance, "出欠管理をしない場合はチェックを外す", class: "ml-2 block text-sm text-gray-900" %>
+    <div>
+      <%= f.label :event_type, "イベントタイプ", class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1 space-y-2">
+        <label class="flex items-center cursor-pointer">
+          <%= f.radio_button :event_type, "Event", class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" %>
+          <span class="ml-2 block text-sm text-gray-900">通常イベント（出欠管理なし）</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <%= f.radio_button :event_type, "AttendanceEvent", class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" %>
+          <span class="ml-2 block text-sm text-gray-900">出欠管理あり</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <%= f.radio_button :event_type, "Competition", class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" %>
+          <span class="ml-2 block text-sm text-gray-900">大会</span>
+        </label>
       </div>
     </div>
 
@@ -174,12 +181,31 @@
           required: true %>
     </div>
 
-    <div class="flex items-center">
-      <%= f.check_box :is_competition, 
-          class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded", 
-          name: 'attendance_event[is_competition]', 
-          id: 'attendance_event_is_competition' %>
-      <%= f.label :is_competition, "大会の場合はチェック", class: "ml-2 block text-sm text-gray-900" %>
+    <div>
+      <%= f.label :event_type, "イベントタイプ", class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1 space-y-2">
+        <label class="flex items-center cursor-pointer">
+          <%= f.radio_button :event_type, "Event", 
+              class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300", 
+              name: 'attendance_event[event_type]', 
+              id: 'attendance_event_event_type_Event' %>
+          <span class="ml-2 block text-sm text-gray-900">通常イベント（出欠管理なし）</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <%= f.radio_button :event_type, "AttendanceEvent", 
+              class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300", 
+              name: 'attendance_event[event_type]', 
+              id: 'attendance_event_event_type_AttendanceEvent' %>
+          <span class="ml-2 block text-sm text-gray-900">出欠管理あり</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <%= f.radio_button :event_type, "Competition", 
+              class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300", 
+              name: 'attendance_event[event_type]', 
+              id: 'attendance_event_event_type_Competition' %>
+          <span class="ml-2 block text-sm text-gray-900">大会</span>
+        </label>
+      </div>
     </div>
 
     <div>
@@ -241,7 +267,14 @@ function openEditModal(button) {
       console.log('Received data:', data);
       form.querySelector('#attendance_event_title').value = data.title;
       form.querySelector('#attendance_event_date').value = data.date;
-      form.querySelector('#attendance_event_is_competition').checked = data.is_competition;
+      // イベントタイプに応じてラジオボタンを設定
+      if (data.type === 'Competition') {
+        form.querySelector('#attendance_event_event_type_Competition').checked = true;
+      } else if (data.type === 'AttendanceEvent') {
+        form.querySelector('#attendance_event_event_type_AttendanceEvent').checked = true;
+      } else {
+        form.querySelector('#attendance_event_event_type_Event').checked = true;
+      }
       form.querySelector('#attendance_event_place').value = data.place || '';
       form.querySelector('#attendance_event_note').value = data.note || '';
       
