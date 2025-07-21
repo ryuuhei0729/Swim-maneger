@@ -8,20 +8,16 @@ class AttendanceController < ApplicationController
       Date.current
     end
 
-    # 今月・来月のイベントを取得
-    this_month = @current_month
-    next_month = @current_month.next_month
-
-    this_month_events = AttendanceEvent.where(date: this_month.beginning_of_month..this_month.end_of_month).order(date: :asc)
-    next_month_events = AttendanceEvent.where(date: next_month.beginning_of_month..next_month.end_of_month).order(date: :asc)
+    # 受付中のイベントを取得（今日以降のもののみ）
+    today = Date.current
+    open_events = AttendanceEvent.where(date: today.., attendance_status: 'open').order(date: :asc)
 
     # 現在のユーザーの出席情報を取得
-    answered_event_ids = current_user_auth.user.attendance.where(attendance_event: this_month_events + next_month_events).pluck(:attendance_event_id)
+    answered_event_ids = current_user_auth.user.attendance.where(attendance_event: open_events).pluck(:attendance_event_id)
 
     # 未回答のイベントのみを取得
-    @this_month_events = this_month_events.where.not(id: answered_event_ids)
-    @next_month_events = next_month_events.where.not(id: answered_event_ids)
-    @attendance = current_user_auth.user.attendance.where(attendance_event: @this_month_events + @next_month_events)
+    @open_events = open_events.where.not(id: answered_event_ids)
+    @attendance = current_user_auth.user.attendance.where(attendance_event: @open_events)
 
     # カレンダー表示用のデータ（STI構造では全てのイベントをEventテーブルから取得）
     all_events = Event
@@ -112,19 +108,15 @@ class AttendanceController < ApplicationController
       Date.current
     end
 
-    # 今月・来月のイベントを取得（今日以降のみ）
-    this_month = @current_month
-    next_month = @current_month.next_month
+    # attendance_statusがopenまたはclosedのイベントを取得（今日以降のみ）
     today = Date.current
-
-    @this_month_events = AttendanceEvent.where(date: today..this_month.end_of_month).order(date: :asc)
-    @next_month_events = AttendanceEvent.where(date: next_month.beginning_of_month..next_month.end_of_month).order(date: :asc)
+    @events = AttendanceEvent.where(date: today.., attendance_status: ['open', 'closed']).order(date: :asc)
 
     # 既存の出席情報を取得
     @user_attendance = {}
     current_user_auth.user.attendance
       .joins(:attendance_event)
-      .where(events: { date: this_month.beginning_of_month..next_month.end_of_month })
+      .where(events: { date: today.. })
       .each do |attendance|
         @user_attendance[attendance.attendance_event_id] = attendance
       end
@@ -184,8 +176,8 @@ class AttendanceController < ApplicationController
 
       attendance.status = params[:status]
       
-      # 「出席」以外の場合のみ編集日時を備考欄に追加
-      if params[:status] != "present"
+      # イベントの受付ステータスがclosedの場合のみ編集日時を備考欄に追加
+      if event.attendance_status == "closed"
         edit_timestamp = Time.current.strftime("（%m/%d %H:%M編集）")
         note_content = params[:note].to_s.strip
         
@@ -199,7 +191,7 @@ class AttendanceController < ApplicationController
           attendance.note = edit_timestamp
         end
       else
-        # 「出席」の場合は入力された備考をそのまま保存
+        # 受付中の場合は入力された備考をそのまま保存
         attendance.note = params[:note]
       end
 

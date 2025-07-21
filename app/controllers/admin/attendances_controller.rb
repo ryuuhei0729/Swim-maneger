@@ -184,4 +184,44 @@ class Admin::AttendancesController < Admin::BaseController
     end
     redirect_to admin_attendance_path, notice: "#{update_count}人の出席状況を更新しました"
   end
+
+  def status
+    # 出欠受付管理画面用のデータを取得
+    @attendance_events = AttendanceEvent.order(date: :desc)
+    @competitions = Competition.order(date: :desc)
+  end
+
+  def update_status
+    begin
+      ActiveRecord::Base.transaction do
+        # AttendanceEventの更新
+        if params[:attendance_events].present?
+          params[:attendance_events].each do |event_id, status|
+            event = AttendanceEvent.find(event_id)
+            event.update!(attendance_status: status)
+          end
+        end
+
+        # Competitionの更新
+        if params[:competitions].present?
+          params[:competitions].each do |event_id, status|
+            event = Competition.find(event_id)
+            event.update!(attendance_status: status)
+          end
+        end
+
+        if request.format.json? || request.content_type == 'application/json'
+          render json: { success: true, message: "出欠受付状況を更新しました" }
+        else
+          redirect_to admin_attendance_status_path, notice: "出欠受付状況を更新しました"
+        end
+      end
+    rescue => e
+      if request.format.json? || request.content_type == 'application/json'
+        render json: { success: false, message: "更新中にエラーが発生しました: #{e.message}" }
+      else
+        redirect_to admin_attendance_status_path, alert: "更新中にエラーが発生しました: #{e.message}"
+      end
+    end
+  end
 end 
