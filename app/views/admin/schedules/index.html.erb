@@ -57,7 +57,7 @@
               <% @events.each do |event| %>
                 <tr>
                   <td class="px-6 py-4 whitespace-nowrap text-gray-900">
-                    <%= event.date.strftime('%Y/%m/%d') %>
+                    <%= event.date.strftime('%m/%d') %>
                     <span class="text-gray-900">(<%= %w[日 月 火 水 木 金 土][event.date.wday] %>)</span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-gray-900"><%= event.title %></td>
@@ -170,7 +170,7 @@
 
 <!-- 編集モーダル -->
 <%= render 'shared/modal', modal_id: 'edit_schedule_modal', title: 'スケジュール編集' do %>
-  <%= form_with(url: '#', method: :patch, class: "space-y-4", id: 'edit_schedule_form') do |f| %>
+  <%= form_with(url: admin_update_schedule_path(0), method: :patch, class: "space-y-4", id: 'edit_schedule_form') do |f| %>
     <div>
       <%= f.label :title, "タイトル", class: "block text-sm font-medium text-gray-700" %>
       <%= f.text_field :title, 
@@ -249,12 +249,28 @@
 <% end %>
 
 <script>
+// CSRFトークンをグローバル変数として定義
+const csrfToken = '<%= form_authenticity_token %>';
+
 function openEditModal(button) {
   const eventId = button.dataset.eventId;
   console.log('Edit button clicked for event:', eventId);
   
   const form = document.querySelector('#edit_schedule_form');
   form.action = `/admin/schedule/${eventId}`;
+  
+  // CSRFトークンを更新
+  const csrfInput = form.querySelector('input[name="authenticity_token"]');
+  if (csrfInput) {
+    csrfInput.value = csrfToken;
+  } else {
+    // CSRFトークンのinputが存在しない場合は作成
+    const newCsrfInput = document.createElement('input');
+    newCsrfInput.type = 'hidden';
+    newCsrfInput.name = 'authenticity_token';
+    newCsrfInput.value = csrfToken;
+    form.appendChild(newCsrfInput);
+  }
   
   fetch(`/admin/schedule/${eventId}/edit`)
     .then(response => {
