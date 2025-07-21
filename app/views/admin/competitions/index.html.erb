@@ -45,7 +45,8 @@
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                   <select class="entry-status-select border border-gray-300 rounded px-2 py-1 text-sm" 
                           data-competition-id="<%= competition.id %>"
-                          data-current-status="<%= competition.entry_status %>">
+                          data-current-status="<%= competition.entry_status %>"
+                          data-url="<%= admin_update_competition_entry_status_path(':id') %>">
                     <option value="before" <%= 'selected' if competition.entry_status == 'before' %>>受付前</option>
                     <option value="open" <%= 'selected' if competition.entry_status == 'open' %>>受付中</option>
                     <option value="closed" <%= 'selected' if competition.entry_status == 'closed' %>>締切済</option>
@@ -147,6 +148,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const competitionId = this.getAttribute('data-competition-id');
       const newStatus = this.value;
       const currentStatus = this.getAttribute('data-current-status');
+      const urlTemplate = this.getAttribute('data-url');
       
       if (newStatus === currentStatus) {
         return; // 変更がない場合は何もしない
@@ -158,12 +160,19 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       
+      // セレクトボックスを無効化して重複送信を防ぐ
+      this.disabled = true;
+      
+      // URLのプレースホルダーを実際のIDに置換
+      const url = urlTemplate.replace(':id', competitionId);
+      
       // AJAXで更新
-      fetch(`/admin/competition/${competitionId}/entry_status`, {
+      fetch(url, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+          'Accept': 'application/json',
+          'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
         },
         body: JSON.stringify({ entry_status: newStatus })
       })
@@ -183,6 +192,10 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Error:', error);
         this.value = currentStatus; // 元の値に戻す
         alert('更新中にエラーが発生しました');
+      })
+      .finally(() => {
+        // 常にセレクトボックスを再有効化
+        this.disabled = false;
       });
     });
   });
