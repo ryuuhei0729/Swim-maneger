@@ -194,17 +194,21 @@ class Admin::AttendancesController < Admin::BaseController
   def update_status
     begin
       ActiveRecord::Base.transaction do
+        # Strong Parametersで許可されたパラメータのみを取得
+        permitted_attendance_events = attendance_events_params
+        permitted_competitions = competitions_params
+
         # AttendanceEventの更新
-        if params[:attendance_events].present?
-          params[:attendance_events].each do |event_id, status|
+        if permitted_attendance_events.present?
+          permitted_attendance_events.each do |event_id, status|
             event = AttendanceEvent.find(event_id)
             event.update!(attendance_status: status)
           end
         end
 
         # Competitionの更新
-        if params[:competitions].present?
-          params[:competitions].each do |event_id, status|
+        if permitted_competitions.present?
+          permitted_competitions.each do |event_id, status|
             event = Competition.find(event_id)
             event.update!(attendance_status: status)
           end
@@ -216,12 +220,57 @@ class Admin::AttendancesController < Admin::BaseController
           redirect_to admin_attendance_status_path, notice: "出欠受付状況を更新しました"
         end
       end
+    rescue ActiveRecord::RecordNotFound => e
+      Rails.logger.error "AttendanceEvent/Competition not found in update_status: #{e.message}"
+      Rails.logger.error e.backtrace.first(5).join("\n")
+      
+      if request.format.json? || request.content_type == 'application/json'
+        render json: { success: false, message: "指定されたイベントが見つかりません" }
+      else
+        redirect_to admin_attendance_status_path, alert: "指定されたイベントが見つかりません"
+      end
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.error "Validation error in update_status: #{e.message}"
+      Rails.logger.error e.backtrace.first(5).join("\n")
+      
+      if request.format.json? || request.content_type == 'application/json'
+        render json: { success: false, message: "データの検証に失敗しました: #{e.message}" }
+      else
+        redirect_to admin_attendance_status_path, alert: "データの検証に失敗しました: #{e.message}"
+      end
     rescue => e
+      Rails.logger.error "Unexpected error in update_status: #{e.message}"
+      Rails.logger.error e.backtrace.first(10).join("\n")
+      
       if request.format.json? || request.content_type == 'application/json'
         render json: { success: false, message: "更新中にエラーが発生しました: #{e.message}" }
       else
         redirect_to admin_attendance_status_path, alert: "更新中にエラーが発生しました: #{e.message}"
       end
+    end
+  end
+
+  private
+
+  def attendance_events_params
+    return {} unless params[:attendance_events].present?
+    
+    # 許可されたstatus値のみをフィルタリング
+    permitted_statuses = AttendanceEvent.attendance_statuses.keys.map(&:to_s)
+    
+    params[:attendance_events].permit!.to_h.select do |event_id, status|
+      permitted_statuses.include?(status.to_s)
+    end
+  end
+
+  def competitions_params
+    return {} unless params[:competitions].present?
+    
+    # 許可されたstatus値のみをフィルタリング
+    permitted_statuses = Competition.attendance_statuses.keys.map(&:to_s)
+    
+    params[:competitions].permit!.to_h.select do |event_id, status|
+      permitted_statuses.include?(status.to_s)
     end
   end
 end 
