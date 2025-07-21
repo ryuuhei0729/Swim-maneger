@@ -338,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // AJAXでサーバーに送信
-    fetch('/admin/attendance/status', {
+    fetch('<%= update_admin_attendance_status_path %>', {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
