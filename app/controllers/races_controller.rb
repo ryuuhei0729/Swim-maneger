@@ -30,10 +30,11 @@ class RacesController < ApplicationController
     # ベストタイムのnoteを取得
     @best_time_notes = @user.best_time_notes
     
-    # エントリー可能な大会を取得（将来の大会のみ）
+    # エントリー可能な大会を取得（将来の大会のみ、エントリー受付中のみ）
     @available_competitions = Competition.where('date >= ?', Date.current)
-                                       .order(:date)
-                                       .limit(5)
+                                         .where(entry_status: :open)
+                                         .order(:date)
+                                         .limit(5)
     
     # 全種目を取得
     @all_styles = Style.all.order(:style, :distance)
