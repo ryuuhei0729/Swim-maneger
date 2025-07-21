@@ -77,7 +77,7 @@ class Api::V1::CalendarController < Api::V1::BaseController
     # イベントタイプ別の統計
     attendance_events = all_events.select { |event| event.is_a?(AttendanceEvent) || event.is_a?(Competition) }
     competitions = all_events.select { |event| event.is_a?(Competition) }
-    practices = all_events.select { |event| event.is_a?(AttendanceEvent) }
+    practices = all_events.select { |event| event.is_a?(AttendanceEvent) && !event.is_a?(Competition) }
 
     {
       total_events: all_events.count,
