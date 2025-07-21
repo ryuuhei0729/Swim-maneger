@@ -5,7 +5,7 @@ class CreateAllTablesV3 < ActiveRecord::Migration[7.0]
       t.integer :generation, null: false
       t.string :name, null: false
       t.integer :gender, null: false
-      t.date :birthday, null: false
+      t.date :birthday
       t.integer :user_type, null: false
       t.text :bio
       t.timestamps

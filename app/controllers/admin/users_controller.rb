@@ -160,6 +160,7 @@ class Admin::UsersController < Admin::BaseController
             "選手" => "player",
             "コーチ" => "coach", 
             "顧問・監督" => "director",
+            "顧問" => "director",
             "マネージャー" => "manager",
             "player" => "player",
             "coach" => "coach",
@@ -208,7 +209,7 @@ class Admin::UsersController < Admin::BaseController
           
           # 期数の処理
           generation_num = generation.to_i if generation.present?
-          if generation_num.nil? || generation_num <= 0
+          if generation_num.nil? || generation_num < 0
             @errors << "行#{row_index + 1}: 有効な期数を入力してください: #{generation}"
             next
           end

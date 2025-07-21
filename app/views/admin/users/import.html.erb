@@ -143,7 +143,7 @@
                           <%= data[:gender] == 'male' ? '男性' : '女性' %>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          <% if data[:birthday] %>
+                          <% if data[:birthday].present? %>
                             <%= data[:birthday].strftime('%Y/%m/%d') %>
                           <% else %>
                             <span class="text-gray-500">未設定</span>
