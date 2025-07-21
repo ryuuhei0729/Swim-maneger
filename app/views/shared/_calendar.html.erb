@@ -111,8 +111,68 @@
           
           <% if events.any? %>
             <div class="mt-2 space-y-2">
-              <% events.each do |event| %>
-                <% if event.is_a?(AttendanceEvent) %>
+              <%# Event > Competition > AttendanceEventの順でソート %>
+              <% sorted_events = events.sort_by do |event| 
+                case event.class.name
+                when 'Event'
+                  0
+                when 'Competition'
+                  1
+                when 'AttendanceEvent'
+                  2
+                else
+                  3
+                end
+              end %>
+              <% sorted_events.each do |event| %>
+                <% if event.is_a?(Competition) %>
+                  <%# Competitionの場合 - 薄い赤色で表示 %>
+                  <div class="group relative">
+                    <div
+                      class="p-2 rounded-md border border-red-200 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer bg-red-50 text-red-800"
+                      data-action="click->calendar#showEventModal"
+                      data-event-id="<%= event.id %>"
+                    >
+                      <div class="flex flex-col space-y-1">
+                        <span class="text-xs font-bold text-red-800"><%= event.title %></span>
+                        <% if event.place.present? %>
+                          <span class="text-[10px] text-red-600">@<%= event.place %></span>
+                        <% end %>
+                        <% user_attendance = user_attendance_by_event&.dig(event.id) %>
+                        <% if user_attendance %>
+                          <% case user_attendance.status %>
+                          <% when 'present', '出席' %>
+                            <span class="text-[10px] text-green-800 bg-green-100 px-1.5 py-0.5 rounded-full self-start font-semibold">
+                              出席
+                            </span>
+                          <% when 'absent', '欠席' %>
+                            <span class="text-[10px] text-red-800 bg-red-100 px-1.5 py-0.5 rounded-full self-start font-semibold">
+                              欠席
+                            </span>
+                          <% when 'other', 'その他' %>
+                            <span class="text-[10px] text-yellow-800 bg-yellow-100 px-1.5 py-0.5 rounded-full self-start font-semibold">
+                              その他
+                            </span>
+                          <% else %>
+                            <span class="text-[10px] text-gray-600 bg-gray-200 px-1.5 py-0.5 rounded-full self-start">
+                              <%= user_attendance.status %>
+                            </span>
+                          <% end %>
+                        <% else %>
+                          <span class="text-[10px] text-orange-700 bg-orange-100 px-1.5 py-0.5 rounded-full self-start">
+                            未回答
+                          </span>
+                        <% end %>
+                      </div>
+                    </div>
+                    <% if event.note.present? %>
+                      <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-white text-gray-900 text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10 border border-gray-200 shadow-lg">
+                        <%= event.note %>
+                        <div class="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+                      </div>
+                    <% end %>
+                  </div>
+                <% elsif event.is_a?(AttendanceEvent) %>
                   <%# AttendanceEventの場合 - クリック可能で出席情報を表示 %>
                   <div class="group relative">
                     <div

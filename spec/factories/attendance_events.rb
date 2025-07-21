@@ -1,20 +1,12 @@
 FactoryBot.define do
   factory :attendance_event do
-    sequence(:title) { |n| "イベント#{n}" }
+    sequence(:title) { |n| "練習#{n}" }
     date { Date.current + rand(1..30).days }
     place { "市営プール" }
     note { "練習内容の詳細" }
+    type { 'AttendanceEvent' }
+    is_attendance { true }
     is_competition { false }
-
-    trait :competition do
-      is_competition { true }
-      title { "大会" }
-    end
-
-    trait :practice do
-      is_competition { false }
-      title { "練習" }
-    end
 
     trait :future_date do
       date { Date.current + rand(1..30).days }
