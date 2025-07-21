@@ -36,4 +36,4 @@
 /app/assets/builds/*
 !/app/assets/builds/.keep
 
-/config/credentials/development2.key
+config/credentials/development2.key
