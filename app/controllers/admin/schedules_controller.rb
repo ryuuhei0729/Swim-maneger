@@ -163,27 +163,30 @@ class Admin::SchedulesController < Admin::BaseController
             note = note_cell&.value.to_s.strip
             
             # 大会フラグの判定（より厳密に）
-            competition_value = competition_cell&.value.to_s.downcase.strip
-            is_competition = ["true", "1", "大会", "yes", "○", "o", "〇"].include?(competition_value)
+            competition_value = competition_cell&.value
+            competition_string = competition_value.to_s.strip.upcase
+            is_competition = case competition_string
+                              when "TRUE", "1", "○", "O", "〇", "YES"
+                                true
+                              when "FALSE", "0", "×", "X", "NO", "-", ""
+                                false
+                              else
+                                # 空白やnilの場合はデフォルトでfalse（Eventテーブル）
+                                false
+                              end
             
             # 出欠フラグの判定
             attendance_value = attendance_cell&.value
-            requires_attendance_input = case attendance_value
-                                        when true, "true", "TRUE", "1", "○", "o", "〇", "yes", "YES"
-                                          true
-                                        when false, "false", "FALSE", "0", "×", "x", "no", "NO"
-                                          false
-                                        else
-                                          # 空白やnilの場合はデフォルトでfalse（Eventテーブル）
-                                          false
-                                        end
-            
-            # ビジネスロジック: 大会フラグがtrueの場合、出欠管理フラグを強制的にtrueにする
-            if is_competition
-              requires_attendance = true
-            else
-              requires_attendance = requires_attendance_input
-            end
+            attendance_string = attendance_value.to_s.strip.upcase
+            requires_attendance = case attendance_string
+                                  when "TRUE", "1", "○", "O", "〇", "YES"
+                                    true
+                                  when "FALSE", "0", "×", "X", "NO", "-", ""
+                                    false
+                                  else
+                                    # 空白やnilの場合はデフォルトでfalse（Eventテーブル）
+                                    false
+                                  end
             
             @preview_data << {
               title: title,
@@ -223,26 +226,36 @@ class Admin::SchedulesController < Admin::BaseController
     errors = []
     
     ActiveRecord::Base.transaction do
-      preview_data.each_with_index do |data, index|
-        requires_attendance = data["requires_attendance"]
+              preview_data.each_with_index do |data, index|
+          is_competition = data[:is_competition] || data["is_competition"]
+          requires_attendance = data[:requires_attendance] || data["requires_attendance"]
         
-        if requires_attendance
-          # 出欠管理が必要な場合はAttendanceEventテーブル
+        # 新しいロジック: 大会フラグ > 出欠フラグ > 通常イベント
+        if is_competition
+          # 大会フラグがTRUEの場合: Competitionテーブルに保存
+          event = Competition.new(
+            title: data[:title] || data["title"],
+            date: data[:date] || data["date"],
+            place: data[:place] || data["place"],
+            note: data[:note] || data["note"]
+          )
+          table_name = "Competition"
+        elsif requires_attendance
+          # 出欠フラグがTRUEの場合: AttendanceEventテーブルに保存
           event = AttendanceEvent.new(
-            title: data["title"],
-            date: data["date"],
-            place: data["place"],
-            note: data["note"],
-            is_competition: data["is_competition"]
+            title: data[:title] || data["title"],
+            date: data[:date] || data["date"],
+            place: data[:place] || data["place"],
+            note: data[:note] || data["note"]
           )
           table_name = "AttendanceEvent"
         else
-          # 出欠管理が不要な場合はEventテーブル
+          # 大会フラグ、出欠フラグ共にFalseの場合: Eventテーブルに保存
           event = Event.new(
-            title: data["title"],
-            date: data["date"],
-            place: data["place"],
-            note: data["note"]
+            title: data[:title] || data["title"],
+            date: data[:date] || data["date"],
+            place: data[:place] || data["place"],
+            note: data[:note] || data["note"]
           )
           table_name = "Event"
         end
@@ -250,7 +263,7 @@ class Admin::SchedulesController < Admin::BaseController
         if event.save
           success_count += 1
         else
-          error_msg = "#{data["title"] || '(タイトルなし)'} (#{data["date"]}): #{event.errors.full_messages.join(', ')}"
+          error_msg = "#{data[:title] || data["title"] || '(タイトルなし)'} (#{data[:date] || data["date"]}): #{event.errors.full_messages.join(', ')}"
           errors << error_msg
         end
       end
