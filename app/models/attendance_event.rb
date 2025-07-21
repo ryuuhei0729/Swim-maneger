@@ -12,8 +12,8 @@ class AttendanceEvent < Event
 
   enum :attendance_status, {
     before: 0,  # 出欠集計前
-    open: 1,    # 集計中
-    closed: 2   # 集計済み
+    open: 1,    # 受付中
+    closed: 2   # 受付終了
   }, prefix: :attendance
 
   # デフォルト値設定（バリデーション前）
