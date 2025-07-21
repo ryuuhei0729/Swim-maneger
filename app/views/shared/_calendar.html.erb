@@ -111,7 +111,20 @@
           
           <% if events.any? %>
             <div class="mt-2 space-y-2">
-              <% events.each do |event| %>
+              <%# Event > Competition > AttendanceEventの順でソート %>
+              <% sorted_events = events.sort_by do |event| 
+                case event.class.name
+                when 'Event'
+                  0
+                when 'Competition'
+                  1
+                when 'AttendanceEvent'
+                  2
+                else
+                  3
+                end
+              end %>
+              <% sorted_events.each do |event| %>
                 <% if event.is_a?(Competition) %>
                   <%# Competitionの場合 - 薄い赤色で表示 %>
                   <div class="group relative">
