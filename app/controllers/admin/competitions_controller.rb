@@ -9,6 +9,29 @@ class Admin::CompetitionsController < Admin::BaseController
                                    .order(date: :desc)
   end
 
+  def update_entry_status
+    @competition = Competition.find(params[:id])
+    
+    # JSONパラメータからentry_statusを取得
+    entry_status = params[:entry_status] || request.body.read
+    
+    if @competition.update(entry_status: entry_status)
+      render json: { success: true, message: "エントリー受付状況を更新しました" }
+    else
+      render json: { success: false, message: "更新に失敗しました" }
+    end
+  rescue ActiveRecord::RecordNotFound
+    render json: { success: false, message: "大会が見つかりません" }
+  end
+
+  def result
+    @competition = Competition.find(params[:id])
+    # 結果入力画面用のデータを取得
+    @entries = @competition.entries.includes(:user, :style).order('users.generation', 'users.name')
+  rescue ActiveRecord::RecordNotFound
+    redirect_to admin_competition_path, alert: "大会が見つかりません"
+  end
+
   def start_entry_collection
     @event = Competition.find(params[:event_id])
     
@@ -54,7 +77,8 @@ class Admin::CompetitionsController < Admin::BaseController
                 user_name: entry.user.name,
                 user_generation: entry.user.generation,
                 entry_time: entry.formatted_entry_time,
-                note: entry.note
+                note: entry.note,
+                style_name: entry.style&.name_jp
               }
             end
           end
