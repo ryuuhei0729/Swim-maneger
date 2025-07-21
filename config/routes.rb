@@ -164,6 +164,8 @@ Rails.application.routes.draw do
 
   # [管理者]大会管理
   get "admin/competition", to: "admin/competitions#index", as: "admin_competition"
+  patch "admin/competition/:id/entry_status", to: "admin/competitions#update_entry_status", as: "admin_update_competition_entry_status"
+  get "admin/competition/result/:id", to: "admin/competitions#result", as: "admin_competition_result"
   
   # [管理者]エントリー管理
   post "admin/competition/entry/start", to: "admin/competitions#start_entry_collection", as: "admin_start_entry_collection"
