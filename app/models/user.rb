@@ -11,7 +11,6 @@ class User < ApplicationRecord
 
   validates :generation, presence: true
   validates :name, presence: true
-  validates :birthday, presence: true
   validates :user_type, presence: true
   validates :gender, presence: true
 
