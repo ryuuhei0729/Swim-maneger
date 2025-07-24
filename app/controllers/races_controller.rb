@@ -5,31 +5,15 @@ class RacesController < ApplicationController
     @user = current_user_auth.user
     @records = @user.records.includes(:style, :attendance_event).order(created_at: :desc)
 
-    # 大会ごとに記録をグルーピング
-    @records_by_event = @records.group_by(&:attendance_event)
-                               .sort_by { |event, records| 
-                                 if event.present?
-                                   event.date
-                                 else
-                                   records.first.created_at
-                                 end
-                               }
-                               .reverse
+    # 大会ごとに記録をグルーピング（大会名＋日付でまとめる）
+    @records_by_event = @records.group_by do |record|
+      if record.attendance_event.present?
+        [record.attendance_event.title, record.attendance_event.date]
+      else
+        ["練習レース", record.created_at.to_date]
+      end
+    end.sort_by { |(title, date), _| date }.reverse
 
-    # 各種目のベストタイムを取得
-    @best_times = {}
-    Style.all.each do |style|
-      best_record = @user.records
-        .joins(:style)
-        .where(styles: { name: style.name })
-        .order(:time)
-        .first
-      @best_times[style.name] = best_record&.time
-    end
-    
-    # ベストタイムのnoteを取得
-    @best_time_notes = @user.best_time_notes
-    
     # エントリー可能な大会を取得（将来の大会のみ、エントリー受付中のみ）
     @available_competitions = Competition.where('date >= ?', Date.current)
                                          .where(entry_status: :open)
