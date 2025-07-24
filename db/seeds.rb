@@ -397,13 +397,30 @@ User.where(user_type: :player).each do |user|
       end
 
       # 記録を作成（大会イベントと関連付け）
-      Record.create!(
+      record = Record.create!(
         user: user,
         style: style,
         time: time,
         attendance_event: competition_event,
         created_at: competition_event.date + rand(0..5).hours
       )
+
+      # 距離ごとにsplit_timeを追加
+      case style.distance
+      when 50
+        # 25mのsplit
+        SplitTime.create!(record: record, distance: 25, split_time: (time / 2).round(2))
+      when 100
+        # 25, 50, 75mのsplit
+        [25, 50, 75].each do |d|
+          SplitTime.create!(record: record, distance: d, split_time: (time * d / 100.0).round(2))
+        end
+      when 200
+        # 50, 100, 150mのsplit
+        [50, 100, 150].each do |d|
+          SplitTime.create!(record: record, distance: d, split_time: (time * d / 200.0).round(2))
+        end
+      end
     end
   end
 end
