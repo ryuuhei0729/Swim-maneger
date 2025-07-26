@@ -419,7 +419,7 @@ class Api::V1::AdminController < Api::V1::BaseController
   private
 
   def check_admin_access
-    unless current_user_auth.user.user_type.in?(["coach", "director"])
+    unless current_user_auth.user.user_type.in?(["coach", "director", "manager"])
       render_error("管理者権限が必要です", :forbidden)
     end
   end
