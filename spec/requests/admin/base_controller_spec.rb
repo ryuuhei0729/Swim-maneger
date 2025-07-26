@@ -32,10 +32,9 @@ RSpec.describe Admin::BaseController, type: :request do
     context 'マネージャーでログインしている場合' do
       before { sign_in manager_auth }
 
-      it '管理者ページにアクセスすると権限エラーでリダイレクトされる' do
+      it '管理者ページにアクセス可能' do
         get admin_path
-        expect(response).to redirect_to(home_path)
-        expect(flash[:alert]).to eq('このページにアクセスする権限がありません。')
+        expect(response).to have_http_status(:ok)
       end
     end
 
