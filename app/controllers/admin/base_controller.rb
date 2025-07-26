@@ -9,7 +9,7 @@ class Admin::BaseController < ApplicationController
   private
 
   def check_admin_access
-    unless current_user_auth.user.user_type.in?(["coach", "director"])
+    unless current_user_auth.user.user_type.in?(["coach", "director", "manager"])
       redirect_to home_path, alert: "このページにアクセスする権限がありません。"
     end
   end
