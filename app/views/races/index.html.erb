@@ -6,7 +6,7 @@
     <div class="mb-8">
       <div class="flex items-center justify-between">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">大会レース</h1>
+          <h1 class="text-3xl font-bold text-gray-900">レース</h1>
           <p class="mt-2 text-sm text-gray-600">あなたの大会での過去のレース結果を確認できます</p>
         </div>
                  <% if @available_competitions.any? %>
@@ -25,79 +25,23 @@
     </div>
 
     <% if @user.present? %>
-      <!-- ベストタイム一覧 -->
-      <div class="mt-12">
-        <div class="flex items-center mb-8">
-          <h3 class="text-2xl font-bold text-gray-900 mr-4">My Best Time</h3>
-          <div class="h-1 flex-grow bg-gradient-to-r from-blue-800 to-blue-400 rounded-full"></div>
-        </div>
-
-        <div class="mb-8">
-          <div class="flex w-full">
-            <% style_order = { 'fr' => 0, 'br' => 1, 'ba' => 2, 'fly' => 3, 'im' => 4 } %>
-            <% style_titles = { 'fr' => '自由形', 'br' => '平泳ぎ', 'ba' => '背泳ぎ', 'fly' => 'バタフライ', 'im' => '個人メドレー' } %>
-            <% style_header_colors = { 'fr' => 'bg-yellow-50', 'br' => 'bg-green-50', 'ba' => 'bg-red-50', 'fly' => 'bg-blue-50', 'im' => 'bg-purple-50' } %>
-            <% Style.all.group_by(&:style).sort_by { |style_type, _| style_order[style_type] || 5 }.each do |style_type, styles| %>
-              <div class="flex-1 min-w-0 mx-1 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-5 border border-gray-100 flex flex-col
-                <%= 'bg-yellow-50' if style_type == 'fr' %>
-                <%= 'bg-green-50' if style_type == 'br' %>
-                <%= 'bg-red-50' if style_type == 'ba' %>
-                <%= 'bg-blue-50' if style_type == 'fly' %>
-                <%= 'bg-purple-50' if style_type == 'im' %>" style="min-width:180px;">
-                <h3 class="text-lg font-bold mb-4 text-blue-800 text-center pb-2 border-b border-gray-300">
-                  <%= style_titles[style_type] || style_type %>
-                </h3>
-                <table class="w-full">
-                  <% styles.each do |style| %>
-                    <tr>
-                      <td class="py-2.5 text-gray-600 font-medium w-1/2 text-center"><%= style.name_jp.match(/\d+m/)[0] %></td>
-                      <td class="py-2.5 w-1/2 text-center">
-                        <div class="group relative">
-                          <span class="<%= @best_times[style.name].present? ? 'cursor-help font-semibold text-gray-800' : 'text-gray-400' %>">
-                            <%= @best_times[style.name].present? ? format_time(@best_times[style.name]) : '-' %>
-                          </span>
-                          <% if @best_time_notes[style.name].present? %>
-                            <div class="hidden group-hover:block absolute z-10 bg-gray-900 text-white text-sm rounded-lg py-2 px-3 mt-1 shadow-lg min-w-[200px] transform -translate-x-1/2 left-1/2">
-                              <%= @best_time_notes[style.name] %>
-                              <div class="absolute -top-2 left-1/2 transform -translate-x-1/2 w-3 h-3 bg-gray-900 rotate-45"></div>
-                            </div>
-                          <% end %>
-                        </div>
-                      </td>
-                    </tr>
-                  <% end %>
-                </table>
-              </div>
-            <% end %>
-          </div>
-        </div>
-
-        <!-- レース履歴 -->
-        <div class="flex items-center mb-8">
-          <h3 class="text-2xl font-bold text-gray-900 mr-4">My Races</h3>
-          <div class="h-1 flex-grow bg-gradient-to-r from-blue-800 to-blue-400 rounded-full"></div>
-        </div>
-                 <div class="space-y-6">
+        <div class="space-y-6">
           <% if @records.any? %>
-            <% @records_by_event.each do |event, records| %>
+            <% @records_by_event.each do |(event_title, event_date), records| %>
               <div class="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden">
                 <!-- 大会ヘッダー -->
                 <div class="bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 border-b border-gray-200">
                   <div class="flex items-center justify-between">
                     <div>
                       <h4 class="text-lg font-semibold text-gray-900">
-                        <%= event.present? ? event.title : '練習レース' %>
+                        <%= event_title %>
                       </h4>
                       <p class="text-sm text-gray-600">
-                        <% if event.present? %>
-                          <%= event.date&.strftime("%Y年%m月%d日") %>
-                        <% else %>
-                          <%= records.group_by { |r| r.created_at.to_date }.keys.sort.reverse.first&.strftime("%Y年%m月%d日") %>
-                        <% end %>
+                        <%= event_date.strftime("%Y年%m月%d日") %>
                       </p>
                     </div>
                     <div class="text-right">
-                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium <%= event.present? ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' %>">
+                      <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                         <%= records.count %>種目
                       </span>
                     </div>
@@ -108,7 +52,7 @@
                 <div class="p-6">
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <% records.each do |record| %>
-                      <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer" data-action="click->modal#openRecord" data-record='<%= record.to_json(include: { style: { only: [:name_jp, :distance, :style] }, attendance_event: { only: [:title, :date] }, split_times: {} }) %>'>
                         <div class="flex items-center space-x-3">
                           <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
                             <%= record.style.name_jp %>
@@ -118,7 +62,7 @@
                           </span>
                         </div>
                         <% if record.video_url.present? %>
-                          <a href="<%= record.video_url %>" target="_blank" class="text-blue-600 hover:text-blue-800">
+                          <a href="<%= record.video_url %>" target="_blank" class="text-blue-600 hover:text-blue-800" onclick="event.stopPropagation();">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                             </svg>
@@ -202,6 +146,12 @@
       <% end %>
 <% end %>
 
+<%= render 'shared/modal', modal_id: 'recordDetailModal', title: 'レース詳細' do %>
+  <div id="recordDetailContent">
+    <!-- 詳細内容はJSで埋め込み -->
+  </div>
+<% end %>
+
 <script>
 function toggleTimeInput(styleId) {
   const checkbox = document.getElementById(`style_${styleId}`);
@@ -276,4 +226,248 @@ document.getElementById('entryForm').addEventListener('submit', function(e) {
     alert('エラーが発生しました。');
   });
 });
+
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
+}
+function formatTime(seconds) {
+  if (!seconds || seconds === 0) return '-';
+  const min = Math.floor(seconds / 60);
+  const sec = (seconds % 60).toFixed(2);
+  return min > 0 ? `${min}:${('0'+sec).slice(-5)}` : sec;
+}
+function calcLapTimes(splitTimes) {
+  if (!splitTimes || splitTimes.length === 0) return [];
+  let prev = 0;
+  return splitTimes.map(st => {
+    const lap = st.split_time - prev;
+    prev = st.split_time;
+    return { distance: st.distance, lap_time: lap };
+  });
+}
+function openRecordModal(record) {
+  const competitionTitle = record.attendance_event ? record.attendance_event.title : '';
+  const competitionDate = record.attendance_event ? formatDate(record.attendance_event.date) : '';
+  const style = record.style ? record.style.name_jp : '';
+  const userName = '<%= j(@user.name) %>';
+  const time = formatTime(record.time);
+  const splitTimes = record.split_times || [];
+  const lapTimes = calcLapTimes(splitTimes);
+  const videoUrl = record.video_url;
+  const note = record.note || '';
+
+  // 種目の距離を取得
+  const raceDistance = record.style ? record.style.distance : 0;
+  
+  // 最終タイムを秒数で取得
+  const finalTimeInSeconds = record.time;
+
+  // 距離のリスト（25m刻みで最大200mまで）
+  const allDistances = [25, 50, 75, 100, 125, 150, 175, 200];
+  
+  // Split timeデータをマップ化
+  const splitTimeMap = {};
+  splitTimes.forEach(st => {
+    splitTimeMap[st.distance] = st.split_time;
+  });
+  
+  // Lap timeデータをマップ化（split timeと等しい場合は除外）
+  const lapTimeMap = {};
+  lapTimes.forEach(lt => {
+    // lap timeがsplit timeと等しくない場合のみ格納
+    if (lt.lap_time !== splitTimeMap[lt.distance]) {
+      lapTimeMap[lt.distance] = lt.lap_time;
+    }
+  });
+  
+  // 最後のsplit timeと最終タイムの差分を計算
+  if (splitTimes.length > 0) {
+    const lastSplitTime = splitTimes[splitTimes.length - 1];
+    if (lastSplitTime.distance < raceDistance) {
+      const finalLapTime = finalTimeInSeconds - lastSplitTime.split_time;
+      if (finalLapTime > 0) {
+        lapTimeMap[raceDistance] = finalLapTime;
+      }
+    }
+  }
+
+  let html = `
+    <div class="space-y-6">
+      <!-- ヘッダー部分 -->
+      <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center space-x-3">
+            <div class="bg-blue-100 rounded-full p-2">
+              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-gray-900">レース記録</h3>
+              <p class="text-gray-500 text-sm">${competitionDate}</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-2xl font-bold text-blue-600">${time}</div>
+            <div class="text-gray-500 text-sm">記録タイム</div>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-gray-50 rounded-lg p-3">
+            <div class="text-gray-500 text-xs mb-1">大会</div>
+            <div class="font-semibold text-gray-900">${competitionTitle}</div>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3">
+            <div class="text-gray-500 text-xs mb-1">選手</div>
+            <div class="font-semibold text-gray-900">${userName}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 種目情報 -->
+      <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <div class="bg-blue-100 rounded-full p-2">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="text-gray-500 text-sm">種目</div>
+              <div class="font-bold text-lg text-gray-900">${style}</div>
+            </div>
+          </div>
+          <div class="text-right">
+            <div class="text-3xl font-bold text-blue-600">${time}</div>
+            <div class="text-gray-500 text-sm">ベストタイム</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- タイム詳細テーブル -->
+      <div class="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+        <div class="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-3 border-b border-gray-200">
+          <h4 class="font-bold text-gray-800 flex items-center">
+            <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            詳細タイム分析
+          </h4>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full text-sm text-center">
+            <thead>
+              <tr class="bg-gradient-to-r from-blue-50 to-indigo-50">
+                <th class="px-3 py-2 font-semibold text-gray-700 border-b border-gray-200"></th>
+                <th class="px-3 py-2 font-semibold text-gray-700 border-b border-gray-200">Split time</th>
+                <th class="px-3 py-2 font-semibold text-gray-700 border-b border-gray-200">25m lap</th>
+                <th class="px-3 py-2 font-semibold text-gray-700 border-b border-gray-200">50m lap</th>
+                <th class="px-3 py-2 font-semibold text-gray-700 border-b border-gray-200">100m lap</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${allDistances.map(distance => {
+                let splitTime = splitTimeMap[distance] ? formatTime(splitTimeMap[distance]) : '';
+                
+                // 種目の距離と一致する場合は最終タイムを表示
+                if (distance === raceDistance && !splitTime) {
+                  splitTime = time;
+                }
+                
+                // 25m lapの1つ目（25m行）は空欄
+                const lapTime25 = (distance === 25) ? '' : (lapTimeMap[distance] ? formatTime(lapTimeMap[distance]) : '');
+                
+                // 50m lapは50m, 100m, 150m, 200mの行にのみ表示（ただし50m行は空欄）
+                let lapTime50 = '';
+                if (distance % 50 === 0 && distance !== 50) {
+                  const prevDistance = distance - 25;
+                  if (lapTimeMap[prevDistance] && lapTimeMap[distance]) {
+                    lapTime50 = formatTime(lapTimeMap[prevDistance] + lapTimeMap[distance]);
+                  }
+                }
+                
+                // 100m lapは100m, 200mの行にのみ表示（ただし100m行は空欄）
+                let lapTime100 = '';
+                if (distance % 100 === 0 && distance !== 100) {
+                  let sum = 0;
+                  let hasAllLaps = true;
+                  for (let d = distance - 75; d <= distance; d += 25) {
+                    if (lapTimeMap[d]) {
+                      sum += lapTimeMap[d];
+                    } else {
+                      hasAllLaps = false;
+                      break;
+                    }
+                  }
+                  if (hasAllLaps && sum > 0) {
+                    lapTime100 = formatTime(sum);
+                  }
+                }
+                
+                const isHighlighted = distance === raceDistance;
+                
+                return `
+                  <tr class="${isHighlighted ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-orange-400' : 'hover:bg-gray-50'}">
+                    <td class="px-3 py-2 font-semibold text-gray-700 border-b border-gray-100">${distance}m</td>
+                    <td class="px-3 py-2 border-b border-gray-100 ${splitTime ? 'font-mono text-blue-700 font-semibold' : ''}">${splitTime}</td>
+                    <td class="px-3 py-2 border-b border-gray-100 ${lapTime25 ? 'font-mono text-green-600' : ''}">${lapTime25}</td>
+                    <td class="px-3 py-2 border-b border-gray-100 ${lapTime50 ? 'font-mono text-purple-600' : ''}">${lapTime50}</td>
+                    <td class="px-3 py-2 border-b border-gray-100 ${lapTime100 ? 'font-mono text-pink-600' : ''}">${lapTime100}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 追加情報 -->
+      <div class="flex flex-wrap gap-3">
+        ${videoUrl ? `
+          <div class="bg-blue-600 rounded-lg p-3 text-white shadow-lg flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+            </svg>
+            <a href="${videoUrl}" target="_blank" class="font-semibold hover:underline">動画を見る</a>
+          </div>
+        ` : ''}
+        ${note ? `
+          <div class="bg-gray-100 rounded-lg p-3 text-gray-700 shadow-lg flex items-center space-x-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+            </svg>
+            <span class="font-semibold">${note}</span>
+          </div>
+        ` : ''}
+      </div>
+
+      <!-- フッター -->
+      <div class="text-center text-gray-500 text-xs">
+        <div class="flex items-center justify-center space-x-2">
+          <span>Swim Manager</span>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('recordDetailContent').innerHTML = html;
+  document.getElementById('recordDetailModal').classList.remove('hidden');
+}
+function closeRecordModal() {
+  document.getElementById('recordDetailModal').classList.add('hidden');
+}
+// モーダル用イベントデリゲート
+if (!window.recordModalInitialized) {
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('[data-action="click->modal#openRecord"]').forEach(el => {
+      el.addEventListener('click', function() {
+        const record = JSON.parse(this.getAttribute('data-record'));
+        openRecordModal(record);
+      });
+    });
+  });
+  window.recordModalInitialized = true;
+}
 </script> 
