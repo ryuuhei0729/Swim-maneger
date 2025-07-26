@@ -251,7 +251,7 @@ function openRecordModal(record) {
   const competitionTitle = record.attendance_event ? record.attendance_event.title : '';
   const competitionDate = record.attendance_event ? formatDate(record.attendance_event.date) : '';
   const style = record.style ? record.style.name_jp : '';
-  const userName = '<%= @user.name %>';
+  const userName = '<%= j(@user.name) %>';
   const time = formatTime(record.time);
   const splitTimes = record.split_times || [];
   const lapTimes = calcLapTimes(splitTimes);
