@@ -114,14 +114,19 @@ Rails.application.routes.draw do
   # 管理者のみのページ
   get "admin", to: "admin/base#index", as: :admin
 
-  # [管理者]新規登録
-  get "admin/create_user", to: "admin/users#create", as: "admin_create_user"
-  post "admin/users", to: "admin/users#create", as: "admin_users"
+  # [管理者]ユーザー管理
+  get "admin/users", to: "admin/users#index", as: "admin_users"
+  get "admin/users/new", to: "admin/users#create", as: "admin_create_user"
+  post "admin/users", to: "admin/users#create"
   patch "admin/users", to: "admin/users#create"
   get "admin/users/import", to: "admin/users#import", as: "admin_users_import"
   get "admin/users/import/template", to: "admin/users#import_template", as: "admin_users_import_template"
   post "admin/users/import/preview", to: "admin/users#import_preview", as: "admin_users_import_preview"
   post "admin/users/import/execute", to: "admin/users#import_execute", as: "admin_users_import_execute"
+  get "admin/users/:id", to: "admin/users#show", as: "admin_user"
+  get "admin/users/:id/edit", to: "admin/users#edit", as: "admin_edit_user"
+  patch "admin/users/:id", to: "admin/users#update", as: "admin_update_user"
+  delete "admin/users/:id", to: "admin/users#destroy", as: "admin_destroy_user"
 
   # [管理者]目標管理
   get "admin/objective", to: "admin/objectives#index", as: "admin_objective"
