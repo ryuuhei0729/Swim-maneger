@@ -258,9 +258,14 @@ class Admin::AttendancesController < Admin::BaseController
     # 許可されたstatus値のみをフィルタリング
     permitted_statuses = AttendanceEvent.attendance_statuses.keys.map(&:to_s)
     
-    params[:attendance_events].permit!.to_h.select do |event_id, status|
-      permitted_statuses.include?(status.to_s)
+    # 各イベントIDに対して許可されたstatus値のみを許可
+    permitted_params = {}
+    params[:attendance_events].each do |event_id, status|
+      if permitted_statuses.include?(status.to_s)
+        permitted_params[event_id] = status
+      end
     end
+    permitted_params
   end
 
   def competitions_params
@@ -269,8 +274,13 @@ class Admin::AttendancesController < Admin::BaseController
     # 許可されたstatus値のみをフィルタリング
     permitted_statuses = Competition.attendance_statuses.keys.map(&:to_s)
     
-    params[:competitions].permit!.to_h.select do |event_id, status|
-      permitted_statuses.include?(status.to_s)
+    # 各イベントIDに対して許可されたstatus値のみを許可
+    permitted_params = {}
+    params[:competitions].each do |event_id, status|
+      if permitted_statuses.include?(status.to_s)
+        permitted_params[event_id] = status
+      end
     end
+    permitted_params
   end
 end 
