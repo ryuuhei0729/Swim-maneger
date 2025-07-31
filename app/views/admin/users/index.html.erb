@@ -1,0 +1,362 @@
+<% content_for :title, 'ユーザー管理' %>
+
+<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="px-8 py-6 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-bold text-gray-900">ユーザー管理</h2>
+          <div class="flex items-center space-x-4">
+            <%= link_to admin_create_user_path, class: "bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300" do %>
+              <svg class="w-4 h-4 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              新規ユーザー登録
+            <% end %>
+            <%= link_to "管理者画面に戻る", admin_path, class: "text-sm font-medium text-blue-600 hover:text-blue-500" %>
+          </div>
+        </div>
+        <p class="mt-1 text-sm text-gray-500">登録されているユーザーの一覧です。編集・削除が可能です。</p>
+      </div>
+
+      <div class="px-8 py-6">
+        <% if @users.any? %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">名前</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">メールアドレス</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ユーザータイプ</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">世代</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">性別</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">誕生日</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% @users.each do |user| %>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <%= user.name %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <%= user.user_auth&.email %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
+                        <%= case user.user_type
+                            when 'player' then 'bg-blue-100 text-blue-800'
+                            when 'coach' then 'bg-green-100 text-green-800'
+                            when 'director' then 'bg-purple-100 text-purple-800'
+                            when 'manager' then 'bg-yellow-100 text-yellow-800'
+                            else 'bg-gray-100 text-gray-800'
+                            end %>">
+                        <%= user.user_type %>
+                      </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <%= user.generation %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <%= user.gender == 'male' ? '男性' : '女性' %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <%= user.birthday&.strftime('%Y/%m/%d') %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <div class="flex space-x-2">
+                        <button onclick="openEditModal(<%= user.id %>)" class="text-blue-600 hover:text-blue-900 underline">
+                          編集
+                        </button>
+                        <button onclick="deleteUser(<%= user.id %>)" class="text-red-600 hover:text-red-900 underline">
+                          削除
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="text-center py-12">
+            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            <h3 class="mt-2 text-sm font-medium text-gray-900">ユーザーが登録されていません</h3>
+            <p class="mt-1 text-sm text-gray-500">新しいユーザーを登録してください。</p>
+            <div class="mt-6">
+              <%= link_to admin_create_user_path, class: "inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700" do %>
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                新規ユーザー登録
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 編集モーダル -->
+<%= render 'shared/modal', modal_id: 'editModal', title: 'ユーザー編集' do %>
+  <div id="editModalContent">
+    <!-- モーダル内容はJavaScriptで動的に読み込まれます -->
+  </div>
+<% end %>
+
+<!-- 編集フォームのテンプレート -->
+<template id="editFormTemplate">
+  <form id="editUserForm" class="space-y-6">
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label for="user_name" class="block text-sm font-medium text-gray-700">
+          名前 <span class="text-red-500">*</span>
+        </label>
+        <input type="text" id="user_name" name="user[name]" autocomplete="given-name" required class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3">
+        <p id="name_error" class="mt-1 text-sm text-red-600 hidden"></p>
+      </div>
+
+      <div>
+        <label for="user_user_type" class="block text-sm font-medium text-gray-700">
+          ユーザータイプ <span class="text-red-500">*</span>
+        </label>
+        <select id="user_user_type" name="user[user_type]" required class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3">
+          <option value="player">選手</option>
+          <option value="coach">コーチ</option>
+          <option value="director">顧問・監督</option>
+          <option value="manager">マネージャー</option>
+        </select>
+        <p id="user_type_error" class="mt-1 text-sm text-red-600 hidden"></p>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label for="user_generation" class="block text-sm font-medium text-gray-700">
+          期数 <span class="text-red-500">*</span>
+        </label>
+        <input type="number" id="user_generation" name="user[generation]" required min="0" max="999" class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3">
+        <p id="generation_error" class="mt-1 text-sm text-red-600 hidden"></p>
+      </div>
+
+      <div>
+        <label for="user_gender" class="block text-sm font-medium text-gray-700">
+          性別 <span class="text-red-500">*</span>
+        </label>
+        <select id="user_gender" name="user[gender]" required class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3">
+          <option value="male">男性</option>
+          <option value="female">女性</option>
+        </select>
+        <p id="gender_error" class="mt-1 text-sm text-red-600 hidden"></p>
+      </div>
+    </div>
+
+    <div>
+      <label for="user_birthday" class="block text-sm font-medium text-gray-700">生年月日</label>
+      <input type="date" id="user_birthday" name="user[birthday]" class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3">
+      <p id="birthday_error" class="mt-1 text-sm text-red-600 hidden"></p>
+    </div>
+
+    <hr class="my-4">
+
+    <div>
+      <label for="user_auth_email" class="block text-sm font-medium text-gray-700">
+        メールアドレス <span class="text-red-500">*</span>
+      </label>
+      <input type="email" id="user_auth_email" name="user_auth[email]" autocomplete="username" required class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3">
+      <p id="email_error" class="mt-1 text-sm text-red-600 hidden"></p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+      <div>
+        <label for="user_auth_password" class="block text-sm font-medium text-gray-700">パスワード（変更する場合のみ入力）</label>
+        <input type="password" id="user_auth_password" name="user_auth[password]" autocomplete="new-password" class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3">
+        <p id="password_error" class="mt-1 text-sm text-red-600 hidden"></p>
+      </div>
+
+      <div>
+        <label for="user_auth_password_confirmation" class="block text-sm font-medium text-gray-700">パスワード（確認）（変更する場合のみ入力）</label>
+        <input type="password" id="user_auth_password_confirmation" name="user_auth[password_confirmation]" autocomplete="new-password" class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3">
+        <p id="password_confirmation_error" class="mt-1 text-sm text-red-600 hidden"></p>
+      </div>
+    </div>
+
+    <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+      <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" data-action="click->modal#close">
+        キャンセル
+      </button>
+      <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        更新
+      </button>
+    </div>
+  </form>
+</template>
+
+<script>
+let currentUserId = null;
+
+function openEditModal(userId) {
+  currentUserId = userId;
+  
+  // ユーザーデータを取得
+  fetch(`/admin/users/${userId}`, {
+    headers: {
+      'Accept': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      // テンプレートからフォームを複製
+      const template = document.getElementById('editFormTemplate');
+      const formClone = template.content.cloneNode(true);
+      
+      // フォームのactionを設定
+      const form = formClone.querySelector('#editUserForm');
+      form.action = `/admin/users/${userId}`;
+      form.method = 'POST';
+      
+      // フォームに_methodフィールドを追加（PATCHリクエスト用）
+      const methodField = document.createElement('input');
+      methodField.type = 'hidden';
+      methodField.name = '_method';
+      methodField.value = 'PATCH';
+      form.appendChild(methodField);
+      
+      // CSRFトークンを追加
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+      const csrfField = document.createElement('input');
+      csrfField.type = 'hidden';
+      csrfField.name = 'authenticity_token';
+      csrfField.value = csrfToken;
+      form.appendChild(csrfField);
+      
+      // フォームの値を設定
+      form.querySelector('#user_name').value = data.user.name;
+      form.querySelector('#user_user_type').value = data.user.user_type;
+      form.querySelector('#user_generation').value = data.user.generation;
+      form.querySelector('#user_gender').value = data.user.gender;
+      form.querySelector('#user_birthday').value = data.user.birthday;
+      form.querySelector('#user_auth_email').value = data.user_auth.email;
+      
+      // モーダルにフォームを表示
+      document.getElementById('editModalContent').innerHTML = '';
+      document.getElementById('editModalContent').appendChild(formClone);
+      
+      // モーダルを表示
+      const modal = document.getElementById('editModal');
+      modal.classList.remove('hidden');
+      
+      // フォーム送信イベントを設定
+      form.addEventListener('submit', handleFormSubmit);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+      alert('ユーザー情報の取得に失敗しました。');
+    });
+}
+
+function handleFormSubmit(event) {
+  event.preventDefault();
+  
+  const form = event.target;
+  const formData = new FormData(form);
+  
+  fetch(form.action, {
+    method: 'POST',
+    body: formData,
+    headers: {
+      'X-Requested-With': 'XMLHttpRequest'
+    }
+  })
+  .then(response => {
+    if (response.redirected) {
+      // 成功時はページをリロード
+      window.location.reload();
+    } else if (!response.ok) {
+      // HTTPエラーの場合
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      return response.json();
+    }
+  })
+  .then(data => {
+    if (data && data.errors) {
+      // エラーがある場合は表示
+      displayErrors(data.errors);
+    } else if (data && data.error) {
+      // サーバーエラーの場合
+      alert('更新に失敗しました: ' + data.error);
+    } else if (data && data.success) {
+      // 成功時はページをリロード
+      window.location.reload();
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    alert('更新に失敗しました。\nエラー: ' + error.message);
+  });
+}
+
+function displayErrors(errors) {
+  // 既存のエラーメッセージをクリア
+  document.querySelectorAll('[id$="_error"]').forEach(element => {
+    element.classList.add('hidden');
+    element.textContent = '';
+  });
+  
+  // 新しいエラーメッセージを表示
+  Object.keys(errors).forEach(field => {
+    const errorElement = document.getElementById(`${field}_error`);
+    if (errorElement) {
+      // エラーメッセージが配列の場合は最初の要素を表示
+      const errorMessage = Array.isArray(errors[field]) ? errors[field][0] : errors[field];
+      errorElement.textContent = errorMessage;
+      errorElement.classList.remove('hidden');
+    }
+  });
+}
+
+function deleteUser(userId) {
+  if (confirm('本当に削除しますか？')) {
+    fetch(`/admin/users/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json',
+        'X-CSRF-Token': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+      }
+    })
+    .then(response => {
+      console.log('Delete response status:', response.status);
+      if (!response.ok) {
+        return response.json().then(data => {
+          throw new Error(data.message || '削除に失敗しました。');
+        });
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        alert(data.message);
+        window.location.reload();
+      } else {
+        alert(data.message || '削除に失敗しました。');
+      }
+    })
+    .catch(error => {
+      console.error('Delete error:', error);
+      alert('削除中にエラーが発生しました: ' + error.message);
+    });
+  }
+}
+</script> 
