@@ -1,21 +1,54 @@
 class Admin::UsersController < Admin::BaseController
   def index
-    # API用（既存のビューファイルはcreateアクションを使用）
-    redirect_to admin_create_user_path
+    @users = User.includes(:user_auth).order(:generation, :name)
   end
 
-  def create
-    if request.post?
-      @user = User.new(user_params)
-      @user_auth = UserAuth.new(user_auth_params)
+  def show
+    @user = User.includes(:user_auth).find(params[:id])
+    
+    # JSONリクエストの場合は直接JSONを返す
+    if request.format.json?
+      user_data = {
+        user: {
+          id: @user.id,
+          name: @user.name,
+          user_type: @user.user_type,
+          generation: @user.generation,
+          gender: @user.gender,
+          birthday: @user.birthday&.strftime('%Y-%m-%d')
+        },
+        user_auth: {
+          email: @user.user_auth&.email
+        }
+      }
+      
+      render json: user_data
+    else
+      # HTMLリクエストの場合は通常のビューを表示
+      respond_to do |format|
+        format.html
+      end
+    end
+  end
 
+  def edit
+    @user = User.includes(:user_auth).find(params[:id])
+    @user_auth = @user.user_auth
+  end
+
+  def update
+    @user = User.find(params[:id])
+    @user_auth = @user.user_auth
+
+    begin
       User.transaction do
-        if @user.save
-          @user_auth.user = @user
-          if @user_auth.save
-            redirect_to admin_path, notice: "ユーザーを作成しました。"
+        if @user.update(user_params)
+          if @user_auth.update(user_auth_params)
+            respond_to do |format|
+              format.html { redirect_to admin_users_path, notice: "ユーザー情報を更新しました。" }
+              format.json { render json: { success: true, message: "ユーザー情報を更新しました。" } }
+            end
           else
-            @user.destroy
             if @user_auth.errors.any?
               @user_auth.errors.messages.each do |attribute, messages|
                 messages.each do |message|
@@ -28,9 +61,88 @@ class Admin::UsersController < Admin::BaseController
                 end
               end
             end
+            
+            # エラーメッセージを統一
+            custom_errors = standardize_error_messages(@user, @user_auth)
+            
+            respond_to do |format|
+              format.html { render :edit, status: :unprocessable_entity }
+              format.json { render json: { errors: custom_errors }, status: :unprocessable_entity }
+            end
+          end
+        else
+          respond_to do |format|
+            format.html { render :edit, status: :unprocessable_entity }
+            format.json { render json: { errors: @user.errors.messages }, status: :unprocessable_entity }
+          end
+        end
+      end
+    rescue => e
+      Rails.logger.error "User update error: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      
+      respond_to do |format|
+        format.html { render :edit, status: :unprocessable_entity }
+        format.json { render json: { error: "更新中にエラーが発生しました: #{e.message}" }, status: :unprocessable_entity }
+      end
+    end
+  end
+
+  def destroy
+    @user = User.find(params[:id])
+    
+    begin
+      if @user.destroy
+        respond_to do |format|
+          format.html { redirect_to admin_users_path, notice: "ユーザーを削除しました。" }
+          format.json { render json: { success: true, message: "ユーザーを削除しました。" } }
+        end
+      else
+        respond_to do |format|
+          format.html { redirect_to admin_users_path, alert: "ユーザーの削除に失敗しました。" }
+          format.json { render json: { success: false, message: "ユーザーの削除に失敗しました。" }, status: :unprocessable_entity }
+        end
+      end
+    rescue => e
+      Rails.logger.error "User destroy error: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      
+      respond_to do |format|
+        format.html { redirect_to admin_users_path, alert: "ユーザーの削除中にエラーが発生しました。" }
+        format.json { render json: { success: false, message: "ユーザーの削除中にエラーが発生しました: #{e.message}" }, status: :internal_server_error }
+      end
+    end
+  end
+
+  def create
+    if request.post?
+      @user = User.new(user_params)
+      @user_auth = UserAuth.new(user_auth_params)
+
+      User.transaction do
+        if @user.save
+          @user_auth.user = @user
+          if @user_auth.save
+            redirect_to admin_users_path, notice: "ユーザーを作成しました。"
+          else
+            @user.destroy
+            # エラーメッセージを統一
+            custom_errors = standardize_error_messages(@user, @user_auth)
+            custom_errors.each do |field, messages|
+              messages.each do |message|
+                @user.errors.add(field, message)
+              end
+            end
             render :create, status: :unprocessable_entity
           end
         else
+          # エラーメッセージを統一
+          custom_errors = standardize_error_messages(@user, @user_auth)
+          custom_errors.each do |field, messages|
+            messages.each do |message|
+              @user.errors.add(field, message)
+            end
+          end
           render :create, status: :unprocessable_entity
         end
       end
@@ -311,11 +423,62 @@ class Admin::UsersController < Admin::BaseController
     if errors.any?
       redirect_to admin_users_import_path, alert: "一括登録に失敗しました: #{errors.join('; ')}"
     else
-      redirect_to admin_create_user_path, notice: "#{success_count}人のユーザーを一括登録しました。"
+      redirect_to admin_users_path, notice: "#{success_count}人のユーザーを一括登録しました。"
     end
   end
 
   private
+
+  # エラーメッセージを統一するメソッド
+  def standardize_error_messages(user, user_auth)
+    custom_errors = {}
+    
+    # Userモデルのエラーを処理
+    user.errors.messages.each do |field, messages|
+      custom_errors[field] = get_custom_error_message(field, messages)
+    end
+    
+    # UserAuthモデルのエラーを処理
+    if user_auth&.errors&.any?
+      user_auth.errors.messages.each do |field, messages|
+        custom_errors[field] = get_custom_error_message(field, messages)
+      end
+    end
+    
+    custom_errors
+  end
+
+  # フィールド別のカスタムエラーメッセージを取得
+  def get_custom_error_message(field, messages)
+    case field.to_s
+    when 'password'
+      messages.map { |msg| msg.include?('英数字') ? msg : 'パスワードを入力してください' }
+    when 'password_confirmation'
+      ['パスワード（確認）を入力してください']
+    when 'email'
+      messages.map { |msg| msg.include?('形式') ? msg : 'メールアドレスを入力してください' }
+    when 'name'
+      messages.map { |msg| msg.include?('長さ') ? '名前は255文字以下にしてください' : '名前を入力してください' }
+    when 'user_type'
+      ['ユーザータイプを選択してください']
+    when 'generation'
+      messages.map { |msg| msg.include?('数値') ? '期数は0-999の整数で入力してください' : '期数を入力してください' }
+    when 'gender'
+      ['性別を選択してください']
+    when 'birthday'
+      messages.map { |msg| 
+        if msg.include?('未来')
+          '生年月日は未来の日付にできません'
+        elsif msg.include?('1900年')
+          '生年月日は1900年以降の日付にしてください'
+        else
+          '生年月日を入力してください'
+        end
+      }
+    else
+      messages
+    end
+  end
 
   def user_params
     params.require(:user).permit(:name, :user_type, :generation, :gender, :birthday)
@@ -323,10 +486,22 @@ class Admin::UsersController < Admin::BaseController
 
   def user_auth_params
     if params[:user_auth].present?
-      params.require(:user_auth).permit(:email, :password, :password_confirmation)
+      permitted_params = params.require(:user_auth).permit(:email, :password, :password_confirmation)
+      # パスワードが空の場合はパスワード関連のパラメータを除外
+      if permitted_params[:password].blank?
+        permitted_params.except(:password, :password_confirmation)
+      else
+        permitted_params
+      end
     else
       # フォームからuser_authパラメータが送信されていない場合、userパラメータから取得
-      params.require(:user).permit(:email, :password, :password_confirmation)
+      permitted_params = params.require(:user).permit(:email, :password, :password_confirmation)
+      # パスワードが空の場合はパスワード関連のパラメータを除外
+      if permitted_params[:password].blank?
+        permitted_params.except(:password, :password_confirmation)
+      else
+        permitted_params
+      end
     end
   end
 end 
