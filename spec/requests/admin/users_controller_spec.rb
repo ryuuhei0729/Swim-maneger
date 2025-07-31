@@ -26,8 +26,8 @@ RSpec.describe Admin::UsersController, type: :request do
             gender: 'male',
             birthday: '2000-01-01',
             email: 'test@example.com',
-            password: '123123',
-            password_confirmation: '123123'
+            password: 'password123',
+            password_confirmation: 'password123'
           }
         }
       end
@@ -38,7 +38,7 @@ RSpec.describe Admin::UsersController, type: :request do
         }.to change(User, :count).by(1)
           .and change(UserAuth, :count).by(1)
 
-        expect(response).to redirect_to(admin_path)
+        expect(response).to redirect_to(admin_users_path)
         expect(flash[:notice]).to eq('ユーザーを作成しました。')
       end
     end
@@ -53,8 +53,8 @@ RSpec.describe Admin::UsersController, type: :request do
             gender: 'male',
             birthday: '2000-01-01',
             email: 'invalid-email',
-            password: '123123',
-            password_confirmation: '123123'
+            password: 'password123',
+            password_confirmation: 'password123'
           }
         }
       end

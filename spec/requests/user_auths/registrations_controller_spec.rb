@@ -33,8 +33,8 @@ RSpec.describe UserAuths::RegistrationsController, type: :request do
         {
           user_auth: {
             email: 'newuser@example.com',
-            password: '123123',
-            password_confirmation: '123123'
+            password: 'password123',
+            password_confirmation: 'password123'
           }
         }
       end
@@ -61,8 +61,8 @@ RSpec.describe UserAuths::RegistrationsController, type: :request do
         {
           user_auth: {
             email: '',
-            password: '123',
-            password_confirmation: '456'
+            password: 'pass',
+            password_confirmation: 'word'
           }
         }
       end
@@ -85,8 +85,8 @@ RSpec.describe UserAuths::RegistrationsController, type: :request do
         {
           user_auth: {
             email: 'test@example.com',
-            password: '123123',
-            password_confirmation: '654321'
+            password: 'password123',
+            password_confirmation: 'password456'
           }
         }
       end
@@ -109,8 +109,8 @@ RSpec.describe UserAuths::RegistrationsController, type: :request do
         {
           user_auth: {
             email: 'existing@example.com',
-            password: '123123',
-            password_confirmation: '123123'
+            password: 'password123',
+            password_confirmation: 'password123'
           }
         }
       end
@@ -159,7 +159,7 @@ RSpec.describe UserAuths::RegistrationsController, type: :request do
         {
           user_auth: {
             email: 'updated@example.com',
-            current_password: '123123'
+            current_password: 'password123'
           }
         }
       end
@@ -203,9 +203,9 @@ RSpec.describe UserAuths::RegistrationsController, type: :request do
       let(:password_change_params) do
         {
           user_auth: {
-            password: 'newpassword',
-            password_confirmation: 'newpassword',
-            current_password: '123123'
+            password: 'newpassword123',
+            password_confirmation: 'newpassword123',
+            current_password: 'password123'
           }
         }
       end
@@ -213,7 +213,7 @@ RSpec.describe UserAuths::RegistrationsController, type: :request do
       it 'パスワードが更新される' do
         patch user_auth_registration_path, params: password_change_params
         user_auth.reload
-        expect(user_auth.valid_password?('newpassword')).to be true
+        expect(user_auth.valid_password?('newpassword123')).to be true
       end
     end
   end
@@ -245,8 +245,8 @@ RSpec.describe UserAuths::RegistrationsController, type: :request do
       {
         user_auth: {
           email: 'newuser@example.com',
-          password: '123123',
-          password_confirmation: '123123'
+          password: 'password123',
+          password_confirmation: 'password123'
         }
       }
     end

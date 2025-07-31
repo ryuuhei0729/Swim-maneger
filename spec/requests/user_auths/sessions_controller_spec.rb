@@ -31,7 +31,7 @@ RSpec.describe UserAuths::SessionsController, type: :request do
         {
           user_auth: {
             email: user_auth.email,
-            password: '123123'
+            password: 'password123'
           }
         }
       end
@@ -75,7 +75,7 @@ RSpec.describe UserAuths::SessionsController, type: :request do
         {
           user_auth: {
             email: 'nonexistent@example.com',
-            password: '123123'
+            password: 'password123'
           }
         }
       end
@@ -135,7 +135,7 @@ RSpec.describe UserAuths::SessionsController, type: :request do
       {
         user_auth: {
           email: user_auth.email,
-          password: '123123',
+          password: 'password123',
           remember_me: '1'
         }
       }
@@ -153,7 +153,7 @@ RSpec.describe UserAuths::SessionsController, type: :request do
         post user_auth_session_path, params: {
           user_auth: {
             email: user_auth.email,
-            password: '123123'
+            password: 'password123'
           }
         }
       end

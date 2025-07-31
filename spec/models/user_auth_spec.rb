@@ -133,7 +133,7 @@ RSpec.describe UserAuth, type: :model do
     end
 
     it '非常に長いpasswordを処理できること' do
-      long_password = "a" * 100
+      long_password = "a" * 98 + "1" + "A"
       user_auth = build(:user_auth, password: long_password, password_confirmation: long_password)
       expect(user_auth).to be_valid
     end

@@ -14,7 +14,7 @@ RSpec.describe Admin::CompetitionsController, type: :request do
   end
 
   describe 'POST #start_entry_collection' do
-    let!(:event) { create(:attendance_event, is_competition: true) }
+    let!(:event) { create(:competition) }
     before { sign_in coach_auth }
 
     it 'エントリー受付が開始される' do
@@ -25,7 +25,7 @@ RSpec.describe Admin::CompetitionsController, type: :request do
   end
 
   describe 'GET #show_entries' do
-    let!(:event) { create(:attendance_event, is_competition: true) }
+    let!(:event) { create(:competition) }
     before { sign_in coach_auth }
 
     it 'エントリー一覧がJSONで返される' do

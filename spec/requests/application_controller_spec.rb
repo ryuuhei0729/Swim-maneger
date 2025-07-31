@@ -40,8 +40,8 @@ RSpec.describe ApplicationController, type: :request do
         {
           user_auth: {
             email: 'newuser@example.com',
-            password: '123123',
-            password_confirmation: '123123'
+            password: 'password123',
+            password_confirmation: 'password123'
           }
         }
       end
@@ -61,7 +61,7 @@ RSpec.describe ApplicationController, type: :request do
         {
           user_auth: {
             email: user_auth.email,
-            password: '123123'
+            password: 'password123'
           }
         }
       end
