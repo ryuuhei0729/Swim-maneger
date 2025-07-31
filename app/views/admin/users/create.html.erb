@@ -8,9 +8,9 @@
           <h2 class="text-2xl font-bold text-gray-900">新規ユーザー登録</h2>
           <div class="flex items-center space-x-4">
             <%= link_to admin_users_import_path, class: "bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors duration-300" do %>
-              ユーザー一括登録
+              一括登録
             <% end %>
-            <%= link_to "管理者画面に戻る", admin_path, class: "text-sm font-medium text-blue-600 hover:text-blue-500" %>
+            <%= link_to "ユーザー管理に戻る", admin_users_path, class: "text-sm font-medium text-blue-600 hover:text-blue-500" %>
           </div>
         </div>
         <p class="mt-1 text-sm text-gray-500">以下の情報を入力してユーザーを登録してください</p>
@@ -34,28 +34,7 @@
                     <ul class="list-disc pl-5 space-y-1">
                       <% @user.errors.messages.each do |attribute, messages| %>
                         <% messages.each do |message| %>
-                          <li>
-                            <% case attribute.to_s %>
-                            <% when 'name' %>
-                              名前を入力してください
-                            <% when 'email' %>
-                              メールアドレスを入力してください
-                            <% when 'password' %>
-                              パスワードを入力してください
-                            <% when 'password_confirmation' %>
-                              パスワード（確認）を入力してください
-                            <% when 'user_type' %>
-                              ユーザータイプを選択してください
-                            <% when 'generation' %>
-                              期数を入力してください
-                            <% when 'gender' %>
-                              性別を選択してください
-                            <% when 'birthday' %>
-                              生年月日を入力してください
-                            <% else %>
-                              <%= attribute.to_s.humanize %>を入力してください
-                            <% end %>
-                          </li>
+                          <li><%= message %></li>
                         <% end %>
                       <% end %>
                     </ul>
@@ -67,7 +46,7 @@
 
           <div class="space-y-6">
             <div>
-              <%= f.label :name, "名前", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.label :name, "名前 <span class=\"text-red-500\">*</span>".html_safe, class: "block text-sm font-medium text-gray-700" %>
               <%= f.text_field "user[name]", value: @user.name, class: "mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 #{@user.errors[:name].any? ? 'border-red-300' : ''}" %>
               <% if @user.errors[:name].any? %>
                 <p class="mt-1 text-sm text-red-600">名前を入力してください</p>
@@ -75,7 +54,7 @@
             </div>
 
             <div>
-              <%= f.label :email, "メールアドレス", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.label :email, "メールアドレス <span class=\"text-red-500\">*</span>".html_safe, class: "block text-sm font-medium text-gray-700" %>
               <%= f.email_field "user_auth[email]", value: @user_auth.email, class: "mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 #{@user.errors[:email].any? ? 'border-red-300' : ''}" %>
               <% if @user.errors[:email].any? %>
                 <p class="mt-1 text-sm text-red-600">メールアドレスを入力してください</p>
@@ -83,7 +62,7 @@
             </div>
 
             <div>
-              <%= f.label :password, "パスワード", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.label :password, "パスワード <span class=\"text-red-500\">*</span>".html_safe, class: "block text-sm font-medium text-gray-700" %>
               <%= f.password_field "user_auth[password]", class: "mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 #{@user.errors[:password].any? ? 'border-red-300' : ''}" %>
               <% if @user.errors[:password].any? %>
                 <p class="mt-1 text-sm text-red-600">パスワードを入力してください</p>
@@ -91,7 +70,7 @@
             </div>
 
             <div>
-              <%= f.label :password_confirmation, "パスワード（確認）", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.label :password_confirmation, "パスワード（確認） <span class=\"text-red-500\">*</span>".html_safe, class: "block text-sm font-medium text-gray-700" %>
               <%= f.password_field "user_auth[password_confirmation]", class: "mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 #{@user.errors[:password_confirmation].any? ? 'border-red-300' : ''}" %>
               <% if @user.errors[:password_confirmation].any? %>
                 <p class="mt-1 text-sm text-red-600">パスワード（確認）を入力してください</p>
@@ -99,7 +78,7 @@
             </div>
 
             <div>
-              <%= f.label :user_type, "ユーザータイプ", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.label :user_type, "ユーザータイプ <span class=\"text-red-500\">*</span>".html_safe, class: "block text-sm font-medium text-gray-700" %>
               <%= f.select "user[user_type]", 
                   [['選手', 'player'], ['コーチ', 'coach'], ['顧問・監督', 'director'], ['マネージャー', 'manager']],
                   { selected: @user.user_type }, 
@@ -110,15 +89,15 @@
             </div>
 
             <div>
-              <%= f.label :generation, "期数", class: "block text-sm font-medium text-gray-700" %>
-              <%= f.number_field "user[generation]", value: @user.generation, class: "mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 #{@user.errors[:generation].any? ? 'border-red-300' : ''}" %>
+              <%= f.label :generation, "期数 <span class=\"text-red-500\">*</span>".html_safe, class: "block text-sm font-medium text-gray-700" %>
+              <%= f.number_field "user[generation]", value: @user.generation, min: 0, max: 999, class: "mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 py-2 px-3 #{@user.errors[:generation].any? ? 'border-red-300' : ''}" %>
               <% if @user.errors[:generation].any? %>
                 <p class="mt-1 text-sm text-red-600">期数を入力してください</p>
               <% end %>
             </div>
 
             <div>
-              <%= f.label :gender, "性別", class: "block text-sm font-medium text-gray-700" %>
+              <%= f.label :gender, "性別 <span class=\"text-red-500\">*</span>".html_safe, class: "block text-sm font-medium text-gray-700" %>
               <%= f.select "user[gender]", 
                   [['男性', 'male'], ['女性', 'female']], 
                   { selected: @user.gender }, 
