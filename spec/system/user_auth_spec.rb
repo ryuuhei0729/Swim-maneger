@@ -1,7 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe 'User Authentication', type: :system do
-  let(:user) { create(:user_auth, email: 'test@example.com', password: '123123') }
+  let(:user) { create(:user_auth, email: 'test@example.com', password: 'password123') }
 
   before do
     driven_by(:rack_test)
@@ -15,7 +15,7 @@ RSpec.describe 'User Authentication', type: :system do
     context 'ログイン成功' do
       it 'メールアドレスとパスワードを入力することでログインが成功すること' do
         fill_in 'user_auth[email]', with: user.email
-        fill_in 'user_auth[password]', with: '123123'
+        fill_in 'user_auth[password]', with: 'password123'
         click_button 'ログイン'
 
         expect(page).to have_content('ログインしました。')
@@ -26,7 +26,7 @@ RSpec.describe 'User Authentication', type: :system do
     context 'ログイン失敗' do
       it '無効なメールアドレスでログインに失敗し、エラーメッセージが表示されること' do
         fill_in 'user_auth[email]', with: 'invalid-email'
-        fill_in 'user_auth[password]', with: '123123'
+        fill_in 'user_auth[password]', with: 'password123'
         click_button 'ログイン'
 
         expect(page).to have_content('メールアドレスまたはパスワードが違います。')
@@ -44,7 +44,7 @@ RSpec.describe 'User Authentication', type: :system do
 
       it 'メールアドレスが間違っているとログインに失敗し、エラーメッセージが表示されること' do
         fill_in 'user_auth[email]', with: 'wrong@example.com'
-        fill_in 'user_auth[password]', with: '123123'
+        fill_in 'user_auth[password]', with: 'password123'
         click_button 'ログイン'
 
         expect(page).to have_content('メールアドレスまたはパスワードが違います。')
@@ -53,7 +53,7 @@ RSpec.describe 'User Authentication', type: :system do
 
       it 'メールアドレスが空の場合、ログインに失敗し、エラーメッセージが表示されること' do
         fill_in 'user_auth[email]', with: ''
-        fill_in 'user_auth[password]', with: '123123'
+        fill_in 'user_auth[password]', with: 'password123'
         click_button 'ログイン'
 
         expect(page).to have_content('メールアドレスまたはパスワードが違います。')
@@ -76,7 +76,7 @@ RSpec.describe 'User Authentication', type: :system do
       # ログインする
       visit new_user_auth_session_path
       fill_in 'user_auth[email]', with: user.email
-      fill_in 'user_auth[password]', with: '123123'
+      fill_in 'user_auth[password]', with: 'password123'
       click_button 'ログイン'
     end
 

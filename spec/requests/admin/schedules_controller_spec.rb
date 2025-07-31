@@ -22,11 +22,10 @@ RSpec.describe Admin::SchedulesController, type: :request do
           attendance_event: {
             title: 'テスト練習',
             date: Date.current + 1.day,
-            is_competition: false,
+            event_type: 'AttendanceEvent',
             note: 'テストメモ',
             place: 'プール'
-          },
-          requires_attendance: "1"
+          }
         }
       end
 
@@ -94,7 +93,7 @@ RSpec.describe Admin::SchedulesController, type: :request do
       json_response = JSON.parse(response.body)
       expect(json_response['title']).to eq(event.title)
       expect(json_response['date']).to eq(event.date.strftime('%Y-%m-%d'))
-      expect(json_response['is_competition']).to eq(event.is_competition)
+      expect(json_response['type']).to eq(event.class.name)
       expect(json_response['note']).to eq(event.note)
       expect(json_response['place']).to eq(event.place)
     end

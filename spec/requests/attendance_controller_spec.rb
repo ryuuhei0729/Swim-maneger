@@ -25,9 +25,9 @@ RSpec.describe AttendanceController, type: :request do
   end
 
   describe 'GET #index' do
-    let!(:current_month_event) { create(:attendance_event, date: Date.current.beginning_of_month + 15.days) }
-    let!(:next_month_event) { create(:attendance_event, date: Date.current.next_month.beginning_of_month + 10.days) }
-    let!(:past_event) { create(:attendance_event, date: Date.current.last_month.end_of_month - 5.days) }
+    let!(:current_month_event) { create(:attendance_event, date: Date.current + 15.days, attendance_status: :open) }
+    let!(:next_month_event) { create(:attendance_event, date: Date.current.next_month.beginning_of_month + 10.days, attendance_status: :open) }
+    let!(:past_event) { create(:attendance_event, date: Date.current - 5.days, attendance_status: :open) }
 
     before { sign_in user_auth }
 
@@ -40,14 +40,13 @@ RSpec.describe AttendanceController, type: :request do
 
       it '今月と来月のイベントが取得される' do
         get attendance_path
-        expect(assigns(:this_month_events)).to include(current_month_event)
-        expect(assigns(:next_month_events)).to include(next_month_event)
+        expect(assigns(:open_events)).to include(current_month_event)
+        expect(assigns(:open_events)).to include(next_month_event)
       end
 
       it '過去のイベントは取得されない' do
         get attendance_path
-        expect(assigns(:this_month_events)).not_to include(past_event)
-        expect(assigns(:next_month_events)).not_to include(past_event)
+        expect(assigns(:open_events)).not_to include(past_event)
       end
     end
 
@@ -68,7 +67,7 @@ RSpec.describe AttendanceController, type: :request do
 
       it '回答済みのイベントは未回答イベントリストに含まれない' do
         get attendance_path
-        expect(assigns(:this_month_events)).not_to include(current_month_event)
+        expect(assigns(:open_events)).not_to include(current_month_event)
       end
     end
 
@@ -94,8 +93,8 @@ RSpec.describe AttendanceController, type: :request do
   end
 
   describe 'POST #update_attendance' do
-    let!(:event1) { create(:attendance_event, date: Date.current + 1.day) }
-    let!(:event2) { create(:attendance_event, date: Date.current + 2.days) }
+    let!(:event1) { create(:attendance_event, date: Date.current + 1.day, attendance_status: :open) }
+    let!(:event2) { create(:attendance_event, date: Date.current + 2.days, attendance_status: :open) }
 
     before { sign_in user_auth }
 

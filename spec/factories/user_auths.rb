@@ -2,8 +2,8 @@ FactoryBot.define do
   factory :user_auth do
     association :user
     sequence(:email) { |n| "user#{n}@example.com" }
-    password { "123123" }
-    password_confirmation { "123123" }
+    password { "password123" }
+    password_confirmation { "password123" }
 
     trait :with_user do
       association :user

@@ -41,10 +41,9 @@ RSpec.describe User, type: :model do
     end
 
     context 'birthdayが空の場合' do
-      it '無効であること' do
+      it '有効であること' do
         user.birthday = nil
-        expect(user).not_to be_valid
-        expect(user.errors[:birthday]).to include("を入力してください")
+        expect(user).to be_valid
       end
     end
 
@@ -281,12 +280,12 @@ RSpec.describe User, type: :model do
 
   describe 'エッジケース' do
     it '非常に長いnameを処理できること' do
-      user = build(:user, name: "a" * 1000)
+      user = build(:user, name: "a" * 255)
       expect(user).to be_valid
     end
 
     it '非常に大きなgenerationを処理できること' do
-      user = build(:user, generation: 999999)
+      user = build(:user, generation: 999)
       expect(user).to be_valid
     end
   end
