@@ -21,11 +21,17 @@ gem "jbuilder"
 gem "devise"
 gem "bcrypt", "~> 3.1.7"
 
+# セッションストア用のgem
+gem "activerecord-session_store"
+
 # データ生成用のgem
 gem "ffaker"
 
 # ページネーション用のgem
 gem "kaminari"
+
+# Excel操作用のgem
+gem "rubyXL"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
@@ -75,7 +81,7 @@ group :test do
   gem "rails-controller-testing"
 end
 
-gem "tailwindcss-rails", "~> 4.2"
+gem "tailwindcss-rails", "~> 4.3"
 
 gem "active_storage_validations"
 

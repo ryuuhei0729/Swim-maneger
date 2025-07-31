@@ -5,11 +5,8 @@ class HomeController < ApplicationController
     # カレンダーの表示で使うコントローラー
     @current_month = Date.current
 
-    attendance_events = AttendanceEvent
-      .where(date: @current_month.beginning_of_month..@current_month.end_of_month)
-      .order(date: :asc)
-
-    events = Event
+    # STI構造では全てのイベントをEventテーブルから取得
+    all_events = Event
       .where(date: @current_month.beginning_of_month..@current_month.end_of_month)
       .order(date: :asc)
 
@@ -17,7 +14,7 @@ class HomeController < ApplicationController
     @user_attendance_by_event = {}
     current_user_auth.user.attendance
       .joins(:attendance_event)
-      .where(attendance_events: { date: @current_month.beginning_of_month..@current_month.end_of_month })
+      .where(events: { date: @current_month.beginning_of_month..@current_month.end_of_month })
       .each do |attendance|
         @user_attendance_by_event[attendance.attendance_event_id] = attendance
       end
@@ -26,6 +23,7 @@ class HomeController < ApplicationController
     @birthdays_by_date = {}
     User.where(user_type: :player).each do |user|
       # その月の誕生日を取得（年は考慮しない）
+      next unless user.birthday.present?
       birthday_this_month = Date.new(@current_month.year, user.birthday.month, user.birthday.day)
       if birthday_this_month.month == @current_month.month
         @birthdays_by_date[birthday_this_month] ||= []
@@ -33,17 +31,9 @@ class HomeController < ApplicationController
       end
     end
 
-    # 両方のイベントを日付ごとにグループ化してマージ
+    # イベントを日付ごとにグループ化
     @events_by_date = {}
-
-    # Eventを先に追加（上に表示される）
-    events.each do |event|
-      @events_by_date[event.date] ||= []
-      @events_by_date[event.date] << event
-    end
-
-    # AttendanceEventを後から追加（下に表示される）
-    attendance_events.each do |event|
+    all_events.each do |event|
       @events_by_date[event.date] ||= []
       @events_by_date[event.date] << event
     end

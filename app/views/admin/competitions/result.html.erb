@@ -1,0 +1,107 @@
+<div class="p-6 bg-white rounded-lg shadow-md">
+  <div class="flex items-center justify-between mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">大会結果入力</h2>
+    <%= link_to "大会一覧に戻る", admin_competition_path, 
+        class: "bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200" %>
+  </div>
+
+  <!-- 大会情報 -->
+  <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+    <h3 class="text-lg font-semibold text-blue-800 mb-2"><%= @competition.title %></h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-blue-700">
+      <div>
+        <span class="font-medium">開催日:</span> <%= @competition.date.strftime("%Y年%m月%d日") %>
+      </div>
+      <div>
+        <span class="font-medium">開催場所:</span> <%= @competition.place %>
+      </div>
+      <div>
+        <span class="font-medium">エントリー数:</span> <%= @entries.count %>件
+      </div>
+    </div>
+  </div>
+
+  <!-- 結果入力フォーム -->
+  <% if @entries.any? %>
+    <div class="mb-6">
+      <h3 class="text-lg font-semibold mb-4 text-gray-700">エントリー一覧と結果入力</h3>
+      
+      <%= form_with url: "#", method: :patch, local: true, class: "space-y-6" do |form| %>
+        <% @entries.group_by(&:style).each do |style, style_entries| %>
+          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h4 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+              <%= style.name_jp %>
+            </h4>
+            
+            <div class="overflow-x-auto">
+              <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+                <thead class="bg-gray-100">
+                  <tr>
+                    <th class="px-4 py-2 border-b border-gray-200 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                      選手
+                    </th>
+                    <th class="px-4 py-2 border-b border-gray-200 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                      期
+                    </th>
+                    <th class="px-4 py-2 border-b border-gray-200 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                      エントリータイム
+                    </th>
+                    <th class="px-4 py-2 border-b border-gray-200 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                      記録タイム
+                    </th>
+                    <th class="px-4 py-2 border-b border-gray-200 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                      順位
+                    </th>
+                    <th class="px-4 py-2 border-b border-gray-200 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                      備考
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <% style_entries.each do |entry| %>
+                    <tr>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        <%= entry.user.name %>
+                      </td>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        <%= entry.user.generation %>期
+                      </td>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        <%= entry.formatted_entry_time %>
+                      </td>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        <%= form.text_field "record_time_#{entry.id}", 
+                            placeholder: "00:00.00", 
+                            class: "border border-gray-300 rounded px-2 py-1 text-sm w-24" %>
+                      </td>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        <%= form.number_field "rank_#{entry.id}", 
+                            min: 1, 
+                            class: "border border-gray-300 rounded px-2 py-1 text-sm w-16" %>
+                      </td>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        <%= form.text_field "note_#{entry.id}", 
+                            placeholder: "備考", 
+                            class: "border border-gray-300 rounded px-2 py-1 text-sm w-32" %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        <% end %>
+        
+        <div class="flex justify-end space-x-4">
+          <%= form.submit "結果を保存", 
+              class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200" %>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="text-center py-8">
+      <p class="text-gray-500">この大会にはエントリーがありません。</p>
+      <p class="text-sm text-gray-400 mt-2">エントリーが提出されてから結果を入力できます。</p>
+    </div>
+  <% end %>
+</div> 

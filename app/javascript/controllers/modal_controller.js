@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus";
 
 export default class extends Controller {
   open(event) {
-    const modalTarget = event.currentTarget.dataset.modalTarget;
+    const modalTarget = event.currentTarget.dataset.modalTarget || event.currentTarget.dataset.modalId;
     const logId = event.currentTarget.dataset.practiceLogId;
     const modal = document.getElementById(modalTarget);
     const content = document.getElementById('practice-times-content');
