@@ -2,6 +2,8 @@ FactoryBot.define do
   factory :event do
     sequence(:title) { |n| "イベント#{n}" }
     date { Date.current + rand(1..30).days }
+    type { 'Event' }
+    is_attendance { false }
 
     trait :future do
       date { Date.current + rand(1..30).days }

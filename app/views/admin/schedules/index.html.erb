@@ -1,6 +1,6 @@
 <% content_for :title, 'Admin' %>
 
-<div class="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-gray-50 py-2 px-4 sm:px-2 lg:px-2">
   <div class="max-w-7xl mx-auto">
     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
       <div class="px-8 py-6 border-b border-gray-200">
@@ -29,10 +29,15 @@
 
         <div class="flex justify-between items-center mb-6">
           <h3 class="text-lg font-medium text-gray-900">スケジュール一覧</h3>
-          <div data-controller="modal">
-            <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300" data-action="click->modal#open" data-modal-id="new_schedule_modal">
-              新規スケジュール登録
-            </button>
+          <div class="flex space-x-3">
+            <%= link_to admin_schedule_import_path, class: "bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors duration-300" do %>
+              スケジュール一括登録
+            <% end %>
+            <div data-controller="modal">
+              <button class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-300" data-action="click->modal#open" data-modal-id="new_schedule_modal">
+                新規スケジュール登録
+              </button>
+            </div>
           </div>
         </div>
 
@@ -52,7 +57,7 @@
               <% @events.each do |event| %>
                 <tr>
                   <td class="px-6 py-4 whitespace-nowrap text-gray-900">
-                    <%= event.date.strftime('%Y/%m/%d') %>
+                    <%= event.date.strftime('%m/%d') %>
                     <span class="text-gray-900">(<%= %w[日 月 火 水 木 金 土][event.date.wday] %>)</span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-gray-900"><%= event.title %></td>
@@ -63,7 +68,7 @@
                     <% end %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-gray-900">
-                    <% if event.is_competition %>
+                    <% if event.is_a?(Competition) %>
                       <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                         大会
                       </span>
@@ -90,6 +95,11 @@
             </tbody>
           </table>
         </div>
+        
+        <!-- ページネーション -->
+        <div class="mt-6 flex justify-center">
+          <%= paginate @events %>
+        </div>
       </div>
     </div>
   </div>
@@ -105,9 +115,22 @@
           placeholder: "練習や大会のタイトルを入力",
           required: true %>
     </div>
-    <div class="flex items-center">
-      <%= f.check_box :is_competition, class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" %>
-      <%= f.label :is_competition, "大会の場合はチェック", class: "ml-2 block text-sm text-gray-900" %>
+    <div>
+      <%= f.label :event_type, "イベントタイプ", class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1 space-y-2">
+        <label class="flex items-center cursor-pointer">
+          <%= f.radio_button :event_type, "Event", class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" %>
+          <span class="ml-2 block text-sm text-gray-900">通常イベント（出欠管理なし）</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <%= f.radio_button :event_type, "AttendanceEvent", class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" %>
+          <span class="ml-2 block text-sm text-gray-900">出欠管理あり</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <%= f.radio_button :event_type, "Competition", class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300" %>
+          <span class="ml-2 block text-sm text-gray-900">大会</span>
+        </label>
+      </div>
     </div>
 
     <div>
@@ -147,7 +170,7 @@
 
 <!-- 編集モーダル -->
 <%= render 'shared/modal', modal_id: 'edit_schedule_modal', title: 'スケジュール編集' do %>
-  <%= form_with(url: '#', method: :patch, class: "space-y-4", id: 'edit_schedule_form') do |f| %>
+  <%= form_with(url: admin_update_schedule_path(0), method: :patch, class: "space-y-4", id: 'edit_schedule_form') do |f| %>
     <div>
       <%= f.label :title, "タイトル", class: "block text-sm font-medium text-gray-700" %>
       <%= f.text_field :title, 
@@ -158,12 +181,31 @@
           required: true %>
     </div>
 
-    <div class="flex items-center">
-      <%= f.check_box :is_competition, 
-          class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded", 
-          name: 'attendance_event[is_competition]', 
-          id: 'attendance_event_is_competition' %>
-      <%= f.label :is_competition, "大会の場合はチェック", class: "ml-2 block text-sm text-gray-900" %>
+    <div>
+      <%= f.label :event_type, "イベントタイプ", class: "block text-sm font-medium text-gray-700" %>
+      <div class="mt-1 space-y-2">
+        <label class="flex items-center cursor-pointer">
+          <%= f.radio_button :event_type, "Event", 
+              class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300", 
+              name: 'attendance_event[event_type]', 
+              id: 'attendance_event_event_type_Event' %>
+          <span class="ml-2 block text-sm text-gray-900">通常イベント（出欠管理なし）</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <%= f.radio_button :event_type, "AttendanceEvent", 
+              class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300", 
+              name: 'attendance_event[event_type]', 
+              id: 'attendance_event_event_type_AttendanceEvent' %>
+          <span class="ml-2 block text-sm text-gray-900">出欠管理あり</span>
+        </label>
+        <label class="flex items-center cursor-pointer">
+          <%= f.radio_button :event_type, "Competition", 
+              class: "h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300", 
+              name: 'attendance_event[event_type]', 
+              id: 'attendance_event_event_type_Competition' %>
+          <span class="ml-2 block text-sm text-gray-900">大会</span>
+        </label>
+      </div>
     </div>
 
     <div>
@@ -207,12 +249,28 @@
 <% end %>
 
 <script>
+// CSRFトークンをグローバル変数として定義
+const csrfToken = '<%= form_authenticity_token %>';
+
 function openEditModal(button) {
   const eventId = button.dataset.eventId;
   console.log('Edit button clicked for event:', eventId);
   
   const form = document.querySelector('#edit_schedule_form');
   form.action = `/admin/schedule/${eventId}`;
+  
+  // CSRFトークンを更新
+  const csrfInput = form.querySelector('input[name="authenticity_token"]');
+  if (csrfInput) {
+    csrfInput.value = csrfToken;
+  } else {
+    // CSRFトークンのinputが存在しない場合は作成
+    const newCsrfInput = document.createElement('input');
+    newCsrfInput.type = 'hidden';
+    newCsrfInput.name = 'authenticity_token';
+    newCsrfInput.value = csrfToken;
+    form.appendChild(newCsrfInput);
+  }
   
   fetch(`/admin/schedule/${eventId}/edit`)
     .then(response => {
@@ -225,7 +283,14 @@ function openEditModal(button) {
       console.log('Received data:', data);
       form.querySelector('#attendance_event_title').value = data.title;
       form.querySelector('#attendance_event_date').value = data.date;
-      form.querySelector('#attendance_event_is_competition').checked = data.is_competition;
+      // イベントタイプに応じてラジオボタンを設定
+      if (data.type === 'Competition') {
+        form.querySelector('#attendance_event_event_type_Competition').checked = true;
+      } else if (data.type === 'AttendanceEvent') {
+        form.querySelector('#attendance_event_event_type_AttendanceEvent').checked = true;
+      } else {
+        form.querySelector('#attendance_event_event_type_Event').checked = true;
+      }
       form.querySelector('#attendance_event_place').value = data.place || '';
       form.querySelector('#attendance_event_note').value = data.note || '';
       

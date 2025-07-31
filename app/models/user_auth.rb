@@ -6,6 +6,18 @@ class UserAuth < ApplicationRecord
 
   belongs_to :user, optional: true
 
+  # DB制約と整合するバリデーション
+  validates :email, presence: true, uniqueness: true, 
+            format: { with: URI::MailTo::EMAIL_REGEXP, message: 'の形式が正しくありません' },
+            length: { maximum: 255 }
+  
+  validates :encrypted_password, presence: true
+  validates :authentication_token, uniqueness: true, allow_nil: true
+
+  # パスワードのカスタムバリデーション
+  validate :password_complexity, if: :password_required?
+  validate :password_length, if: :password_required?
+
   before_create :build_default_user
   before_create :generate_authentication_token
 
@@ -40,5 +52,27 @@ class UserAuth < ApplicationRecord
       birthday: Date.today,  # デフォルト値
       user_type: :player  # enum対応
     )
+  end
+
+  def password_required?
+    new_record? || password.present? || password_confirmation.present?
+  end
+
+  def password_complexity
+    return if password.blank?
+    
+    unless password.match?(/\A(?=.*[a-zA-Z])(?=.*\d)/)
+      errors.add(:password, 'は英数字を含む必要があります')
+    end
+  end
+
+  def password_length
+    return if password.blank?
+    
+    if password.length < 6
+      errors.add(:password, 'は6文字以上である必要があります')
+    elsif password.length > 128
+      errors.add(:password, 'は128文字以下である必要があります')
+    end
   end
 end

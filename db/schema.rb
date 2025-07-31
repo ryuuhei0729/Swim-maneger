@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_07_03_031741) do
+ActiveRecord::Schema[8.0].define(version: 2025_07_24_133833) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -66,23 +66,37 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_031741) do
     t.check_constraint "status = ANY (ARRAY[0, 1, 2])", name: "check_status"
   end
 
-  create_table "attendance_events", force: :cascade do |t|
+  create_table "entries", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "attendance_event_id", null: false
+    t.integer "style_id", null: false
+    t.decimal "entry_time", precision: 10, scale: 2, null: false
+    t.text "note"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["attendance_event_id", "user_id", "style_id"], name: "index_entries_unique_combination", unique: true
+    t.index ["attendance_event_id"], name: "index_entries_on_attendance_event_id"
+    t.index ["style_id"], name: "index_entries_on_style_id"
+    t.index ["user_id"], name: "index_entries_on_user_id"
+  end
+
+  create_table "events", force: :cascade do |t|
     t.string "title", null: false
     t.date "date", null: false
     t.string "place"
     t.text "note"
-    t.boolean "is_competition", default: false, null: false
+    t.string "type", default: "Event", null: false
+    t.boolean "is_attendance", default: false, null: false
+    t.integer "attendance_status", default: 0
+    t.boolean "is_competition", default: false
+    t.integer "entry_status", default: 0
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-  end
-
-  create_table "events", force: :cascade do |t|
-    t.string "title"
-    t.date "date"
-    t.string "place"
-    t.text "note"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.index ["date"], name: "index_events_on_date"
+    t.index ["is_attendance"], name: "index_events_on_is_attendance"
+    t.index ["is_competition"], name: "index_events_on_is_competition"
+    t.index ["type", "date"], name: "index_events_on_type_and_date"
+    t.index ["type"], name: "index_events_on_type"
   end
 
   create_table "milestone_reviews", force: :cascade do |t|
@@ -197,6 +211,26 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_031741) do
     t.index ["user_id"], name: "index_records_on_user_id"
   end
 
+  create_table "sessions", force: :cascade do |t|
+    t.string "session_id", null: false
+    t.text "data"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["session_id"], name: "index_sessions_on_session_id", unique: true
+    t.index ["updated_at"], name: "index_sessions_on_updated_at"
+  end
+
+  create_table "split_times", force: :cascade do |t|
+    t.bigint "record_id", null: false
+    t.bigint "race_goal_id"
+    t.integer "distance", null: false
+    t.decimal "split_time", precision: 10, scale: 2, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["race_goal_id"], name: "index_split_times_on_race_goal_id"
+    t.index ["record_id"], name: "index_split_times_on_record_id"
+  end
+
   create_table "styles", force: :cascade do |t|
     t.string "name_jp", null: false
     t.string "name", null: false
@@ -226,7 +260,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_031741) do
   create_table "users", force: :cascade do |t|
     t.integer "generation", null: false
     t.string "name", null: false
-    t.date "birthday", null: false
+    t.date "birthday"
     t.text "bio"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -238,25 +272,30 @@ ActiveRecord::Schema[8.0].define(version: 2025_07_03_031741) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "attendance", "attendance_events"
+  add_foreign_key "attendance", "events", column: "attendance_event_id"
   add_foreign_key "attendance", "users"
+  add_foreign_key "entries", "events", column: "attendance_event_id"
+  add_foreign_key "entries", "styles"
+  add_foreign_key "entries", "users"
   add_foreign_key "milestone_reviews", "milestones"
   add_foreign_key "milestones", "objectives"
-  add_foreign_key "objectives", "attendance_events"
+  add_foreign_key "objectives", "events", column: "attendance_event_id"
   add_foreign_key "objectives", "styles"
   add_foreign_key "objectives", "users"
-  add_foreign_key "practice_logs", "attendance_events"
+  add_foreign_key "practice_logs", "events", column: "attendance_event_id"
   add_foreign_key "practice_times", "practice_logs"
   add_foreign_key "practice_times", "users"
   add_foreign_key "race_feedbacks", "race_goals"
   add_foreign_key "race_feedbacks", "users"
-  add_foreign_key "race_goals", "attendance_events"
+  add_foreign_key "race_goals", "events", column: "attendance_event_id"
   add_foreign_key "race_goals", "styles"
   add_foreign_key "race_goals", "users"
   add_foreign_key "race_reviews", "race_goals"
   add_foreign_key "race_reviews", "styles"
-  add_foreign_key "records", "attendance_events"
+  add_foreign_key "records", "events", column: "attendance_event_id"
   add_foreign_key "records", "styles"
   add_foreign_key "records", "users"
+  add_foreign_key "split_times", "race_goals"
+  add_foreign_key "split_times", "records"
   add_foreign_key "user_auths", "users"
 end
