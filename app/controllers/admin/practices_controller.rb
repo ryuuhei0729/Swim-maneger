@@ -1,8 +1,85 @@
 class Admin::PracticesController < Admin::BaseController
   def index
-    @practice_logs = PracticeLog.includes(:attendance_event)
+    @practice_logs = PracticeLog.includes(:attendance_event, :practice_times)
                                .order("events.date DESC")
-                               .limit(5)
+                               .page(params[:page])
+                               .per(20)
+    
+    # 各練習記録の参加者数を事前に計算
+    @practice_logs.each do |log|
+      # その日の出席者数を取得（presentまたはotherステータスの部員）
+      attendees_count = log.attendance_event.attendances
+                           .includes(:user)
+                           .where(status: ['present', 'other'])
+                           .joins(:user)
+                           .where(users: { user_type: 'player' })
+                           .count
+      log.instance_variable_set(:@attendees_count, attendees_count)
+    end
+  end
+
+  def show
+    @practice_log = PracticeLog.includes(:attendance_event, practice_times: :user)
+                               .find(params[:id])
+    @practice_times_by_user = @practice_log.practice_times.group_by(&:user)
+  end
+
+  def edit
+    @practice_log = PracticeLog.includes(:attendance_event, practice_times: :user)
+                               .find(params[:id])
+    @styles = PracticeLog::STYLE_OPTIONS
+    @practice_times_by_user = @practice_log.practice_times.group_by(&:user)
+  end
+
+  def update
+    @practice_log = PracticeLog.find(params[:id])
+    
+    PracticeLog.transaction do
+      @practice_log.update!(practice_log_params)
+
+      # 既存のタイムを削除
+      @practice_log.practice_times.destroy_all
+
+      # 新しいタイムを保存
+      times_params = params.require(:times)
+      times_params.each do |user_id, set_data|
+        set_data.each do |set_number, rep_data|
+          rep_data.each do |rep_number, time|
+            next if time.blank?
+
+            # 時間を秒に変換 (MM:SS.ss or SS.ss)
+            total_seconds = 0.0
+            if time.include?(":")
+              minutes, seconds_part = time.split(":", 2)
+              total_seconds = minutes.to_i * 60 + seconds_part.to_f
+            else
+              total_seconds = time.to_f
+            end
+
+            PracticeTime.create!(
+              user_id: user_id,
+              practice_log_id: @practice_log.id,
+              set_number: set_number,
+              rep_number: rep_number,
+              time: total_seconds
+            )
+          end
+        end
+      end
+
+      redirect_to admin_practice_path, notice: "練習記録を更新しました。"
+    rescue ActiveRecord::RecordInvalid => e
+      @styles = PracticeLog::STYLE_OPTIONS
+      @practice_times_by_user = @practice_log.practice_times.group_by(&:user)
+      flash.now[:alert] = "更新に失敗しました: #{@practice_log.errors.full_messages.join(', ')}"
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @practice_log = PracticeLog.find(params[:id])
+    @practice_log.destroy
+    redirect_to admin_practice_path, notice: "練習記録を削除しました。"
   end
 
   def time

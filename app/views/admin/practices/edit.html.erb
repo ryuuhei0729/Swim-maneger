@@ -1,0 +1,162 @@
+<% content_for :title, '練習記録編集' %>
+
+<div class="w-full pt-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- ヘッダー -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">練習記録編集</h1>
+          <p class="text-lg text-gray-600 mt-2">
+            <%= @practice_log.attendance_event.date.strftime('%Y年%m月%d日') %>の練習
+          </p>
+        </div>
+        <div class="flex space-x-3">
+          <%= link_to admin_practice_show_path(@practice_log), class: "bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors duration-300" do %>
+            <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            戻る
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <%= form_with model: @practice_log, url: admin_practice_update_path(@practice_log), method: :patch, local: true do |form| %>
+      <!-- 練習情報編集 -->
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+        <div class="p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-6">練習情報</h2>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <%= form.label :attendance_event_id, "練習日", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.select :attendance_event_id, 
+                  AttendanceEvent.order(date: :desc).map { |event| [event.date.strftime('%Y年%m月%d日'), event.id] },
+                  { selected: @practice_log.attendance_event_id },
+                  { class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" } %>
+            </div>
+
+            <div>
+              <%= form.label :style, "泳法", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.select :style, 
+                  @styles.map { |key, value| [value, key] },
+                  { selected: @practice_log.style },
+                  { class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" } %>
+            </div>
+
+            <div>
+              <%= form.label :distance, "距離 (m)", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.number_field :distance, 
+                  value: @practice_log.distance,
+                  class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" %>
+            </div>
+
+            <div>
+              <%= form.label :rep_count, "本数", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.number_field :rep_count, 
+                  value: @practice_log.rep_count,
+                  class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" %>
+            </div>
+
+            <div>
+              <%= form.label :set_count, "セット数", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.number_field :set_count, 
+                  value: @practice_log.set_count,
+                  class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" %>
+            </div>
+
+            <div>
+              <%= form.label :circle, "サークル", class: "block text-sm font-medium text-gray-700 mb-2" %>
+              <%= form.number_field :circle, 
+                  value: @practice_log.circle,
+                  step: 0.1,
+                  class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" %>
+            </div>
+          </div>
+
+          <div class="mt-6">
+            <%= form.label :note, "メモ", class: "block text-sm font-medium text-gray-700 mb-2" %>
+            <%= form.text_area :note, 
+                value: @practice_log.note,
+                rows: 3,
+                class: "w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" %>
+          </div>
+        </div>
+      </div>
+
+      <!-- タイム編集 -->
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+        <div class="p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-6">タイム編集</h2>
+          
+          <% if @practice_times_by_user.any? %>
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">選手</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">学年/期数</th>
+                    <% @practice_log.set_count.times do |set_num| %>
+                      <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        セット<%= set_num + 1 %>
+                      </th>
+                    <% end %>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  <% @practice_times_by_user.each do |user, times| %>
+                    <tr class="hover:bg-gray-50">
+                      <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900"><%= user.name %></div>
+                      </td>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <%= user.generation %><%= ordinal_suffix(user.generation) %>
+                      </td>
+                      <% @practice_log.set_count.times do |set_num| %>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <% set_times = times.select { |t| t.set_number == set_num + 1 }.sort_by(&:rep_number) %>
+                          <div class="space-y-2">
+                            <% @practice_log.rep_count.times do |rep_num| %>
+                              <% time_record = set_times.find { |t| t.rep_number == rep_num + 1 } %>
+                              <div class="flex items-center space-x-2">
+                                <span class="text-xs text-gray-500"><%= rep_num + 1 %>:</span>
+                                <input type="text" 
+                                       name="times[<%= user.id %>][<%= set_num + 1 %>][<%= rep_num + 1 %>]" 
+                                       value="<%= time_record ? format_time(time_record.time) : '' %>"
+                                       placeholder="MM:SS.ss"
+                                       class="w-24 text-sm border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                              </div>
+                            <% end %>
+                          </div>
+                        </td>
+                      <% end %>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="text-center py-8">
+              <div class="text-gray-400 mb-4">
+                <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h3 class="text-lg font-medium text-gray-900 mb-2">タイム記録がありません</h3>
+              <p class="text-gray-500">この練習のタイム記録は登録されていません</p>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- 保存ボタン -->
+      <div class="flex justify-end space-x-4">
+        <%= link_to admin_practice_show_path(@practice_log), class: "bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700 transition-colors duration-300" do %>
+          キャンセル
+        <% end %>
+        <%= form.submit "更新", class: "bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700 transition-colors duration-300" %>
+      </div>
+    <% end %>
+  </div>
+</div> 
