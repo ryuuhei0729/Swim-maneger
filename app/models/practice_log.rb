@@ -8,6 +8,19 @@ class PracticeLog < ApplicationRecord
   validates :distance, presence: true, numericality: { greater_than: 0 }
   validates :circle, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :style, presence: true, inclusion: { in: %w[Fr Br Ba Fly IM S1] }
+  validates :note, length: { maximum: 1000 }
+
+  # その日の参加者数を取得
+  def attendees_count
+    return @attendees_count if defined?(@attendees_count)
+    
+    attendance_event.attendances
+                   .includes(:user)
+                   .where(status: ['present', 'other'])
+                   .joins(:user)
+                   .where(users: { user_type: 'player' })
+                   .count
+  end
 
 
   STYLE_OPTIONS = {

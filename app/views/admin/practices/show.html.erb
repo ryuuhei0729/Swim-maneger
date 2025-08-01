@@ -1,0 +1,155 @@
+<% content_for :title, '練習記録詳細' %>
+
+<div class="w-full pt-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- ヘッダー -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-3xl font-bold text-gray-900">練習記録詳細</h1>
+          <p class="text-lg text-gray-600 mt-2">
+            <%= @practice_log.attendance_event.date.strftime('%Y年%m月%d日') %>の練習
+          </p>
+        </div>
+        <div class="flex space-x-3">
+          <%= link_to admin_practice_edit_path(@practice_log), class: "bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition-colors duration-300" do %>
+            <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            編集
+          <% end %>
+          <%= link_to admin_practice_path, class: "bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors duration-300" do %>
+            <svg class="h-4 w-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            戻る
+          <% end %>
+        </div>
+      </div>
+    </div>
+
+    <!-- 練習情報 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <!-- 基本情報 -->
+      <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="p-6">
+          <h2 class="text-xl font-semibold text-gray-900 mb-4">練習情報</h2>
+          <div class="space-y-4">
+            <div class="flex justify-between">
+              <span class="text-gray-600">日付:</span>
+              <span class="font-medium"><%= @practice_log.attendance_event.date.strftime('%Y年%m月%d日') %></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">泳法:</span>
+              <span class="font-medium"><%= PracticeLog::STYLE_OPTIONS[@practice_log.style] %></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">距離:</span>
+              <span class="font-medium"><%= @practice_log.distance %>m</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">本数×セット:</span>
+              <span class="font-medium"><%= @practice_log.rep_count %>×<%= @practice_log.set_count %></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">サークル:</span>
+              <span class="font-medium"><%= format_circle_time(@practice_log.circle) %></span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-600">参加者数:</span>
+              <span class="font-medium"><%= @practice_log.attendees_count %>人</span>
+            </div>
+            <% if @practice_log.note.present? %>
+              <div class="border-t pt-4">
+                <span class="text-gray-600 block mb-2">メモ:</span>
+                <p class="text-gray-900 bg-gray-50 p-3 rounded-md"><%= @practice_log.note %></p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 参加者タイム一覧 -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="p-6">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">参加者タイム一覧</h2>
+        
+        <% if @practice_times_by_user.any? %>
+          <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">選手</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">学年/期数</th>
+                  <% @practice_log.set_count.times do |set_num| %>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      セット<%= set_num + 1 %>
+                    </th>
+                  <% end %>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">平均</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ベスト</th>
+                </tr>
+              </thead>
+              <tbody class="bg-white divide-y divide-gray-200">
+                <% @practice_times_by_user.each do |user, times| %>
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                      <div class="text-sm font-medium text-gray-900"><%= user.name %></div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <%= user.generation %><%= ordinal_suffix(user.generation) %>
+                    </td>
+                    <% @practice_log.set_count.times do |set_num| %>
+                      <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <% set_times = times.select { |t| t.set_number == set_num + 1 }.sort_by(&:rep_number) %>
+                        <% if set_times.any? %>
+                          <div class="space-y-1">
+                            <% set_times.each do |time| %>
+                              <% set_times_array = set_times.map(&:time) %>
+                              <div class="<%= time.time == set_times_array.min ? 'text-green-600 font-medium' : '' %><%= time.time == set_times_array.max ? 'text-red-600 font-medium' : '' %>">
+                                <%= format_time(time.time) %>
+                              </div>
+                            <% end %>
+                          </div>
+                        <% else %>
+                          <span class="text-gray-400">-</span>
+                        <% end %>
+                      </td>
+                    <% end %>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      <% user_times = times.map(&:time) %>
+                      <% if user_times.any? %>
+                        <%= format_time(user_times.sum / user_times.length) %>
+                      <% else %>
+                        -
+                      <% end %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                      <% user_times = times.map(&:time) %>
+                      <% if user_times.any? %>
+                        <%= format_time(user_times.min) %>
+                      <% else %>
+                        -
+                      <% end %>
+                    </td>
+                  </tr>
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        <% else %>
+          <div class="text-center py-8">
+            <div class="text-gray-400 mb-4">
+              <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">タイム記録がありません</h3>
+            <p class="text-gray-500">この練習のタイム記録は登録されていません</p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div> 
