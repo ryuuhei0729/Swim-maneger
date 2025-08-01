@@ -151,6 +151,10 @@ Rails.application.routes.draw do
   # [管理者]練習管理
   get "admin/practice", to: "admin/practices#index", as: "admin_practice"
   get "admin/practice/time", to: "admin/practices#time", as: "admin_practice_time"
+  post "admin/practice/time", to: "admin/practices#time", as: "admin_practice_time_preview"
+  get "admin/practice/time/input", to: "admin/practices#time_input", as: "admin_practice_time_input"
+  post "admin/practice/time/input/add_attendee", to: "admin/practices#add_attendee", as: "admin_practice_add_attendee"
+  delete "admin/practice/time/input/remove_attendee", to: "admin/practices#remove_attendee", as: "admin_practice_remove_attendee"
   post "admin/practice/time", to: "admin/practices#create_time", as: "admin_create_practice_log_and_times"
   get "admin/practice/register", to: "admin/practices#register", as: "admin_practice_register"
   post "admin/practice_register", to: "admin/practices#create_register", as: "admin_practice_register_create"

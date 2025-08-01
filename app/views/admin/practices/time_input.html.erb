@@ -1,0 +1,348 @@
+<% content_for :title, 'タイム入力' %>
+
+<div class="w-full pt-8">
+  <div class="text-center mb-8">
+    <h1 class="text-3xl font-bold text-gray-900 mb-3">タイム入力</h1>
+    <p class="text-lg text-gray-600">
+      <%= @event.date.strftime('%Y年%m月%d日') %>の練習
+    </p>
+  </div>
+
+  <!-- 練習情報表示 -->
+  <div class="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+    <div class="p-6">
+      <h2 class="text-xl font-semibold text-gray-900 mb-4">練習情報</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div>
+          <span class="text-sm text-gray-600">泳法:</span>
+          <span class="font-medium"><%= PracticeLog::STYLE_OPTIONS[@practice_log.style] %></span>
+        </div>
+        <div>
+          <span class="text-sm text-gray-600">距離:</span>
+          <span class="font-medium"><%= @practice_log.distance %>m</span>
+        </div>
+        <div>
+          <span class="text-sm text-gray-600">本数×セット:</span>
+          <span class="font-medium"><%= @practice_log.rep_count %>×<%= @practice_log.set_count %></span>
+        </div>
+        <div>
+          <span class="text-sm text-gray-600">サークル:</span>
+          <span class="font-medium"><%= format_circle_time(@practice_log.circle) %></span>
+        </div>
+      </div>
+      <% if @practice_log.note.present? %>
+        <div class="mt-4">
+          <span class="text-sm text-gray-600">メモ:</span>
+          <p class="text-gray-900 bg-gray-50 p-3 rounded-md mt-1"><%= @practice_log.note %></p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- タイム入力フォーム -->
+  <%= form_with(model: @practice_log, url: admin_create_practice_log_and_times_path, method: :post, local: true) do |form| %>
+    <!-- 隠しフィールドで練習情報を送信 -->
+    <%= form.hidden_field :attendance_event_id, value: @practice_log.attendance_event_id %>
+    <%= form.hidden_field :style, value: @practice_log.style %>
+    <%= form.hidden_field :distance, value: @practice_log.distance %>
+    <%= form.hidden_field :rep_count, value: @practice_log.rep_count %>
+    <%= form.hidden_field :set_count, value: @practice_log.set_count %>
+    <%= form.hidden_field :circle, value: @practice_log.circle %>
+    <%= form.hidden_field :note, value: @practice_log.note %>
+
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-semibold text-gray-900">タイム入力テーブル</h2>
+          <div class="flex items-center space-x-4">
+            <div class="text-sm text-gray-600">
+              参加者: <%= @attendees.count %>人
+            </div>
+            <button type="button" 
+                    onclick="document.getElementById('addAttendeeModal').classList.remove('hidden')"
+                    class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+              <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              参加者追加
+            </button>
+          </div>
+        </div>
+
+        <% if @attendees.present? %>
+          <% @sets.times do |set| %>
+            <div class="mb-8">
+              <h3 class="text-lg font-medium text-gray-900 mb-4">セット<%= set + 1 %></h3>
+              <div class="flex justify-start">
+                <div class="overflow-x-auto">
+                  <table class="divide-y divide-gray-200" style="width: <%= [48 + (@attendees.count * 64), 600].max %>px;">
+                                    <thead class="bg-gray-50">
+                    <tr>
+                      <th class="px-1 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-12">本数</th>
+                      <% @attendees.each do |attendee| %>
+                        <th class="px-1 py-3 text-xs font-medium text-gray-800 uppercase tracking-wider relative w-16">
+                          <div class="flex items-center justify-center w-full h-full">
+                            <span class="whitespace-nowrap"><%= attendee.name %></span>
+                          </div>
+                          <button type="button" 
+                                  onclick="removeAttendee(<%= attendee.id %>)"
+                                  class="absolute top-1 right-1 text-red-500 hover:text-red-700">
+                            <svg class="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </th>
+                      <% end %>
+                    </tr>
+                  </thead>
+                  <tbody class="bg-white divide-y divide-gray-200">
+                    <% @laps.times do |lap| %>
+                      <tr>
+                        <td class="px-1 py-4 whitespace-nowrap text-sm text-gray-500 font-medium text-center w-12"><%= lap + 1 %>本目</td>
+                        <% @attendees.each do |attendee| %>
+                          <td class="px-1 py-4 whitespace-nowrap text-center w-16">
+                            <input type="text" 
+                                   class="block w-16 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-center placeholder-gray-300 py-1 px-1 text-sm mx-auto" 
+                                   name="times[<%= attendee.id %>][<%= set + 1 %>][<%= lap + 1 %>]" 
+                                   placeholder="1:23.4"
+                                   data-next-input>
+                          </td>
+                        <% end %>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          <% end %>
+
+          <!-- 保存ボタン -->
+          <div class="flex justify-end space-x-4 pt-6 border-t">
+            <%= link_to "戻る", admin_practice_time_path, class: "px-6 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+            <%= form.submit "タイムを保存", class: "px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+          </div>
+        <% else %>
+          <div class="text-center py-8">
+            <div class="text-gray-400 mb-4">
+              <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">参加者がいません</h3>
+            <p class="text-gray-500">この練習に参加者が登録されていません</p>
+            <button type="button" 
+                    onclick="document.getElementById('addAttendeeModal').classList.remove('hidden')"
+                    class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+              <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              参加者を追加
+            </button>
+            <%= link_to "戻る", admin_practice_time_path, class: "mt-4 ml-4 inline-flex px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- 参加者追加モーダル -->
+    <%= render 'shared/modal', modal_id: 'addAttendeeModal', title: '参加者を追加' do %>
+      <div class="max-h-96 overflow-y-auto">
+        <% all_users = User.where(user_type: 'player').order(:generation, :name) %>
+        <% current_attendee_ids = @attendees.map(&:id) %>
+        <% available_users = all_users.reject { |user| current_attendee_ids.include?(user.id) } %>
+        
+        <% if available_users.any? %>
+          <div class="space-y-6">
+            <% available_users.group_by(&:generation).each do |generation, users| %>
+                              <div class="bg-gray-50 rounded-xl p-3">
+                  <div class="flex items-center mb-3">
+                    <h4 class="text-sm font-semibold text-gray-800">
+                      <%= generation %><%= ordinal_suffix(generation) %>
+                    </h4>
+                    <span class="ml-auto text-xs text-gray-500 bg-white px-2 py-1 rounded-full">
+                      <%= users.count %>名
+                    </span>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 gap-1">
+                    <% users.each do |user| %>
+                      <div class="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all duration-200">
+                        <div class="flex items-center">
+                          <div class="w-6 h-6 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mr-2">
+                            <span class="text-white font-medium text-xs"><%= user.name.first %></span>
+                          </div>
+                          <div>
+                            <div class="font-medium text-gray-900 text-sm"><%= user.name %></div>
+                          </div>
+                        </div>
+                        <button type="button" 
+                                onclick="addAttendee(<%= user.id %>)"
+                                class="inline-flex items-center px-3 py-1 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white text-xs font-medium rounded-md shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105">
+                          <svg class="h-3 w-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                          追加
+                        </button>
+                      </div>
+                    <% end %>
+                  </div>
+                </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="text-center py-12">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">追加できる参加者がいません</h3>
+            <p class="text-gray-500">すべての参加者が既に追加されています</p>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Enterキーで次の入力欄に移動
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && e.target.matches('input[data-next-input]')) {
+      e.preventDefault();
+      
+      const currentInput = e.target;
+      const currentCell = currentInput.closest('td');
+      const currentRow = currentInput.closest('tr');
+      const currentSetDiv = currentRow.closest('.mb-8');
+      
+      const cellIndex = Array.from(currentRow.children).indexOf(currentCell);
+      let nextInput = null;
+
+      // 同じセット内に次の行がある場合
+      const nextRow = currentRow.nextElementSibling;
+      if (nextRow && nextRow.querySelector('input')) {
+        const nextCell = nextRow.children[cellIndex];
+        if (nextCell) {
+          nextInput = nextCell.querySelector('input');
+        }
+      } else {
+        // セットの最終行の場合、次のセットを探す
+        // すべてのmb-8クラスを持つ要素を取得
+        const allSetDivs = document.querySelectorAll('.mb-8');
+        
+        // 現在のセットのインデックスを見つける
+        let currentSetIndex = -1;
+        for (let i = 0; i < allSetDivs.length; i++) {
+          if (allSetDivs[i] === currentSetDiv) {
+            currentSetIndex = i;
+            break;
+          }
+        }
+        
+        // 次のセットがあるかチェック
+        if (currentSetIndex !== -1 && currentSetIndex + 1 < allSetDivs.length) {
+          const nextSetDiv = allSetDivs[currentSetIndex + 1];
+          
+          const nextTable = nextSetDiv.querySelector('table');
+          if (nextTable) {
+            const firstRowInNextTable = nextTable.querySelector('tbody tr');
+            if (firstRowInNextTable) {
+              const nextCell = firstRowInNextTable.children[cellIndex];
+              if (nextCell) {
+                nextInput = nextCell.querySelector('input');
+              }
+            }
+          }
+        } else {
+          // 最終セットの最終行の場合、次の列の最初の行に移動
+          if (cellIndex < currentRow.children.length - 1) {
+            const nextCellIndex = cellIndex + 1;
+            
+            // 実際のセットのdivを探す（h3要素を持つもの）
+            let actualFirstSetDiv = null;
+            for (let i = 0; i < allSetDivs.length; i++) {
+              const div = allSetDivs[i];
+              if (div.querySelector('h3')) {
+                actualFirstSetDiv = div;
+                break;
+              }
+            }
+            
+            const firstTable = actualFirstSetDiv ? actualFirstSetDiv.querySelector('table') : null;
+            if (firstTable) {
+              const firstRow = firstTable.querySelector('tbody tr');
+              if (firstRow) {
+                const nextCell = firstRow.children[nextCellIndex];
+                if (nextCell) {
+                  nextInput = nextCell.querySelector('input');
+                }
+              }
+            }
+          }
+        }
+      }
+
+      if (nextInput) {
+        nextInput.focus();
+        nextInput.select(); // テキストを選択状態にする
+      }
+    }
+  });
+});
+
+// 参加者を追加する関数
+function addAttendee(attendeeId) {
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = '<%= admin_practice_add_attendee_path %>';
+  
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  const tokenInput = document.createElement('input');
+  tokenInput.type = 'hidden';
+  tokenInput.name = 'authenticity_token';
+  tokenInput.value = csrfToken;
+  
+  const attendeeInput = document.createElement('input');
+  attendeeInput.type = 'hidden';
+  attendeeInput.name = 'attendee_id';
+  attendeeInput.value = attendeeId;
+  
+  form.appendChild(tokenInput);
+  form.appendChild(attendeeInput);
+  document.body.appendChild(form);
+  form.submit();
+}
+
+// 参加者を削除する関数
+function removeAttendee(attendeeId) {
+  if (confirm('この参加者を削除しますか？')) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '<%= admin_practice_remove_attendee_path %>';
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    const tokenInput = document.createElement('input');
+    tokenInput.type = 'hidden';
+    tokenInput.name = 'authenticity_token';
+    tokenInput.value = csrfToken;
+    
+    const methodInput = document.createElement('input');
+    methodInput.type = 'hidden';
+    methodInput.name = '_method';
+    methodInput.value = 'DELETE';
+    
+    const attendeeInput = document.createElement('input');
+    attendeeInput.type = 'hidden';
+    attendeeInput.name = 'attendee_id';
+    attendeeInput.value = attendeeId;
+    
+    form.appendChild(tokenInput);
+    form.appendChild(methodInput);
+    form.appendChild(attendeeInput);
+    document.body.appendChild(form);
+    form.submit();
+  }
+}
+</script> 
