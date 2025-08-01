@@ -87,9 +87,15 @@
                                     <thead class="bg-gray-50">
                     <tr>
                       <th class="px-1 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-12">本数</th>
-                      <% @attendees.each do |attendee| %>
-                        <th class="px-1 py-3 text-xs font-medium text-gray-800 uppercase tracking-wider relative w-16">
-                          <div class="flex items-center justify-center w-full h-full">
+                      <% @attendees.each_with_index do |attendee, index| %>
+                        <th class="px-1 py-3 text-xs font-medium text-gray-800 uppercase tracking-wider relative w-16" 
+                            draggable="true" 
+                            data-attendee-id="<%= attendee.id %>" 
+                            data-column-index="<%= index %>"
+                            ondragstart="dragStart(event)" 
+                            ondragover="dragOver(event)" 
+                            ondrop="drop(event)">
+                          <div class="flex items-center justify-center w-full h-full cursor-move">
                             <span class="whitespace-nowrap"><%= attendee.name %></span>
                           </div>
                           <button type="button" 
@@ -412,5 +418,115 @@ function applyCustomBulkInput() {
     inputs[0].focus();
     inputs[0].select();
   }
+}
+
+// ドラッグ&ドロップ機能
+let draggedElement = null;
+
+function dragStart(event) {
+  draggedElement = event.target.closest('th');
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/html', draggedElement.outerHTML);
+  draggedElement.style.opacity = '0.5';
+  
+  // ドラッグ終了時のイベントリスナーを追加
+  document.addEventListener('dragend', function onDragEnd() {
+    removeDropGuides();
+    document.removeEventListener('dragend', onDragEnd);
+  });
+}
+
+function dragOver(event) {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+  
+  const targetTh = event.target.closest('th');
+  if (targetTh && targetTh !== draggedElement) {
+    // 既存のガイドラインを削除
+    removeDropGuides();
+    
+    // 新しいガイドラインを表示
+    showDropGuide(targetTh);
+  }
+}
+
+function drop(event) {
+  event.preventDefault();
+  
+  const targetTh = event.target.closest('th');
+  if (!targetTh || !draggedElement || targetTh === draggedElement) {
+    return;
+  }
+  
+  // ドラッグされた要素とターゲット要素のインデックスを取得
+  const draggedIndex = parseInt(draggedElement.dataset.columnIndex);
+  const targetIndex = parseInt(targetTh.dataset.columnIndex);
+  
+  // 列の順番を変更
+  reorderColumns(draggedIndex, targetIndex);
+  
+  // ドラッグ状態をリセット
+  draggedElement.style.opacity = '';
+  draggedElement = null;
+  
+  // ガイドラインを削除
+  removeDropGuides();
+}
+
+function reorderColumns(fromIndex, toIndex) {
+  const tables = document.querySelectorAll('table');
+  
+  tables.forEach(table => {
+    const headerRow = table.querySelector('thead tr');
+    const bodyRows = table.querySelectorAll('tbody tr');
+    
+    // ヘッダーの列を移動
+    const headerCells = Array.from(headerRow.children);
+    const draggedHeader = headerCells[fromIndex + 1]; // +1 for 本数列
+    headerRow.removeChild(draggedHeader);
+    headerRow.insertBefore(draggedHeader, headerCells[toIndex + 1]);
+    
+    // 各データ行の列を移動
+    bodyRows.forEach(row => {
+      const cells = Array.from(row.children);
+      const draggedCell = cells[fromIndex + 1]; // +1 for 本数列
+      row.removeChild(draggedCell);
+      row.insertBefore(draggedCell, cells[toIndex + 1]);
+    });
+  });
+  
+  // データ属性を更新
+  updateColumnIndices();
+}
+
+function updateColumnIndices() {
+  const headerCells = document.querySelectorAll('th[draggable="true"]');
+  headerCells.forEach((cell, index) => {
+    cell.dataset.columnIndex = index;
+  });
+}
+
+// ドロップガイドライン機能
+function showDropGuide(targetTh) {
+  const rect = targetTh.getBoundingClientRect();
+  const guide = document.createElement('div');
+  guide.id = 'drop-guide';
+  guide.style.cssText = `
+    position: fixed;
+    top: ${rect.top}px;
+    left: ${rect.left - 2}px;
+    width: 4px;
+    height: ${rect.height}px;
+    background-color: #3B82F6;
+    pointer-events: none;
+    z-index: 1000;
+    border-radius: 2px;
+  `;
+  document.body.appendChild(guide);
+}
+
+function removeDropGuides() {
+  const guides = document.querySelectorAll('#drop-guide');
+  guides.forEach(guide => guide.remove());
 }
 </script> 
