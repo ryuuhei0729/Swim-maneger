@@ -59,6 +59,14 @@
               参加者: <%= @attendees.count %>人
             </div>
             <button type="button" 
+                    onclick="document.getElementById('bulkInputModal').classList.remove('hidden')"
+                    class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+              <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+              一括入力
+            </button>
+            <button type="button" 
                     onclick="document.getElementById('addAttendeeModal').classList.remove('hidden')"
                     class="inline-flex items-center px-3 py-1 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
               <svg class="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -143,6 +151,28 @@
         <% end %>
       </div>
     </div>
+
+    <!-- 一括入力モーダル -->
+    <%= render 'shared/modal', modal_id: 'bulkInputModal', title: '一括入力' do %>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">プレフィックス</label>
+          <input type="text" id="bulkPrefix" placeholder="例: 1:" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div class="flex space-x-2">
+          <button type="button" onclick="applyBulkInput('1:')" class="flex-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium">1:</button>
+          <button type="button" onclick="applyBulkInput('2:')" class="flex-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium">2:</button>
+          <button type="button" onclick="applyBulkInput('3:')" class="flex-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium">3:</button>
+        </div>
+        <div class="flex space-x-2">
+          <button type="button" onclick="applyBulkInput('0:')" class="flex-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium">0:</button>
+          <button type="button" onclick="applyBulkInput('')" class="flex-1 px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-md text-sm font-medium">クリア</button>
+        </div>
+        <div class="pt-4 border-t">
+          <button type="button" onclick="applyCustomBulkInput()" class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium">適用</button>
+        </div>
+      </div>
+    <% end %>
 
     <!-- 参加者追加モーダル -->
     <%= render 'shared/modal', modal_id: 'addAttendeeModal', title: '参加者を追加' do %>
@@ -286,7 +316,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
       if (nextInput) {
         nextInput.focus();
-        nextInput.select(); // テキストを選択状態にする
+        
+        // 一括入力されたプレフィックスの場合は、プレフィックスの後ろにカーソルを配置
+        const bulkPrefixes = ['1:', '2:', '3:', '0:'];
+        const hasBulkPrefix = bulkPrefixes.some(prefix => nextInput.value === prefix);
+        
+        if (hasBulkPrefix) {
+          // プレフィックスの後ろにカーソルを配置
+          nextInput.setSelectionRange(nextInput.value.length, nextInput.value.length);
+        } else {
+          // 通常の場合はテキストを選択状態にする
+          nextInput.select();
+        }
       }
     }
   });
@@ -343,6 +384,33 @@ function removeAttendee(attendeeId) {
     form.appendChild(attendeeInput);
     document.body.appendChild(form);
     form.submit();
+  }
+}
+
+// 一括入力機能
+function applyBulkInput(prefix) {
+  document.getElementById('bulkPrefix').value = prefix;
+}
+
+function applyCustomBulkInput() {
+  const prefix = document.getElementById('bulkPrefix').value;
+  const inputs = document.querySelectorAll('input[data-next-input]');
+  
+  inputs.forEach(input => {
+    if (input.value === '' || input.value === prefix) {
+      input.value = prefix;
+    } else if (!input.value.startsWith(prefix)) {
+      input.value = prefix + input.value;
+    }
+  });
+  
+  // モーダルを閉じる
+  document.getElementById('bulkInputModal').classList.add('hidden');
+  
+  // 最初の入力フィールドにフォーカス
+  if (inputs.length > 0) {
+    inputs[0].focus();
+    inputs[0].select();
   }
 }
 </script> 
