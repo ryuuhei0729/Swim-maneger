@@ -14,7 +14,7 @@ class PracticeLog < ApplicationRecord
   def attendees_count
     return @attendees_count if defined?(@attendees_count)
     
-    attendance_event.attendances
+    @attendees_count = attendance_event.attendances
                    .includes(:user)
                    .where(status: ['present', 'other'])
                    .joins(:user)
