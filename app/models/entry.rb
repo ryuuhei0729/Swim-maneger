@@ -26,4 +26,6 @@ class Entry < ApplicationRecord
       format("%.2f", seconds)
     end
   end
+
+
 end 
