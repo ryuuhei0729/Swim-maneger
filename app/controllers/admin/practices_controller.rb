@@ -145,8 +145,10 @@ class Admin::PracticesController < Admin::BaseController
     PracticeLog.transaction do
       @practice_log.save!
 
-      times_params = params.require(:times)
-      times_params.each do |user_id, set_data|
+      # timesパラメータが存在するかチェック
+      if params[:times].present?
+        times_params = params[:times]
+        times_params.each do |user_id, set_data|
         set_data.each do |set_number, rep_data|
           rep_data.each do |rep_number, time|
             next if time.blank?
@@ -169,6 +171,7 @@ class Admin::PracticesController < Admin::BaseController
             )
           end
         end
+      end
       end
 
       redirect_to admin_practice_path, notice: "練習タイムとメニューを保存しました。"

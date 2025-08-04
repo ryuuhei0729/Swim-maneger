@@ -40,7 +40,7 @@
   </div>
 
   <!-- タイム入力フォーム -->
-  <%= form_with(model: @practice_log, url: admin_create_practice_log_and_times_path, method: :post, local: true) do |form| %>
+  <%= form_with(model: @practice_log, url: admin_create_practice_log_and_times_path, method: :post, local: true, data: { turbo: false }) do |form| %>
     <!-- 隠しフィールドで練習情報を送信 -->
     <%= form.hidden_field :attendance_event_id, value: @practice_log.attendance_event_id %>
     <%= form.hidden_field :style, value: @practice_log.style %>
@@ -529,4 +529,6 @@ function removeDropGuides() {
   const guides = document.querySelectorAll('#drop-guide');
   guides.forEach(guide => guide.remove());
 }
+
+
 </script> 
