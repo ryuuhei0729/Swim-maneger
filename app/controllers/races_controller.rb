@@ -8,56 +8,56 @@ class RacesController < ApplicationController
     # 大会ごとに記録をグルーピング（大会名＋日付でまとめる）
     @records_by_event = @records.group_by do |record|
       if record.attendance_event.present?
-        [record.attendance_event.title, record.attendance_event.date]
+        [ record.attendance_event.title, record.attendance_event.date ]
       else
-        ["練習レース", record.created_at.to_date]
+        [ "練習レース", record.created_at.to_date ]
       end
     end.sort_by { |(title, date), _| date }.reverse
 
     # エントリー可能な大会を取得（将来の大会のみ、エントリー受付中のみ）
-    @available_competitions = Competition.where('date >= ?', Date.current)
+    @available_competitions = Competition.where("date >= ?", Date.current)
                                          .where(entry_status: :open)
                                          .order(:date)
                                          .limit(5)
-    
+
     # 全種目を取得
     @all_styles = Style.all.order(:style, :distance)
   end
 
   def submit_entry
     @user = current_user_auth.user
-    
+
     # バリデーション
-    unless params[:event_id].present?
+    unless params[:competition_id].present?
       render json: { success: false, message: "大会を選択してください。" }
       return
     end
-    
-    @event = AttendanceEvent.find(params[:event_id])
-    
+
+    @event = Competition.find(params[:competition_id])
+
     # 選択された種目とタイム
     selected_styles = params[:selected_styles] || {}
-    
+
     if selected_styles.empty?
       render json: { success: false, message: "エントリーする種目を選択してください。" }
       return
     end
-    
+
     begin
       Entry.transaction do
         success_count = 0
-        
+
         selected_styles.each do |style_id, time_str|
           next if time_str.blank?
-          
+
           style = Style.find(style_id)
-          
+
           # 時間を秒に変換
           entry_time = parse_time_to_seconds(time_str)
-          
+
           # 既存のエントリーがあるかチェック
           existing_entry = Entry.find_by(user: @user, attendance_event: @event, style: style)
-          
+
           if existing_entry
             existing_entry.update!(entry_time: entry_time)
           else
@@ -68,13 +68,13 @@ class RacesController < ApplicationController
               entry_time: entry_time
             )
           end
-          
+
           success_count += 1
         end
-        
-        render json: { 
-          success: true, 
-          message: "#{success_count}種目のエントリーを提出しました。" 
+
+        render json: {
+          success: true,
+          message: "#{success_count}種目のエントリーを提出しました。"
         }
       end
     rescue ActiveRecord::RecordInvalid => e
@@ -101,7 +101,7 @@ class RacesController < ApplicationController
 
   def parse_time_to_seconds(time_str)
     return 0.0 if time_str.blank?
-    
+
     # MM:SS.ss または SS.ss 形式をパース
     if time_str.include?(":")
       minutes, seconds_part = time_str.split(":", 2)
@@ -110,7 +110,7 @@ class RacesController < ApplicationController
       time_str.to_f
     end
   end
-  
+
   def format_time(seconds)
     return "-" if seconds.nil? || seconds.zero?
 
@@ -123,6 +123,6 @@ class RacesController < ApplicationController
       sprintf("%d:%05.2f", minutes, remaining_seconds)
     end
   end
-  
+
   helper_method :format_time_display, :format_time
-end 
+end

@@ -46,4 +46,18 @@ module ApplicationHelper
     weekdays = { 'Sun' => '日', 'Mon' => '月', 'Tue' => '火', 'Wed' => '水', 'Thu' => '木', 'Fri' => '金', 'Sat' => '土' }
     weekdays[date.strftime('%a')]
   end
+
+  # split timeをフォーマットするメソッド
+  def format_split_time(time_in_seconds)
+    return "" if time_in_seconds.blank?
+    
+    minutes = (time_in_seconds / 60).to_i
+    seconds = (time_in_seconds % 60)
+    
+    if minutes > 0
+      format("%d:%05.2f", minutes, seconds)
+    else
+      format("%.2f", seconds)
+    end
+  end
 end

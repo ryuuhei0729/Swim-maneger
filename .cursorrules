@@ -1,0 +1,30 @@
+# Cursor AI 設定ファイル
+
+## システム要件
+このプロジェクトは水泳選手マネジメントシステム（Swim Manager）です。
+
+## 重要な指示
+- すべての指示を実行する前に、必ず `requirements.md` ファイルを読み込んでください
+- `requirements.md` の内容に基づいて、適切な実装を行ってください
+- 特に以下の点に注意してください：
+  - Rails開発ベストプラクティス（セクション13）に従う
+  - 命名規則を守る
+  - セキュリティ要件を満たす
+  - パフォーマンス要件を考慮する
+
+## 技術スタック
+- Ruby on Rails 8.0
+- PostgreSQL
+- Devise（認証）
+- Tailwind CSS
+- Stimulus
+- Active Storage
+
+## ユーザータイプ
+- player: 選手（0）
+- manager: マネージャー（1）
+- coach: コーチ（2）
+- director: 監督（3）
+
+## 応答言語
+日本語で応答してください。 
