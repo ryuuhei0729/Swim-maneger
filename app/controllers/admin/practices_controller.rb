@@ -1,8 +1,85 @@
 class Admin::PracticesController < Admin::BaseController
   def index
-    @practice_logs = PracticeLog.includes(:attendance_event)
+    @practice_logs = PracticeLog.includes(:attendance_event, :practice_times)
                                .order("events.date DESC")
-                               .limit(5)
+                               .page(params[:page])
+                               .per(20)
+    
+    # 各練習記録の参加者数を事前に計算
+    @practice_logs.each do |log|
+      # その日の出席者数を取得（presentまたはotherステータスの部員）
+      attendees_count = log.attendance_event.attendances
+                           .includes(:user)
+                           .where(status: ['present', 'other'])
+                           .joins(:user)
+                           .where(users: { user_type: 'player' })
+                           .count
+      log.instance_variable_set(:@attendees_count, attendees_count)
+    end
+  end
+
+  def show
+    @practice_log = PracticeLog.includes(:attendance_event, practice_times: :user)
+                               .find(params[:id])
+    @practice_times_by_user = @practice_log.practice_times.group_by(&:user)
+  end
+
+  def edit
+    @practice_log = PracticeLog.includes(:attendance_event, practice_times: :user)
+                               .find(params[:id])
+    @styles = PracticeLog::STYLE_OPTIONS
+    @practice_times_by_user = @practice_log.practice_times.group_by(&:user)
+  end
+
+  def update
+    @practice_log = PracticeLog.find(params[:id])
+    
+    PracticeLog.transaction do
+      @practice_log.update!(practice_log_params)
+
+      # 既存のタイムを削除
+      @practice_log.practice_times.destroy_all
+
+      # 新しいタイムを保存
+      times_params = params.require(:times)
+      times_params.each do |user_id, set_data|
+        set_data.each do |set_number, rep_data|
+          rep_data.each do |rep_number, time|
+            next if time.blank?
+
+            # 時間を秒に変換 (MM:SS.ss or SS.ss)
+            total_seconds = 0.0
+            if time.include?(":")
+              minutes, seconds_part = time.split(":", 2)
+              total_seconds = minutes.to_i * 60 + seconds_part.to_f
+            else
+              total_seconds = time.to_f
+            end
+
+            PracticeTime.create!(
+              user_id: user_id,
+              practice_log_id: @practice_log.id,
+              set_number: set_number,
+              rep_number: rep_number,
+              time: total_seconds
+            )
+          end
+        end
+      end
+
+      redirect_to admin_practice_path, notice: "練習記録を更新しました。"
+    rescue ActiveRecord::RecordInvalid => e
+      @styles = PracticeLog::STYLE_OPTIONS
+      @practice_times_by_user = @practice_log.practice_times.group_by(&:user)
+      flash.now[:alert] = "更新に失敗しました: #{@practice_log.errors.full_messages.join(', ')}"
+      render :edit, status: :unprocessable_entity
+    end
+  end
+
+  def destroy
+    @practice_log = PracticeLog.find(params[:id])
+    @practice_log.destroy
+    redirect_to admin_practice_path, notice: "練習記録を削除しました。"
   end
 
   def time
@@ -17,14 +94,25 @@ class Admin::PracticesController < Admin::BaseController
     # GETパラメータから@practice_logを初期化
     @practice_log = PracticeLog.new(practice_log_get_params)
 
+    # POSTリクエストの場合は新しい画面にリダイレクト
+    if request.post?
+      redirect_to admin_practice_time_input_path(practice_log: practice_log_params)
+      return
+    end
+  end
+
+  def time_input
+    # パラメータから練習ログ情報を取得
+    @practice_log = PracticeLog.new(practice_log_params)
+    @styles = PracticeLog::STYLE_OPTIONS
+
     # パラメータがある場合はテーブルを生成
     if @practice_log.rep_count.present? && @practice_log.set_count.present?
       @laps = @practice_log.rep_count
       @sets = @practice_log.set_count
-      @show_modal = true
 
       # 選択された練習の参加者を取得
-      event_id = @practice_log.attendance_event_id.presence || params.dig(:practice_log, :attendance_event_id).presence || @default_event&.id
+      event_id = @practice_log.attendance_event_id.presence || params.dig(:practice_log, :attendance_event_id).presence
       if event_id.present?
         @event = AttendanceEvent.find(event_id)
         @attendees = @event.attendances.includes(:user)
@@ -33,7 +121,21 @@ class Admin::PracticesController < Admin::BaseController
                           .where(users: { user_type: "player" })
                           .map(&:user)
                           .sort_by { |user| [ user.generation, user.name ] }
+        
+        # 削除された参加者を除外
+        removed_attendee_ids = session[:removed_attendees] || []
+        @attendees = @attendees.reject { |user| removed_attendee_ids.include?(user.id) }
+        
+        # 追加された参加者を取得
+        additional_attendee_ids = session[:additional_attendees] || []
+        if additional_attendee_ids.any?
+          additional_attendees = User.where(id: additional_attendee_ids, user_type: 'player')
+                                   .order(:generation, :name)
+          @attendees = (@attendees + additional_attendees).uniq
+        end
       end
+    else
+      redirect_to admin_practice_time_path, alert: "本数とセット数を入力してください"
     end
   end
 
@@ -112,6 +214,34 @@ class Admin::PracticesController < Admin::BaseController
       @default_event = @attendance_event
       render :register, status: :unprocessable_entity
     end
+  end
+
+  def add_attendee
+    # 現在の参加者リストをセッションから取得
+    session[:additional_attendees] ||= []
+    
+    # 新しい参加者IDを追加
+    attendee_id = params[:attendee_id].to_i
+    unless session[:additional_attendees].include?(attendee_id)
+      session[:additional_attendees] << attendee_id
+    end
+    
+    # 元の画面にリダイレクト
+    redirect_back(fallback_location: admin_practice_time_input_path)
+  end
+
+  def remove_attendee
+    # 参加者IDをセッションから削除
+    session[:additional_attendees] ||= []
+    attendee_id = params[:attendee_id].to_i
+    session[:additional_attendees].delete(attendee_id)
+    
+    # 削除された参加者を記録（最初から出席していた参加者も削除可能にするため）
+    session[:removed_attendees] ||= []
+    session[:removed_attendees] << attendee_id unless session[:removed_attendees].include?(attendee_id)
+    
+    # 元の画面にリダイレクト
+    redirect_back(fallback_location: admin_practice_time_input_path)
   end
 
   private
