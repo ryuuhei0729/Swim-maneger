@@ -26,6 +26,21 @@ module ApplicationHelper
     end
   end
 
+  # サークル時間を「分'秒"」の形式でフォーマットするメソッド
+  # 例）90秒 → 1'30"
+  def format_circle_time(seconds)
+    return "0\"0" if seconds.nil? || seconds.zero?
+    
+    minutes = (seconds / 60).floor
+    remaining_seconds = (seconds % 60).round
+    
+    if minutes > 0
+      "#{minutes}'#{remaining_seconds.to_s.rjust(2, '0')}\""
+    else
+      "#{remaining_seconds}\""
+    end
+  end
+
   # 日付の曜日を日本語で取得するメソッド
   def japanese_weekday(date)
     weekdays = { 'Sun' => '日', 'Mon' => '月', 'Tue' => '火', 'Wed' => '水', 'Thu' => '木', 'Fri' => '金', 'Sat' => '土' }

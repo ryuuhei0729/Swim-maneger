@@ -18,9 +18,6 @@
   <% else %>
     <div class="grid gap-1 ">
       <% @practice_logs.each do |log| %>
-        <% circle_min = log.circle.to_i / 60 %>
-        <% circle_sec = log.circle.to_i % 60 %>
-        <% circle_str = "#{circle_min}'#{format('%02d', circle_sec)}\"" %>
         <div class="border rounded-lg px-4 py-1 hover:bg-gray-50 cursor-pointer bg-white" 
               data-controller="modal"
               data-action="click->modal#open"
@@ -38,7 +35,7 @@
             </div>
             <div class="text-right">
               <p class="text-sm text-gray-600">
-                <%= "#{log.distance}m × #{log.rep_count}本 × #{log.set_count}セット　#{log.style}　#{circle_str}" %>
+                <%= "#{log.distance}m × #{log.rep_count}本 × #{log.set_count}セット　#{log.style}　#{format_circle_time(log.circle)}" %>
               </p>
             </div>
           </div>
