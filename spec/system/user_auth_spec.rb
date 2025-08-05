@@ -71,44 +71,125 @@ RSpec.describe 'User Authentication', type: :system do
     end
   end
 
-  describe 'ログアウト機能' do
+  describe '管理者ページへのアクセス権限' do
     before do
-      # ログインする
-      visit new_user_auth_session_path
-      fill_in 'user_auth[email]', with: user.email
-      fill_in 'user_auth[password]', with: 'password123'
-      click_button 'ログイン'
+      # playerとしてログイン
+      login_as_player
     end
 
-    context 'ログアウト成功' do
-      it 'ログアウトボタンをクリックすることでログアウトが成功すること' do
-        # ログイン後のページにいることを確認
+    context 'admin/以下のURLにアクセスした場合' do
+      it 'admin/にアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
         expect(current_path).to eq('/home')
-
-        # ログアウトボタンをクリック
-        click_button 'ログアウト'
-
-        # ログアウト後の確認
-        expect(page).to have_content('ログアウトしました。')
-        expect(current_path).to eq(new_user_auth_session_path)
       end
 
-      it 'ログアウト後にログイン画面にリダイレクトされること' do
-        click_button 'ログアウト'
-
-        # ログイン画面にいることを確認
-        expect(current_path).to eq(new_user_auth_session_path)
-        expect(page).to have_content('ログイン')
+      it 'admin/usersにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_users_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
       end
 
-      it 'ログアウト後に保護されたページにアクセスできないこと' do
-        click_button 'ログアウト'
+      it 'admin/users/newにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_create_user_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
 
-        # 保護されたページにアクセス
-        visit home_path
+      it 'admin/users/importにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_users_import_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
 
-        # ログイン画面にリダイレクトされることを確認
-        expect(current_path).to eq(new_user_auth_session_path)
+      it 'admin/users/import/templateにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_users_import_template_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
+
+      it 'admin/objectiveにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_objective_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
+
+      it 'admin/announcementにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_announcement_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
+
+      it 'admin/scheduleにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_schedule_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
+
+      it 'admin/schedule/importにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_schedule_import_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
+
+      it 'admin/schedule/import/templateにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_schedule_import_template_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
+
+      it 'admin/practiceにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_practice_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
+
+      it 'admin/practice/timeにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_practice_time_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
+
+      it 'admin/practice/time/inputにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_practice_time_input_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
+
+      it 'admin/practice/registerにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_practice_register_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
+
+      it 'admin/attendanceにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_attendance_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
+
+      it 'admin/attendance/checkにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_attendance_check_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
+
+      it 'admin/attendance/statusにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_attendance_status_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
+
+      it 'admin/attendance/updateにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_attendance_update_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
+      end
+
+      it 'admin/competitionにアクセスすると権限エラーでリダイレクトされること' do
+        visit admin_competition_path
+        expect(page).to have_content('このページにアクセスする権限がありません。')
+        expect(current_path).to eq('/home')
       end
     end
   end
