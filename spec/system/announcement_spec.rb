@@ -217,6 +217,24 @@ RSpec.describe 'お知らせ機能', type: :system do
         # エラーメッセージが表示されることを確認
         expect(page).to have_content('内容 を入力してください')
       end
+
+      it '公開日時が過去の場合にエラーメッセージが表示されること' do
+        # 管理者でログイン
+        login_as_admin
+
+        # お知らせ管理ページに移動
+        visit admin_announcement_path
+
+        # 無効なデータでお知らせを作成（過去の日時）
+        fill_in 'announcement[title]', with: 'タイトル'
+        fill_in 'announcement[content]', with: '内容'
+        check 'announcement[is_active]'
+        fill_in 'announcement[published_at]', with: 1.day.ago.strftime("%Y-%m-%dT%H:%M")
+        click_button '作成'
+
+        # エラーメッセージが表示されることを確認
+        expect(page).to have_content('公開日時 は現在日時以降を指定してください')
+      end
     end
   end
 end 
