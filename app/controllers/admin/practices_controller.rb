@@ -72,7 +72,7 @@ class Admin::PracticesController < Admin::BaseController
       @styles = PracticeLog::STYLE_OPTIONS
       @practice_times_by_user = @practice_log.practice_times.group_by(&:user)
       flash.now[:alert] = "更新に失敗しました: #{@practice_log.errors.full_messages.join(', ')}"
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 
@@ -196,7 +196,7 @@ class Admin::PracticesController < Admin::BaseController
       end
 
       flash.now[:alert] = "保存に失敗しました: #{@practice_log.errors.full_messages.join(', ')}"
-      render :time, status: :unprocessable_entity
+      render :time, status: :unprocessable_content
     end
   end
 
@@ -215,7 +215,7 @@ class Admin::PracticesController < Admin::BaseController
       today = Date.today
       @attendance_events = AttendanceEvent.order(date: :desc)
       @default_event = @attendance_event
-      render :register, status: :unprocessable_entity
+      render :register, status: :unprocessable_content
     end
   end
 

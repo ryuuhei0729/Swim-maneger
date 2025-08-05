@@ -33,7 +33,7 @@ class Api::V1::MypageController < Api::V1::BaseController
     # 画像形式のチェック（Base64の場合）
     if params[:avatar_base64].present?
       unless valid_base64_image?(params[:avatar_base64])
-        render_error("JPGまたはPNG形式の画像のみアップロード可能です", :unprocessable_entity)
+        render_error("JPGまたはPNG形式の画像のみアップロード可能です", :unprocessable_content)
         return
       end
     end
@@ -44,7 +44,7 @@ class Api::V1::MypageController < Api::V1::BaseController
         decoded_image = decode_base64_image(params[:avatar_base64])
         user.avatar.attach(decoded_image)
       rescue => e
-        render_error("画像の処理に失敗しました: #{e.message}", :unprocessable_entity)
+        render_error("画像の処理に失敗しました: #{e.message}", :unprocessable_content)
         return
       end
     end
@@ -56,7 +56,7 @@ class Api::V1::MypageController < Api::V1::BaseController
         profile: build_profile_data(user.reload)
       })
     else
-      render_error("プロフィールの更新に失敗しました", :unprocessable_entity, user.errors)
+              render_error("プロフィールの更新に失敗しました", :unprocessable_content, user.errors)
     end
   end
 

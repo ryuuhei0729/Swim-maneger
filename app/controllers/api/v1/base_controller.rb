@@ -45,6 +45,6 @@ class Api::V1::BaseController < ActionController::API
   end
 
   rescue_from ActiveRecord::RecordInvalid do |e|
-    render_error('Validation failed', :unprocessable_entity, e.record.errors.as_json)
+          render_error('Validation failed', :unprocessable_content, e.record.errors.as_json)
   end
 end 

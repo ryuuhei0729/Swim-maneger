@@ -11,7 +11,7 @@ class Admin::AnnouncementsController < Admin::BaseController
       redirect_to admin_announcement_path, notice: "お知らせを作成しました。"
     else
       @announcements = Announcement.all.order(published_at: :desc)
-      render :index, status: :unprocessable_entity
+      render :index, status: :unprocessable_content
     end
   end
 
@@ -22,7 +22,7 @@ class Admin::AnnouncementsController < Admin::BaseController
       redirect_to admin_announcement_path, notice: "お知らせを更新しました。"
     else
       @announcements = Announcement.all.order(published_at: :desc)
-      render :index, status: :unprocessable_entity
+      render :index, status: :unprocessable_content
     end
   end
 

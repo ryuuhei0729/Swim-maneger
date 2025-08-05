@@ -24,7 +24,7 @@ class ObjectiveController < ApplicationController
     if @objective.save
       redirect_to objective_index_path, notice: "目標を設定しました。"
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 

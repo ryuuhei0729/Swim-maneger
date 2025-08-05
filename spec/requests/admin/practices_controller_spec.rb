@@ -91,7 +91,7 @@ RSpec.describe Admin::PracticesController, type: :request do
           post admin_create_practice_log_and_times_path, params: invalid_params
         }.not_to change(PracticeLog, :count)
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end

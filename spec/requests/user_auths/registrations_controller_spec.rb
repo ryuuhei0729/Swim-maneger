@@ -75,7 +75,7 @@ RSpec.describe UserAuths::RegistrationsController, type: :request do
 
       it '新規登録ページに戻る' do
         post user_auth_registration_path, params: invalid_params
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include('Sign up')
       end
     end
@@ -99,7 +99,7 @@ RSpec.describe UserAuths::RegistrationsController, type: :request do
 
       it 'エラーメッセージが表示される' do
         post user_auth_registration_path, params: mismatched_params
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
 
@@ -123,7 +123,7 @@ RSpec.describe UserAuths::RegistrationsController, type: :request do
 
       it 'エラーメッセージが表示される' do
         post user_auth_registration_path, params: duplicate_params
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
   end
@@ -195,7 +195,7 @@ RSpec.describe UserAuths::RegistrationsController, type: :request do
 
       it 'エラーメッセージが表示される' do
         patch user_auth_registration_path, params: invalid_password_params
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
 

@@ -47,10 +47,10 @@ class Api::V1::AdminController < Api::V1::BaseController
           }, :created)
         else
           user.destroy
-          render_error("ユーザー認証情報の作成に失敗しました", :unprocessable_entity, user_auth.errors)
+          render_error("ユーザー認証情報の作成に失敗しました", :unprocessable_content, user_auth.errors)
         end
       else
-        render_error("ユーザーの作成に失敗しました", :unprocessable_entity, user.errors)
+        render_error("ユーザーの作成に失敗しました", :unprocessable_content, user.errors)
       end
     end
   end
@@ -88,7 +88,7 @@ class Api::V1::AdminController < Api::V1::BaseController
         }
       }, :created)
     else
-      render_error("お知らせの作成に失敗しました", :unprocessable_entity, announcement.errors)
+      render_error("お知らせの作成に失敗しました", :unprocessable_content, announcement.errors)
     end
   end
 
@@ -107,7 +107,7 @@ class Api::V1::AdminController < Api::V1::BaseController
         }
       })
     else
-      render_error("お知らせの更新に失敗しました", :unprocessable_entity, announcement.errors)
+      render_error("お知らせの更新に失敗しました", :unprocessable_content, announcement.errors)
     end
   rescue ActiveRecord::RecordNotFound
     render_error("お知らせが見つかりません", :not_found)
@@ -159,7 +159,7 @@ class Api::V1::AdminController < Api::V1::BaseController
         }
       }, :created)
     else
-      render_error("スケジュールの登録に失敗しました", :unprocessable_entity, event.errors)
+      render_error("スケジュールの登録に失敗しました", :unprocessable_content, event.errors)
     end
   end
 
@@ -179,7 +179,7 @@ class Api::V1::AdminController < Api::V1::BaseController
         }
       })
     else
-      render_error("スケジュールの更新に失敗しました", :unprocessable_entity, event.errors)
+      render_error("スケジュールの更新に失敗しました", :unprocessable_content, event.errors)
     end
   rescue ActiveRecord::RecordNotFound
     render_error("スケジュールが見つかりません", :not_found)
@@ -297,7 +297,7 @@ class Api::V1::AdminController < Api::V1::BaseController
         end
       })
     else
-      render_error("練習設定が不完全です", :unprocessable_entity)
+      render_error("練習設定が不完全です", :unprocessable_content)
     end
   end
 
@@ -348,7 +348,7 @@ class Api::V1::AdminController < Api::V1::BaseController
         times_count: created_times.count
       }, :created)
     rescue ActiveRecord::RecordInvalid => e
-      render_error("練習データの保存に失敗しました", :unprocessable_entity, practice_log.errors)
+      render_error("練習データの保存に失敗しました", :unprocessable_content, practice_log.errors)
     end
   end
 
@@ -410,7 +410,7 @@ class Api::V1::AdminController < Api::V1::BaseController
         }
       })
     else
-      render_error("練習メニュー画像の更新に失敗しました", :unprocessable_entity, attendance_event.errors)
+      render_error("練習メニュー画像の更新に失敗しました", :unprocessable_content, attendance_event.errors)
     end
   rescue ActiveRecord::RecordNotFound
     render_error("イベントが見つかりません", :not_found)

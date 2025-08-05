@@ -8,6 +8,23 @@
     <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
+    
+    <script>
+      function clearAllStorage() {
+        // sessionStorageとlocalStorageを完全にクリア
+        sessionStorage.clear();
+        localStorage.clear();
+        
+        // ブラウザキャッシュをクリア（可能な範囲で）
+        if ('caches' in window) {
+          caches.keys().then(function(names) {
+            for (let name of names) {
+              caches.delete(name);
+            }
+          });
+        }
+      }
+    </script>
   </head>
 
   <body class="min-h-screen bg-gray-50">

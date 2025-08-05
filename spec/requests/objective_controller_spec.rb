@@ -81,7 +81,7 @@ RSpec.describe ObjectiveController, type: :request do
       expect {
         post objective_index_path, params: { objective: { attendance_event_id: nil, style_id: nil } }
       }.not_to change(Objective, :count)
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include('目標')
     end
 
@@ -91,7 +91,7 @@ RSpec.describe ObjectiveController, type: :request do
         post objective_index_path, params: params_without_time
       }.not_to change(Objective, :count)
       
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
       expect(response.body).to include('目標')
     end
   end

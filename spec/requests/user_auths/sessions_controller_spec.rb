@@ -60,7 +60,7 @@ RSpec.describe UserAuths::SessionsController, type: :request do
 
       it 'ログインに失敗し、ログインページに戻る' do
         post user_auth_session_path, params: invalid_params
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include('ログイン')
       end
 
@@ -82,7 +82,7 @@ RSpec.describe UserAuths::SessionsController, type: :request do
 
       it 'ログインに失敗し、ログインページに戻る' do
         post user_auth_session_path, params: non_existent_params
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include('ログイン')
       end
     end
@@ -99,7 +99,7 @@ RSpec.describe UserAuths::SessionsController, type: :request do
 
       it 'ログインに失敗し、ログインページに戻る' do
         post user_auth_session_path, params: empty_params
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
         expect(response.body).to include('ログイン')
       end
     end

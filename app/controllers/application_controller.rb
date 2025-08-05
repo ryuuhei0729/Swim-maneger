@@ -27,6 +27,6 @@ class ApplicationController < ActionController::Base
   end
 
   def render_unprocessable_entity(exception)
-    render file: "#{Rails.root}/app/views/errors/unprocessable_entity.html.erb", status: :unprocessable_entity, layout: "error"
+    render file: "#{Rails.root}/app/views/errors/unprocessable_entity.html.erb", status: :unprocessable_content, layout: "error"
   end
 end

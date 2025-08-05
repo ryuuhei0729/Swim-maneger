@@ -11,6 +11,19 @@ class UserAuths::SessionsController < Devise::SessionsController
     end
   end
 
+  def destroy
+    # セッションを完全にクリア
+    session.clear
+    
+    # Railsキャッシュをクリア（ユーザー固有のキャッシュがある場合）
+    if current_user_auth
+      Rails.cache.delete_matched("user_#{current_user_auth.id}_*")
+    end
+    
+    # Deviseの標準的なログアウト処理を実行
+    super
+  end
+
   protected
 
   def after_sign_in_path_for(resource)

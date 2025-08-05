@@ -24,7 +24,7 @@ class Admin::SchedulesController < Admin::BaseController
       redirect_to admin_schedule_path, notice: "スケジュールを登録しました。"
     else
       @events = Event.order(date: :desc).page(params[:page]).per(10)
-      render :index, status: :unprocessable_entity
+      render :index, status: :unprocessable_content
     end
   end
 
@@ -34,7 +34,7 @@ class Admin::SchedulesController < Admin::BaseController
       redirect_to admin_schedule_path, notice: "スケジュールを更新しました。"
     else
       @events = Event.order(date: :desc).page(params[:page]).per(10)
-      render :index, status: :unprocessable_entity
+      render :index, status: :unprocessable_content
     end
   end
 

@@ -66,14 +66,14 @@ class Admin::UsersController < Admin::BaseController
             custom_errors = standardize_error_messages(@user, @user_auth)
             
             respond_to do |format|
-              format.html { render :edit, status: :unprocessable_entity }
-              format.json { render json: { errors: custom_errors }, status: :unprocessable_entity }
+                      format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: { errors: custom_errors }, status: :unprocessable_content }
             end
           end
         else
           respond_to do |format|
-            format.html { render :edit, status: :unprocessable_entity }
-            format.json { render json: { errors: @user.errors.messages }, status: :unprocessable_entity }
+                    format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: { errors: @user.errors.messages }, status: :unprocessable_content }
           end
         end
       end
@@ -82,8 +82,8 @@ class Admin::UsersController < Admin::BaseController
       Rails.logger.error e.backtrace.join("\n")
       
       respond_to do |format|
-        format.html { render :edit, status: :unprocessable_entity }
-        format.json { render json: { error: "更新中にエラーが発生しました: #{e.message}" }, status: :unprocessable_entity }
+        format.html { render :edit, status: :unprocessable_content }
+        format.json { render json: { error: "更新中にエラーが発生しました: #{e.message}" }, status: :unprocessable_content }
       end
     end
   end
@@ -100,7 +100,7 @@ class Admin::UsersController < Admin::BaseController
       else
         respond_to do |format|
           format.html { redirect_to admin_users_path, alert: "ユーザーの削除に失敗しました。" }
-          format.json { render json: { success: false, message: "ユーザーの削除に失敗しました。" }, status: :unprocessable_entity }
+          format.json { render json: { success: false, message: "ユーザーの削除に失敗しました。" }, status: :unprocessable_content }
         end
       end
     rescue => e
@@ -133,7 +133,7 @@ class Admin::UsersController < Admin::BaseController
                 @user.errors.add(field, message)
               end
             end
-            render :create, status: :unprocessable_entity
+            render :create, status: :unprocessable_content
           end
         else
           # エラーメッセージを統一
@@ -143,7 +143,7 @@ class Admin::UsersController < Admin::BaseController
               @user.errors.add(field, message)
             end
           end
-          render :create, status: :unprocessable_entity
+          render :create, status: :unprocessable_content
         end
       end
     else

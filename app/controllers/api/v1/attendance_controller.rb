@@ -76,7 +76,7 @@ class Api::V1::AttendanceController < Api::V1::BaseController
         message: "出席状況を更新しました"
       })
     else
-      render_error("出席状況の更新中にエラーが発生しました", :unprocessable_entity, { details: errors })
+              render_error("出席状況の更新中にエラーが発生しました", :unprocessable_content, { details: errors })
     end
   end
 
