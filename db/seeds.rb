@@ -128,7 +128,7 @@ puts "Creating users..."
   # UserAuthの作成と紐付け
   UserAuth.create!(
     email: "director#{i+1}@test",
-    password: "123123",
+    password: "Pass123",
     user: user
   )
 
@@ -154,7 +154,7 @@ end
   # UserAuthの作成と紐付け
   UserAuth.create!(
     email: "coach#{i+1}@test",
-    password: "123123",
+    password: "Pass123",
     user: user
   )
 
@@ -180,7 +180,7 @@ end
   # UserAuthの作成と紐付け
   UserAuth.create!(
     email: "player#{i+1}@test",
-    password: "123123",
+    password: "Pass123",
     user: user
   )
 
