@@ -42,6 +42,42 @@ class Admin::CompetitionsController < Admin::BaseController
       )
       @records[entry.id] = record
     end
+
+    # 各選手のベストタイムを取得（保存された記録を除外）
+    @best_times = {}
+    @best_time_updated = {}
+    @entries.each do |entry|
+      # 現在の大会の記録を除外してベストタイムを計算
+      best_record = entry.user.records
+                        .where(style: entry.style)
+                        .where.not(id: @records[entry.id]&.id)
+                        .order(:time)
+                        .first
+      
+      if best_record
+        minutes = (best_record.time / 60).to_i
+        seconds = (best_record.time % 60).round(2)
+        if minutes > 0
+          @best_times[entry.id] = "#{minutes}:#{format('%05.2f', seconds)}"
+        else
+          @best_times[entry.id] = format('%.2f', seconds)
+        end
+      else
+        @best_times[entry.id] = nil
+      end
+      
+      # ベストタイム更新の判定
+      if @records[entry.id]&.time.present?
+        current_best = best_record&.time
+        if current_best.nil? || @records[entry.id].time < current_best
+          @best_time_updated[entry.id] = true
+        else
+          @best_time_updated[entry.id] = false
+        end
+      else
+        @best_time_updated[entry.id] = false
+      end
+    end
   rescue ActiveRecord::RecordNotFound
     redirect_to admin_competition_path, alert: "大会が見つかりません"
   end
@@ -72,7 +108,7 @@ class Admin::CompetitionsController < Admin::BaseController
         end
       end
       
-      redirect_to admin_competition_path, notice: "結果を保存しました"
+      redirect_to admin_competition_result_path(@competition), notice: "結果を保存しました"
     end
   rescue ActiveRecord::RecordNotFound
     redirect_to admin_competition_path, alert: "大会が見つかりません"

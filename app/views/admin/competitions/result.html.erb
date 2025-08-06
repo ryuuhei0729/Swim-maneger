@@ -26,13 +26,13 @@
     <div class="mb-6">
       <h3 class="text-lg font-semibold mb-4 text-gray-700">エントリー一覧と結果入力</h3>
       
-      <%= form_with url: admin_competition_save_results_path(@competition), method: :patch, local: true, class: "space-y-6" do |form| %>
-        <% @entries.group_by(&:style).each do |style, style_entries| %>
-          <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h4 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
-              <%= style.name_jp %>
-            </h4>
-            
+      <% @entries.group_by(&:style).each do |style, style_entries| %>
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
+          <h4 class="text-lg font-semibold text-gray-800 mb-4 border-b border-gray-200 pb-2">
+            <%= style.name_jp %>
+          </h4>
+          
+          <%= form_with url: admin_competition_save_results_path(@competition), method: :patch, local: true, class: "space-y-6" do |form| %>
             <div class="overflow-x-auto">
               <table class="min-w-full bg-white border border-gray-200 rounded-lg">
                 <thead class="bg-gray-100">
@@ -47,6 +47,9 @@
                       エントリータイム
                     </th>
                     <th class="px-4 py-2 border-b border-gray-200 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
+                      ベストタイム
+                    </th>
+                    <th class="px-4 py-2 border-b border-gray-200 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
                       記録タイム
                     </th>
                     <th class="px-4 py-2 border-b border-gray-200 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
@@ -59,7 +62,7 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                   <% style_entries.each do |entry| %>
-                    <tr data-entry-id="<%= entry.id %>">
+                    <tr data-entry-id="<%= entry.id %>" class="<%= @best_time_updated[entry.id] ? 'best-record-row bg-gradient-to-r from-yellow-50 to-orange-50 border-l-4 border-yellow-400' : '' %>">
                       <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                         <%= entry.user.name %>
                       </td>
@@ -70,10 +73,26 @@
                         <%= entry.formatted_entry_time %>
                       </td>
                       <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
-                        <%= form.text_field "record_time_#{entry.id}", 
-                            value: @records[entry.id] ? format_split_time(@records[entry.id].time) : "",
-                            placeholder: "00:00.00", 
-                            class: "border border-gray-300 rounded px-2 py-1 text-sm w-24" %>
+                        <% if @best_times[entry.id] %>
+                          <span class="text-blue-600 font-medium"><%= @best_times[entry.id] %></span>
+                        <% else %>
+                          <span class="text-gray-400">未記録</span>
+                        <% end %>
+                      </td>
+                      <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
+                        <div class="flex items-center space-x-2">
+                          <%= form.text_field "record_time_#{entry.id}", 
+                              value: @records[entry.id] ? format_split_time(@records[entry.id].time) : "",
+                              placeholder: "00:00.00", 
+                              class: "border border-gray-300 rounded px-2 py-1 text-sm w-24" %>
+                          <% if @best_time_updated[entry.id] %>
+                            <div class="best-record-badge bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold text-xs px-2 py-0.5 rounded-full shadow-lg border-2 border-yellow-400">
+                              <span class="flex items-center">
+                                Best Record!!
+                              </span>
+                            </div>
+                          <% end %>
+                        </div>
                       </td>
                       <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-900">
                         <div class="split-times-container" data-entry-id="<%= entry.id %>">
@@ -123,12 +142,12 @@
                 </tbody>
               </table>
             </div>
-          </div>
-        <% end %>
-        
-        <div class="flex justify-end space-x-4">
-          <%= form.submit "結果を保存", 
-              class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200" %>
+            
+            <div class="flex justify-end">
+              <%= form.submit "保存", 
+                  class: "bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200" %>
+            </div>
+          <% end %>
         </div>
       <% end %>
     </div>
@@ -186,5 +205,26 @@ document.addEventListener('DOMContentLoaded', function() {
       this.parentElement.remove();
     });
   });
+
+  // ベストタイム更新行の特別な効果
+  document.querySelectorAll('.best-record-row').forEach(row => {
+    // 行全体にキラキラ効果を追加
+    row.style.boxShadow = '0 0 10px rgba(251, 191, 36, 0.5)';
+    
+    // 選手名を強調表示
+    const playerName = row.querySelector('td:first-child');
+    if (playerName) {
+      playerName.innerHTML = `<span class="font-bold text-yellow-600">${playerName.textContent}</span>`;
+    }
+  });
 });
+
+// カスタムCSSアニメーション
+const style = document.createElement('style');
+style.textContent = `
+  .best-record-row {
+    transition: all 0.3s ease;
+  }
+`;
+document.head.appendChild(style);
 </script> 
