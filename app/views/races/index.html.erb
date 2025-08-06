@@ -240,7 +240,7 @@
     </div>
 
     <!-- 種目選択 -->
-    <div id="styleSelectionSection" class="hidden">
+    <div id="styleSelectionSection">
       <label class="block text-sm font-medium text-gray-700 mb-4">エントリーする種目を選択してください</label>
       <div class="space-y-4">
         <% @all_styles.group_by(&:style).each do |style_type, styles| %>
@@ -305,16 +305,10 @@ function toggleTimeInput(styleId) {
 
 // 大会選択時に現在のエントリー情報を取得して入力
 function loadCurrentEntries(competitionId) {
-  const styleSelectionSection = document.getElementById('styleSelectionSection');
-  
   if (!competitionId) {
     resetEntryForm();
-    styleSelectionSection.classList.add('hidden');
     return;
   }
-  
-  // 種目選択欄を表示
-  styleSelectionSection.classList.remove('hidden');
   
   fetch(`/races/current_entries/${competitionId}`)
     .then(response => response.json())
@@ -372,17 +366,9 @@ function openEntryModal(competitionId, competitionTitle, competitionDate) {
 }
 
 function resetEntryForm() {
-  // フォームをリセット（セレクトボックスは除外）
+  // フォームをリセット
   const form = document.getElementById('entryForm');
-  const competitionSelect = form.querySelector('select[name="competition_id"]');
-  const selectedCompetition = competitionSelect ? competitionSelect.value : '';
-  
   form.reset();
-  
-  // セレクトボックスの選択状態を復元
-  if (competitionSelect && selectedCompetition) {
-    competitionSelect.value = selectedCompetition;
-  }
   
   // チェックボックスとタイム入力をリセット
   document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
@@ -751,12 +737,6 @@ if (!window.recordModalInitialized) {
                 input.disabled = true;
                 input.value = '';
               });
-              
-              // 種目選択欄を非表示にする
-              const styleSelectionSection = document.getElementById('styleSelectionSection');
-              if (styleSelectionSection) {
-                styleSelectionSection.classList.add('hidden');
-              }
             } else {
               // モーダルが閉じられた時にグローバル変数をクリア
               window.currentCompetitionInfo = null;
