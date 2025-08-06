@@ -62,6 +62,26 @@ class User < ApplicationRecord
     best_notes
   end
 
+  # 指定した種目のベストタイムを取得するメソッド
+  def best_time_for_style(style)
+    best_record = records.where(style: style).order(:time).first
+    best_record&.time
+  end
+
+  # 指定した種目のベストタイムをフォーマットして取得するメソッド
+  def formatted_best_time_for_style(style)
+    best_time = best_time_for_style(style)
+    return nil unless best_time
+    
+    minutes = (best_time / 60).to_i
+    seconds = (best_time % 60).round(2)
+    if minutes > 0
+      "#{minutes}:#{format('%05.2f', seconds)}"
+    else
+      format('%.2f', seconds)
+    end
+  end
+
   private
 
   def birthday_cannot_be_in_future
