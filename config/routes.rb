@@ -85,8 +85,10 @@ Rails.application.routes.draw do
   get "practice", to: "practice#index", as: :practice
   get "races", to: "races#index", as: :races
   
-  # エントリー提出
+  # エントリー提出・削除・取得
   post "races/entry", to: "races#submit_entry", as: "submit_entry"
+  delete "races/entry/:id", to: "races#delete_entry", as: "delete_entry"
+  get "races/current_entries/:competition_id", to: "races#get_current_entries", as: "get_current_entries"
 
   # 目標管理
   get "objective", to: "objective#index", as: :objective_index

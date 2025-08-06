@@ -14,6 +14,24 @@ class RacesController < ApplicationController
       end
     end.sort_by { |(title, date), _| date }.reverse
 
+    # 将来の大会を取得（エントリーの有無に関係なく）
+    @future_events = Competition.where("date >= ?", Date.current)
+                               .order(:date)
+                               .includes(:entries)
+
+    # 大会ごとにエントリー情報を整理
+    @events_with_entries = @future_events.map do |event|
+      user_entries = event.entries.where(user: @user)
+      is_closed = event.entry_status == 'closed' || event.date < Date.current
+      
+      {
+        event: event,
+        entries: user_entries,
+        is_closed: is_closed,
+        has_entries: user_entries.any?
+      }
+    end
+
     # エントリー可能な大会を取得（将来の大会のみ、エントリー受付中のみ）
     @available_competitions = Competition.where("date >= ?", Date.current)
                                          .where(entry_status: :open)
@@ -45,8 +63,12 @@ class RacesController < ApplicationController
 
     begin
       Entry.transaction do
+        # その大会の既存エントリーを全て削除
+        deleted_count = @user.entries.where(attendance_event: @event).count
+        @user.entries.where(attendance_event: @event).destroy_all
+        
+        # 新規エントリーを作成
         success_count = 0
-
         selected_styles.each do |style_id, time_str|
           next if time_str.blank?
 
@@ -55,33 +77,67 @@ class RacesController < ApplicationController
           # 時間を秒に変換
           entry_time = parse_time_to_seconds(time_str)
 
-          # 既存のエントリーがあるかチェック
-          existing_entry = Entry.find_by(user: @user, attendance_event: @event, style: style)
-
-          if existing_entry
-            existing_entry.update!(entry_time: entry_time)
-          else
-            Entry.create!(
-              user: @user,
-              attendance_event: @event,
-              style: style,
-              entry_time: entry_time
-            )
-          end
+          # 新規エントリーを作成
+          Entry.create!(
+            user: @user,
+            attendance_event: @event,
+            style: style,
+            entry_time: entry_time
+          )
 
           success_count += 1
         end
 
-        render json: {
-          success: true,
-          message: "#{success_count}種目のエントリーを提出しました。"
-        }
+        # 結果メッセージを表示
+        if deleted_count > 0
+          render json: {
+            success: true,
+            message: "#{success_count}種目のエントリーを提出しました。"
+          }
+        else
+          render json: {
+            success: true,
+            message: "#{success_count}種目のエントリーを提出しました。"
+          }
+        end
       end
     rescue ActiveRecord::RecordInvalid => e
       render json: { success: false, message: "エントリーに失敗しました: #{e.message}" }
     rescue => e
       render json: { success: false, message: "エラーが発生しました: #{e.message}" }
     end
+  end
+
+  def delete_entry
+    @user = current_user_auth.user
+    @entry = @user.entries.find(params[:id])
+
+    if @entry.destroy
+      render json: { success: true, message: "エントリーを削除しました。" }
+    else
+      render json: { success: false, message: "エントリーの削除に失敗しました。" }
+    end
+  rescue ActiveRecord::RecordNotFound
+    render json: { success: false, message: "エントリーが見つかりません。" }
+  end
+
+  def get_current_entries
+    @user = current_user_auth.user
+    competition_id = params[:competition_id]
+    
+    @entries = @user.entries.includes(:style)
+                    .where(attendance_event_id: competition_id)
+    
+    entries_data = @entries.map do |entry|
+      {
+        style_id: entry.style_id,
+        entry_time: entry.formatted_entry_time
+      }
+    end
+    
+    render json: { entries: entries_data }
+  rescue => e
+    render json: { entries: [] }
   end
 
   private
