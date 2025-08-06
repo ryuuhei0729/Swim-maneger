@@ -219,9 +219,28 @@ class AttendanceController < ApplicationController
   end
 
   def event_status
-    @event = AttendanceEvent.find(params[:event_id])
-    @attendance = @event.attendances.includes(:user)
-    render partial: "shared/event_attendance_status", locals: { event: @event, attendance: @attendance }
+    # AttendanceEventまたはCompetitionを取得
+    @event = Event.find(params[:event_id])
+    
+    if @event.is_a?(Competition)
+      # Competitionの場合は出席情報とエントリー情報を取得
+      @attendance = @event.attendances.includes(:user)
+      @entries = @event.entries.includes(:user, :style)
+      render partial: "shared/event_attendance_status", locals: { 
+        event: @event, 
+        attendance: @attendance, 
+        entries: @entries,
+        is_competition: true 
+      }
+    else
+      # AttendanceEventの場合は出席情報のみを取得
+      @attendance = @event.attendances.includes(:user)
+      render partial: "shared/event_attendance_status", locals: { 
+        event: @event, 
+        attendance: @attendance,
+        is_competition: false 
+      }
+    end
   end
 
   private
