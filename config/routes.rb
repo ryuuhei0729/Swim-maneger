@@ -176,13 +176,12 @@ Rails.application.routes.draw do
   patch "admin/attendance/update", to: "admin/attendances#save_update", as: "save_admin_attendance_update"
 
   # [管理者]大会管理
-  get "admin/competition", to: "admin/competitions#index", as: "admin_competition"
-  patch "admin/competition/:id/entry_status", to: "admin/competitions#update_entry_status", as: "admin_update_competition_entry_status"
-  get "admin/competition/result/:id", to: "admin/competitions#result", as: "admin_competition_result"
-  
-  # [管理者]エントリー管理
   post "admin/competition/entry/start", to: "admin/competitions#start_entry_collection", as: "admin_start_entry_collection"
-  get "admin/competition/entry/:event_id", to: "admin/competitions#show_entries", as: "admin_show_entries"
+  get "admin/competition/entry/:competition_id", to: "admin/competitions#show_entries", as: "admin_show_entries"
+  get "admin/competition/result/:id", to: "admin/competitions#result", as: "admin_competition_result"
+  patch "admin/competition/:id/entry_status", to: "admin/competitions#update_entry_status", as: "admin_update_competition_entry_status"
+  patch "admin/competition/:id/save_results", to: "admin/competitions#save_results", as: "admin_competition_save_results"
+  get "admin/competition", to: "admin/competitions#index", as: "admin_competition"
 
   # エラーページ
   match "/404", to: "errors#not_found", via: :all
