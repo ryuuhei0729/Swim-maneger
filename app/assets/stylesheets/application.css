@@ -19,6 +19,19 @@ button {
   cursor: pointer;
 }
 
+/* カスタムレスポンシブクラス */
+@media (min-width: 768px) {
+  .md\:show-text {
+    display: inline !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .md\:show-text {
+    display: none !important;
+  }
+}
+
 /* app/assets/stylesheets/application.css */
 
 .modal {
