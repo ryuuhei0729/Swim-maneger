@@ -483,22 +483,285 @@ users.each { |user| user.user_auth.email } # 追加クエリが発生
 - バックアップ: 日次
 - 障害復旧時間: 4時間以内
 
-## 15. 今後の開発計画
+## 15. 追加ルール・ガイドライン
 
-### 15.1 短期計画（1-3ヶ月）
-1. 既存機能のバグ修正・改善
-2. UI/UXの改善
-3. モバイル対応の強化
+### 15.1 コード品質・保守性
 
-### 15.2 中期計画（3-6ヶ月）
-1. 追加機能の実装（健康管理、栄養管理など）
-2. データ分析機能の強化
-3. 通知機能の実装
+#### 15.1.1 コメント・ドキュメント
+- **必須コメント**: 複雑なビジネスロジックには必ずコメントを記述
+- **APIドキュメント**: 新規API作成時はSwagger/OpenAPI形式でドキュメント化
+- **requirements更新**: 新機能追加時はrequirements.mdを更新
 
-### 15.3 長期計画（6ヶ月以上）
-1. AI機能の導入
-2. 外部システムとの連携
-3. スケーラビリティの向上
+```ruby
+# 良い例
+class PracticeLog < ApplicationRecord
+  # 練習記録の作成時に自動的に練習時間を計算
+  # 泳法と距離から標準的な練習時間を算出
+  before_create :calculate_practice_duration
+  
+  private
+  
+  def calculate_practice_duration
+    # 泳法別の標準時間（分/100m）を定義
+    standard_times = {
+      'freestyle' => 2.5,
+      'backstroke' => 3.0,
+      'breaststroke' => 3.5,
+      'butterfly' => 3.0
+    }
+    
+    time_per_100m = standard_times[style] || 3.0
+    self.duration = (distance / 100.0 * time_per_100m).round
+  end
+end
+```
+
+#### 15.1.2 エラーハンドリング
+- **例外処理**: 予期しないエラーは適切にキャッチしてログ出力
+- **ユーザーフレンドリー**: エラーメッセージは一般ユーザーが理解できる内容
+- **ログレベル**: 適切なログレベル（debug, info, warn, error）の使用
+
+```ruby
+# 良い例
+def create_practice_log
+  @practice_log = PracticeLog.new(practice_log_params)
+  
+  if @practice_log.save
+    redirect_to practice_logs_path, notice: '練習記録を作成しました'
+  else
+    Rails.logger.error "練習記録作成失敗: #{@practice_log.errors.full_messages}"
+    render :new, status: :unprocessable_entity
+  end
+rescue => e
+  Rails.logger.error "練習記録作成中にエラーが発生: #{e.message}"
+  redirect_to practice_logs_path, alert: '練習記録の作成に失敗しました。しばらく時間をおいて再度お試しください。'
+end
+```
+
+### 15.2 セキュリティ強化ルール
+
+#### 15.2.1 データ保護
+- **個人情報**: 選手の個人情報は暗号化して保存
+- **アクセスログ**: 重要な操作は必ずログに記録
+- **データ削除**: 物理削除ではなく論理削除を基本とする
+- **バックアップ暗号化**: バックアップデータも暗号化
+
+```ruby
+# 良い例
+class User < ApplicationRecord
+  # 論理削除の実装
+  scope :active, -> { where(deleted_at: nil) }
+  
+  def soft_delete
+    update(deleted_at: Time.current)
+  end
+  
+  # 個人情報の暗号化
+  encrypts :phone_number, :emergency_contact
+end
+```
+
+#### 15.2.2 認証・認可の強化
+- **セッションタイムアウト**: 30分でセッションタイムアウト
+- **パスワードポリシー**: 8文字以上、英数字混在必須
+- **ログイン試行制限**: 5回失敗でアカウントロック
+- **二段階認証**: 管理者アカウントは二段階認証必須
+
+```ruby
+# 良い例
+class UserAuth < ApplicationRecord
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :validatable,
+         :lockable, :timeoutable, :trackable
+  
+  # パスワードポリシー
+  validates :password, 
+    length: { minimum: 8 },
+    format: { 
+      with: /\A(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      message: 'は英大文字、英小文字、数字を含む必要があります'
+    }
+  
+  # 管理者は二段階認証必須
+  def require_two_factor?
+    user.user_type.in?(%w[coach director manager])
+  end
+end
+```
+
+### 15.3 パフォーマンス最適化ルール
+
+#### 15.3.1 データベース最適化
+- **クエリ制限**: 1回のクエリで取得するレコード数は1000件以下
+- **インデックス戦略**: 検索頻度の高いカラムには必ずインデックス
+- **バッチ処理**: 大量データ処理はバックグラウンドジョブで実行
+- **キャッシュ戦略**: 頻繁にアクセスされるデータはキャッシュ
+
+```ruby
+# 良い例
+class PracticeLog < ApplicationRecord
+  # 検索用インデックス
+  scope :by_date_range, ->(start_date, end_date) {
+    where(created_at: start_date.beginning_of_day..end_date.end_of_day)
+  }
+  
+  # パフォーマンス最適化
+  scope :with_user_info, -> {
+    includes(:user).select('practice_logs.*, users.name as user_name')
+  }
+  
+  # バッチ処理用
+  def self.bulk_create_from_csv(csv_data)
+    PracticeLog.transaction do
+      csv_data.each_slice(100) do |batch|
+        PracticeLog.create!(batch)
+      end
+    end
+  end
+end
+```
+
+#### 15.3.2 フロントエンド最適化
+- **画像最適化**: 画像はWebP形式で提供、適切なサイズにリサイズ
+- **JavaScript最適化**: 非同期処理の活用、不要なリクエストの削減
+- **CSS最適化**: 未使用CSSの削除、クリティカルCSSの分離
+
+### 15.4 運用・監視ルール
+
+#### 15.4.1 ログ管理
+- **構造化ログ**: JSON形式でログ出力
+- **ログローテーション**: 日次でログローテーション
+- **監視アラート**: エラー率5%以上でアラート
+- **パフォーマンス監視**: レスポンス時間3秒以上でアラート
+
+```ruby
+# 良い例
+class ApplicationController < ActionController::Base
+  around_action :log_request
+  
+  private
+  
+  def log_request
+    start_time = Time.current
+    yield
+    duration = Time.current - start_time
+    
+    Rails.logger.info({
+      method: request.method,
+      path: request.path,
+      duration: duration,
+      status: response.status,
+      user_id: current_user&.id
+    }.to_json)
+  end
+end
+```
+
+#### 15.4.2 バックアップ・復旧
+- **自動バックアップ**: 日次で自動バックアップ実行
+- **復旧テスト**: 月次で復旧テストを実施
+- **データ保持**: ログデータは1年間保持
+- **災害対策**: 複数リージョンでのバックアップ
+
+### 15.5 開発プロセスルール
+
+#### 15.5.1 ブランチ戦略
+- **Git Flow**: feature → develop → main の流れ
+- **プルリクエスト**: 全機能追加はプルリクエスト必須
+- **コードレビュー**: 最低1名のレビュー必須
+- **テストカバレッジ**: 新機能は80%以上のカバレッジ必須
+
+#### 15.5.2 リリース管理
+- **セマンティックバージョニング**: MAJOR.MINOR.PATCH形式
+- **リリースノート**: 全リリースでリリースノート作成
+- **段階的リリース**: 重要な変更は段階的にリリース
+- **ロールバック計画**: リリース前のロールバック計画必須
+
+### 15.6 アクセシビリティ・UXルール
+
+#### 15.6.1 アクセシビリティ
+- **WCAG 2.1準拠**: AAレベルでの準拠
+- **キーボードナビゲーション**: 全機能をキーボードで操作可能
+- **スクリーンリーダー対応**: 適切なaria属性の設定
+- **色覚異常対応**: 色だけでなく形状でも情報を表現
+
+```erb
+<!-- 良い例 -->
+<button class="btn btn-primary" 
+        aria-label="練習記録を追加"
+        role="button">
+  <i class="fas fa-plus" aria-hidden="true"></i>
+  追加
+</button>
+```
+
+#### 15.6.2 ユーザビリティ
+- **レスポンシブデザイン**: 全デバイスで適切に表示
+- **ローディング状態**: 非同期処理中は適切なローディング表示
+- **エラー表示**: 分かりやすいエラーメッセージ
+- **成功フィードバック**: 操作成功時の適切なフィードバック
+
+### 15.7 国際化・ローカライゼーション
+
+#### 15.7.1 多言語対応
+- **日本語優先**: 日本語をデフォルト言語とする
+- **英語対応**: 将来的な英語対応を考慮した設計
+- **日付形式**: 日本の慣習に合わせた日付表示
+- **数値形式**: 日本の慣習に合わせた数値表示
+
+```ruby
+# 良い例
+class ApplicationController < ActionController::Base
+  before_action :set_locale
+  
+  private
+  
+  def set_locale
+    I18n.locale = :ja # デフォルトは日本語
+  end
+end
+```
+
+### 15.8 データ管理ルール
+
+#### 15.8.1 データ整合性
+- **外部キー制約**: データベースレベルでの整合性確保
+- **バリデーション**: アプリケーションレベルでの整合性チェック
+- **データクレンジング**: 定期的なデータクレンジング実行
+- **重複チェック**: 重複データの自動検出・処理
+
+#### 15.8.2 データライフサイクル
+- **データ保持期間**: 選手データは引退後5年間保持
+- **アーカイブ**: 古いデータはアーカイブテーブルに移動
+- **完全削除**: 7年経過後は物理削除
+- **データエクスポート**: 選手のデータエクスポート機能提供
+
+### 15.9 コンプライアンス・法的要件
+
+#### 15.9.1 個人情報保護
+- **GDPR準拠**: 欧州の個人情報保護法への準拠
+- **個人情報保護法**: 日本の個人情報保護法への準拠
+- **同意管理**: 個人情報利用の同意管理
+- **データ主体の権利**: データの削除・訂正権の実装
+
+#### 15.9.2 スポーツ関連法規
+- **アンチドーピング**: アンチドーピング関連の記録保持
+- **未成年保護**: 未成年選手の特別な保護措置
+- **健康管理**: 選手の健康管理データの適切な取り扱い
+
+### 15.10 緊急時対応ルール
+
+#### 15.10.1 障害対応
+- **障害レベル定義**: レベル1〜3の障害レベル定義
+- **エスカレーション**: 障害発生時のエスカレーション手順
+- **復旧手順**: 各障害レベル別の復旧手順
+- **顧客対応**: 障害時の顧客への適切な情報提供
+
+#### 15.10.2 セキュリティインシデント
+- **インシデント定義**: セキュリティインシデントの定義
+- **報告手順**: インシデント発見時の報告手順
+- **対応手順**: インシデント対応の手順
+- **再発防止**: インシデント後の再発防止策
 
 ---
 

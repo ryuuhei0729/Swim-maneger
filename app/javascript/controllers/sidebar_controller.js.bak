@@ -1,0 +1,101 @@
+import { Controller } from "@hotwired/stimulus"
+
+export default class extends Controller {
+  static targets = ["sidebar", "overlay", "hamburger"]
+  static classes = ["open", "closed"]
+
+  connect() {
+    console.log("Sidebar controller connected")
+    console.log("Window width:", window.innerWidth)
+    console.log("Sidebar target:", this.sidebarTarget)
+    console.log("Hamburger target:", this.hamburgerTarget)
+    
+    // 初期状態ではサイドバーを閉じる（モバイル時）
+    if (window.innerWidth < 768) {
+      console.log("Mobile view - closing sidebar")
+      this.close()
+    } else {
+      // デスクトップ時は開く
+      console.log("Desktop view - opening sidebar")
+      this.open()
+    }
+    
+    // ウィンドウリサイズイベントのリスナーを追加
+    window.addEventListener('resize', this.handleResize.bind(this))
+    
+    // ESCキーイベントのリスナーを追加
+    document.addEventListener('keydown', this.closeOnEscape.bind(this))
+    
+    // グローバルイベントリスナーを追加
+    console.log("Adding global event listener for sidebar:toggle")
+    document.addEventListener('sidebar:toggle', this.toggle.bind(this))
+    console.log("Global event listener added")
+  }
+
+  disconnect() {
+    // イベントリスナーをクリーンアップ
+    window.removeEventListener('resize', this.handleResize.bind(this))
+    document.removeEventListener('keydown', this.closeOnEscape.bind(this))
+    document.removeEventListener('sidebar:toggle', this.toggle.bind(this))
+  }
+
+  toggle(event) {
+    console.log("Toggle called")
+    console.log("Event:", event)
+    console.log("Is open:", this.isOpen())
+    if (this.isOpen()) {
+      this.close()
+    } else {
+      this.open()
+    }
+  }
+
+  open() {
+    console.log("Opening sidebar")
+    this.sidebarTarget.classList.remove(this.closedClass)
+    this.sidebarTarget.classList.add(this.openClass)
+    this.overlayTarget.classList.remove('hidden')
+    document.body.style.overflow = 'hidden'
+  }
+
+  close() {
+    console.log("Closing sidebar")
+    this.sidebarTarget.classList.remove(this.openClass)
+    this.sidebarTarget.classList.add(this.closedClass)
+    this.overlayTarget.classList.add('hidden')
+    document.body.style.overflow = ''
+  }
+
+  isOpen() {
+    return this.sidebarTarget.classList.contains(this.openClass)
+  }
+
+  // オーバーレイクリックでサイドバーを閉じる
+  closeOnOverlayClick() {
+    this.close()
+  }
+
+  // ESCキーでサイドバーを閉じる
+  closeOnEscape(event) {
+    if (event.key === 'Escape' && this.isOpen()) {
+      this.close()
+    }
+  }
+
+  // ウィンドウリサイズ時の処理
+  handleResize() {
+    console.log("Window resized to:", window.innerWidth)
+    if (window.innerWidth >= 768) {
+      // デスクトップサイズでは常に開く
+      console.log("Desktop size - opening sidebar")
+      this.sidebarTarget.classList.remove(this.closedClass)
+      this.sidebarTarget.classList.add(this.openClass)
+      this.overlayTarget.classList.add('hidden')
+      document.body.style.overflow = ''
+    } else {
+      // モバイルサイズでは閉じる
+      console.log("Mobile size - closing sidebar")
+      this.close()
+    }
+  }
+}
