@@ -13,17 +13,21 @@ export default class extends Controller {
       this.open()
     }
     
+    // ハンドラーを一度だけバインドして保存
+    this.boundHandleResize = this.handleResize.bind(this)
+    this.boundToggle = this.toggle.bind(this)
+    
     // ウィンドウリサイズイベントのリスナーを追加
-    window.addEventListener('resize', this.handleResize.bind(this))
+    window.addEventListener('resize', this.boundHandleResize)
     
     // グローバルイベントリスナーを追加
-    document.addEventListener('sidebar:toggle', this.toggle.bind(this))
+    document.addEventListener('sidebar:toggle', this.boundToggle)
   }
 
   disconnect() {
     // イベントリスナーをクリーンアップ
-    window.removeEventListener('resize', this.handleResize.bind(this))
-    document.removeEventListener('sidebar:toggle', this.toggle.bind(this))
+    window.removeEventListener('resize', this.boundHandleResize)
+    document.removeEventListener('sidebar:toggle', this.boundToggle)
   }
 
   toggle(event) {
