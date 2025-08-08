@@ -5,13 +5,8 @@ export default class extends Controller {
   static classes = ["open", "closed"]
 
   connect() {
-    // 初期状態ではサイドバーを閉じる（モバイル時）
-    if (window.innerWidth < 768) {
-      this.close()
-    } else {
-      // デスクトップ時は開く
-      this.open()
-    }
+    // 初期化
+    this.initializeSidebar()
     
     // ハンドラーを一度だけバインドして保存
     this.boundHandleResize = this.handleResize.bind(this)
@@ -22,6 +17,11 @@ export default class extends Controller {
     
     // グローバルイベントリスナーを追加
     document.addEventListener('sidebar:toggle', this.boundToggle)
+    
+    // ページ読み込み完了後に再度状態を確認
+    setTimeout(() => {
+      this.initializeSidebar()
+    }, 100)
   }
 
   disconnect() {
@@ -81,6 +81,16 @@ export default class extends Controller {
     } else {
       // モバイルサイズでは閉じる
       this.close()
+    }
+  }
+
+  // ページ読み込み時の初期化を確実にする
+  initializeSidebar() {
+    const isMobile = window.innerWidth < 768
+    if (isMobile) {
+      this.close()
+    } else {
+      this.open()
     }
   }
 }
