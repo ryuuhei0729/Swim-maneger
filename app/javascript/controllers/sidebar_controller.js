@@ -45,7 +45,10 @@ export default class extends Controller {
     if (this.hasOverlayTarget) {
       this.overlayTarget.classList.remove('hidden')
     }
-    document.body.style.overflow = 'hidden'
+    // モバイル時のみoverflowをhiddenにする
+    if (window.innerWidth < 768) {
+      document.body.style.overflow = 'hidden'
+    }
   }
 
   close() {
@@ -55,7 +58,10 @@ export default class extends Controller {
     if (this.hasOverlayTarget) {
       this.overlayTarget.classList.add('hidden')
     }
-    document.body.style.overflow = ''
+    // モバイル時のみoverflowをリセットする
+    if (window.innerWidth < 768) {
+      document.body.style.overflow = ''
+    }
   }
 
   isOpen() {
@@ -77,6 +83,7 @@ export default class extends Controller {
       if (this.hasOverlayTarget) {
         this.overlayTarget.classList.add('hidden')
       }
+      // デスクトップサイズでは確実にスクロールを有効にする
       document.body.style.overflow = ''
     } else {
       // モバイルサイズでは閉じる
@@ -91,6 +98,8 @@ export default class extends Controller {
       this.close()
     } else {
       this.open()
+      // デスクトップサイズでは確実にスクロールを有効にする
+      document.body.style.overflow = ''
     }
   }
 }
