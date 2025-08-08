@@ -1,5 +1,30 @@
 # 水泳選手マネジメントシステム 要件定義書
 
+## 0. 開発固定前提（AIプロンプト参照用）
+本プロジェクトで「毎回共通」の前提。個別タスクの指示では、差分や上書きが必要な事項のみ記載すれば良い。
+
+- ランタイム/フレームワーク: Ruby on Rails 8.0（Ruby はチーム標準の安定版）
+- データベース: PostgreSQL
+- 認証: Devise（Web: Cookie セッション, API: セッション/トークン拡張）。API トークンは `user_auths.authentication_token` を利用
+- 認可: Pundit（ポリシーで一元管理）
+- フロント: ERB + Turbo + Stimulus + Tailwind CSS
+- ファイルアップロード: Active Storage（本番 S3 / 開発 Disk）
+- バックグラウンド: Active Job + Sidekiq（Redis）
+- キャッシュ: Redis Cache Store
+- ページネーション: Kaminari
+- シリアライザ: Jbuilder（または AMS）。原則 Jbuilder を優先
+- ルーティング方針: Web（既定）/ 管理 `/admin` 
+- コーディング規約: `requirements.md` の「13. Rails開発ベストプラクティス」に準拠（命名/設計/API/セキュリティ/性能）
+- ディレクトリ/アーキ構成: `architecture.md` に準拠
+- 実行/開発コマンド（標準）: `bin/dev`（開発起動）, `bin/rails spec`（テスト）
+- 禁止/制約（共通）:
+  - 既存マイグレーションの書換え禁止（新規マイグレーションで対応）
+  - 破壊的な API 変更禁止（後方互換）
+  - パッケージの無断バージョンアップ禁止
+  - 資格情報の直書き/コミット禁止（`credentials`/環境変数を使用）
+  - 既存 UI の DOM 構造/Tailwind クラス大幅変更は要相談
+
+
 ## 1. システム概要
 
 ### 1.1 システム名
