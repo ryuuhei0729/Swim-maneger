@@ -83,7 +83,7 @@
                         <div class="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
                           <div class="flex items-center space-x-2">
                             <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              <%= entry.style.name_jp %>
+                              <%= entry.style.name %>
                             </span>
                             <span class="text-sm font-semibold text-gray-900">
                               <%= entry.formatted_entry_time %>
@@ -189,7 +189,7 @@
                       <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer" data-action="click->modal#openRecord" data-record='<%= record.to_json(include: { style: { only: [:name_jp, :distance, :style] }, attendance_event: { only: [:title, :date] }, split_times: {} }) %>'>
                         <div class="flex items-center space-x-3">
                           <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
-                            <%= record.style.name_jp %>
+                            <%= record.style.name %>
                           </span>
                           <span class="text-lg font-semibold text-gray-900">
                             <%= format_time(record.time) %>

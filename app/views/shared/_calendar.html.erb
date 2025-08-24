@@ -6,7 +6,7 @@
   birthdays_by_date = local_assigns[:birthdays_by_date] || @birthdays_by_date
   user_attendance_by_event = local_assigns[:user_attendance_by_event] || @user_attendance_by_event
 %>
-<div class="bg-white shadow-lg rounded-xl overflow-hidden" id="calendar" data-controller="calendar">
+<div class="bg-white shadow-lg md:rounded-xl overflow-hidden" id="calendar" data-controller="calendar">
   <%= hidden_field_tag :current_month, current_month.strftime("%Y-%m-%d"), data: { calendar_target: "currentMonth" } %>
   
   <%# カレンダーヘッダー %>
@@ -32,9 +32,9 @@
   </div>
 
   <%# カレンダー本体 %>
-  <div class="p-4">
+  <div class="p-0 md:p-4">
     <%# 曜日のヘッダー %>
-    <div class="grid grid-cols-7 gap-1 mb-2">
+    <div class="grid grid-cols-7 gap-0 md:gap-1 mb-2">
       <% %w[日 月 火 水 木 金 土].each do |day| %>
         <div class="text-center py-2 font-medium text-gray-600 text-sm">
           <%= day %>
@@ -43,7 +43,7 @@
     </div>
 
     <%# カレンダーの日付 %>
-    <div class="grid grid-cols-7 gap-1">
+    <div class="grid grid-cols-7 gap-0 md:gap-1">
       <% calendar_start = current_month.beginning_of_month.beginning_of_week(:sunday) %>
       <% calendar_end = current_month.end_of_month.end_of_week(:sunday) %>
       <% holidays = HolidayJp.between(calendar_start, calendar_end).index_by(&:date) %>
@@ -82,7 +82,7 @@
           is_current_month ? 'text-gray-900' : 'text-gray-400'
         end %>
         
-        <div class="min-h-[100px] p-2 border rounded-lg <%= bg_color %> <%= is_today ? 'ring-2 ring-blue-500' : '' %> hover:shadow-md transition-shadow duration-200">
+        <div class="min-h-[100px] p-1 md:p-2 border border-gray-200 md:border-gray-800 md:rounded-lg <%= bg_color %> <%= is_today ? 'ring-2 ring-blue-500' : '' %> hover:shadow-md transition-shadow duration-200">
           <div class="flex justify-between items-start">
             <div class="text-sm font-medium <%= text_color %> <%= is_today ? 'bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center' : '' %>">
               <%= date.day %>
@@ -100,9 +100,9 @@
             <div class="mt-1 space-y-1">
               <% birthdays.each do |user| %>
                 <div class="flex items-center space-x-1">
-                  <span class="text-pink-500">🎂</span>
-                  <span class="text-xs text-pink-700 bg-pink-100 px-1.5 py-0.5 rounded-full">
-                    <%= user.name %>の誕生日
+                  
+                  <span class="text-[8px] md:text-xs text-pink-700 bg-pink-100 px-1 py-0.5 md:px-1.5 rounded-full">
+                  🎂<%= user.name %>の誕生日
                   </span>
                 </div>
               <% end %>
@@ -129,37 +129,37 @@
                   <%# Competitionの場合 - 薄い赤色で表示 %>
                   <div class="group relative">
                     <div
-                      class="p-2 rounded-md border border-red-200 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer bg-red-50 text-red-800"
+                      class="p-1 md:p-2 md:rounded-md border border-red-200 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer bg-red-50 text-red-800"
                       data-action="click->calendar#showEventModal"
                       data-event-id="<%= event.id %>"
                     >
                       <div class="flex flex-col space-y-1">
-                        <span class="text-xs font-bold text-red-800"><%= event.title %></span>
+                        <span class="text-[10px] md:text-xs font-bold text-red-800"><%= event.title %></span>
                         <% if event.place.present? %>
-                          <span class="text-[10px] text-red-600">@<%= event.place %></span>
+                          <span class="text-[8px] md:text-[10px] text-red-600">@<%= event.place %></span>
                         <% end %>
                         <% user_attendance = user_attendance_by_event&.dig(event.id) %>
                         <% if user_attendance %>
                           <% case user_attendance.status %>
                           <% when 'present', '出席' %>
-                            <span class="text-[10px] text-green-800 bg-green-100 px-1.5 py-0.5 rounded-full self-start font-semibold">
+                            <span class="text-[8px] md:text-[10px] text-green-800 bg-green-100 px-1 py-0.5 md:px-1.5 rounded-full self-start font-semibold">
                               出席
                             </span>
                           <% when 'absent', '欠席' %>
-                            <span class="text-[10px] text-red-800 bg-red-100 px-1.5 py-0.5 rounded-full self-start font-semibold">
+                            <span class="text-[8px] md:text-[10px] text-red-800 bg-red-100 px-1 py-0.5 md:px-1.5 rounded-full self-start font-semibold">
                               欠席
                             </span>
                           <% when 'other', 'その他' %>
-                            <span class="text-[10px] text-yellow-800 bg-yellow-100 px-1.5 py-0.5 rounded-full self-start font-semibold">
+                            <span class="text-[8px] md:text-[10px] text-yellow-800 bg-yellow-100 px-1 py-0.5 md:px-1.5 rounded-full self-start font-semibold">
                               その他
                             </span>
                           <% else %>
-                            <span class="text-[10px] text-gray-600 bg-gray-200 px-1.5 py-0.5 rounded-full self-start">
+                            <span class="text-[8px] md:text-[10px] text-gray-600 bg-gray-200 px-1 py-0.5 md:px-1.5 rounded-full self-start">
                               <%= user_attendance.status %>
                             </span>
                           <% end %>
                         <% else %>
-                          <span class="text-[10px] text-orange-700 bg-orange-100 px-1.5 py-0.5 rounded-full self-start">
+                          <span class="text-[8px] md:text-[10px] text-orange-700 bg-orange-100 px-1 py-0.5 md:px-1.5 rounded-full self-start">
                             未回答
                           </span>
                         <% end %>
@@ -176,37 +176,37 @@
                   <%# AttendanceEventの場合 - クリック可能で出席情報を表示 %>
                   <div class="group relative">
                     <div
-                      class="p-2 rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer bg-white/80 backdrop-blur-sm"
+                      class="p-1 md:p-2 md:rounded-md border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer bg-white/80 backdrop-blur-sm"
                       data-action="click->calendar#showEventModal"
                       data-event-id="<%= event.id %>"
                     >
                       <div class="flex flex-col space-y-1">
-                        <span class="text-xs font-medium text-gray-900"><%= event.title %></span>
+                        <span class="text-[10px] md:text-xs font-medium text-gray-900"><%= event.title %></span>
                         <% if event.place.present? %>
-                          <span class="text-[10px] text-gray-600">@<%= event.place %></span>
+                          <span class="text-[8px] md:text-[10px] text-gray-600">@<%= event.place %></span>
                         <% end %>
                         <% user_attendance = user_attendance_by_event&.dig(event.id) %>
                         <% if user_attendance %>
                           <% case user_attendance.status %>
                           <% when 'present', '出席' %>
-                            <span class="text-[10px] text-green-800 bg-green-100 px-1.5 py-0.5 rounded-full self-start font-semibold">
+                            <span class="text-[8px] md:text-[10px] text-green-800 bg-green-100 px-1 py-0.5 md:px-1.5 rounded-full self-start font-semibold">
                               出席
                             </span>
                           <% when 'absent', '欠席' %>
-                            <span class="text-[10px] text-red-800 bg-red-100 px-1.5 py-0.5 rounded-full self-start font-semibold">
+                            <span class="text-[8px] md:text-[10px] text-red-800 bg-red-100 px-1 py-0.5 md:px-1.5 rounded-full self-start font-semibold">
                               欠席
                             </span>
                           <% when 'other', 'その他' %>
-                            <span class="text-[10px] text-yellow-800 bg-yellow-100 px-1.5 py-0.5 rounded-full self-start font-semibold">
+                            <span class="text-[8px] md:text-[10px] text-yellow-800 bg-yellow-100 px-1 py-0.5 md:px-1.5 rounded-full self-start font-semibold">
                               その他
                             </span>
                           <% else %>
-                            <span class="text-[10px] text-gray-600 bg-gray-200 px-1.5 py-0.5 rounded-full self-start">
+                            <span class="text-[8px] md:text-[10px] text-gray-600 bg-gray-200 px-1 py-0.5 md:px-1.5 rounded-full self-start">
                               <%= user_attendance.status %>
                             </span>
                           <% end %>
                         <% else %>
-                          <span class="text-[10px] text-orange-700 bg-orange-100 px-1.5 py-0.5 rounded-full self-start">
+                          <span class="text-[8px] md:text-[10px] text-orange-700 bg-orange-100 px-1 py-0.5 md:px-1.5 rounded-full self-start">
                             未回答
                           </span>
                         <% end %>
@@ -221,8 +221,8 @@
                   </div>
                 <% else %>
                   <%# Eventの場合 - テキストのみで表示（背景は白） %>
-                  <div class="p-1 relative group">
-                    <span class="text-xs text-gray-700 bg-white px-1.5 py-0.5 rounded border">
+                  <div class="p-0.5 md:p-1 relative group">
+                    <span class="text-[8px] md:text-xs text-gray-700 bg-white px-1 py-0.5 md:px-1.5 md:rounded border">
                       <%= event.title %>
                     </span>
                     <% if event.note.present? %>
