@@ -82,16 +82,16 @@
           is_current_month ? 'text-gray-900' : 'text-gray-400'
         end %>
         
-        <div class="min-h-[100px] p-1 md:p-2 border border-gray-200 md:border-gray-800 md:rounded-lg <%= bg_color %> <%= is_today ? 'ring-2 ring-blue-500' : '' %> hover:shadow-md transition-shadow duration-200">
+        <div class="min-h-[100px] p-1 md:p-2 <%= is_today ? 'border-2 border-blue-500' : 'border border-gray-200 md:border-gray-800' %> lg:rounded-lg <%= bg_color %> hover:shadow-md transition-shadow duration-200">
           <div class="flex justify-between items-start">
             <div class="text-sm font-medium <%= text_color %> <%= is_today ? 'bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center' : '' %>">
               <%= date.day %>
             </div>
             <% if is_today %>
-              <span class="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded-full">今日</span>
+              <span class="text-[8px] md:text-xs bg-blue-100 text-blue-800 px-1 py-0.5 md:px-1.5 rounded-full">今日</span>
             <% end %>
             <% if is_holiday && is_current_month %>
-              <span class="text-xs bg-red-100 text-red-800 px-1.5 py-0.5 rounded-full"><%= holidays[date].name %></span>
+              <span class="text-[8px] md:text-xs bg-red-100 text-red-800 px-1 py-0.5 md:px-1.5 rounded-full"><%= holidays[date].name %></span>
             <% end %>
           </div>
           
