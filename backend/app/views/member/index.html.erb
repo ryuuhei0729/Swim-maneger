@@ -1,0 +1,199 @@
+<% content_for :title, 'Member' %>
+
+<div class="flex h-screen bg-gray-100" data-controller="member">
+  <!-- 左側のサイドバー -->
+  <div class="w-64 bg-white shadow-lg">
+    <div class="p-4">
+      <h2 class="text-xl font-bold text-gray-900 mb-4">メンバー区分</h2>
+      <nav class="space-y-2">
+        <div class="space-y-1">
+          <button
+            class="w-full text-left px-4 py-2 rounded-lg transition-colors duration-150 hover:bg-gray-100 group member-type-button active"
+            data-type="player"
+            data-action="click->member#handleMemberTypeClick"
+            data-toggle="player-generations"
+          >
+            <div class="flex items-center">
+              <div class="flex items-center">
+                <span class="text-gray-900 font-medium">選手</span>
+                <span class="ml-1 text-gray-900 text-xs font-medium">(<%= @grouped_by_type['player']&.size || 0 %>)</span>
+              </div>
+            </div>
+          </button>
+          
+          <!-- 期別グループ -->
+          <div id="player-generations" class="pl-4 space-y-1">
+            <% @grouped_by_generation.each do |generation, users| %>
+              <% player_count = users.count { |u| u.user_type == 'player' } %>
+              <% if player_count > 0 %>
+                <button
+                  class="w-full text-left px-4 py-2 rounded-lg transition-colors duration-150 hover:bg-gray-100 group generation-button"
+                  data-type="player"
+                  data-generation="<%= generation %>"
+                  data-action="click->member#handleGenerationClick"
+                >
+                  <div class="flex items-center">
+                    <div class="flex items-center">
+                      <span class="text-gray-900 font-medium">- <%= generation %>期</span>
+                      <span class="ml-1 text-gray-900 text-xs font-medium">(<%= player_count %>)</span>
+                    </div>
+                  </div>
+                </button>
+              <% end %>
+            <% end %>
+          </div>
+        </div>
+
+        <button
+          class="w-full text-left px-4 py-2 rounded-lg transition-colors duration-150 hover:bg-gray-100 group member-type-button"
+          data-type="coach"
+          data-action="click->member#handleMemberTypeClick"
+        >
+          <div class="flex items-center">
+            <div class="flex items-center">
+              <span class="text-gray-900 font-medium">コーチ</span>
+              <span class="ml-1 text-gray-900 text-xs font-medium">(<%= @grouped_by_type['coach']&.size || 0 %>)</span>
+            </div>
+          </div>
+        </button>
+        <button
+          class="w-full text-left px-4 py-2 rounded-lg transition-colors duration-150 hover:bg-gray-100 group member-type-button"
+          data-type="director"
+          data-action="click->member#handleMemberTypeClick"
+        >
+          <div class="flex items-center">
+            <div class="flex items-center">
+              <span class="text-gray-900 font-medium">監督/顧問</span>
+              <span class="ml-1 text-gray-900 text-xs font-medium">(<%= @grouped_by_type['director']&.size || 0 %>)</span>
+            </div>
+          </div>
+        </button>
+      </nav>
+    </div>
+  </div>
+
+  <!-- 右側のメインコンテンツ -->
+  <div class="flex-1 p-8">
+    <% @grouped_by_type.each do |user_type, users| %>
+      <div class="member-list <%= user_type == 'player' ? '' : 'hidden' %>" data-type="<%= user_type %>">
+        <div class="bg-white shadow rounded-lg p-6 w-full">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">
+              <%= user_type == 'director' ? '監督/顧問' : (user_type == 'coach' ? 'コーチ' : '選手') %>一覧
+            </h2>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <% users.each do |user| %>
+              <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer min-w-0"
+                   data-controller="modal"
+                   data-action="click->modal#open"
+                   data-modal-target="user-modal-<%= user.id %>">
+                <div class="flex justify-center pt-8">
+                  <% if user.avatar.attached? %>
+                    <%= image_tag url_for(user.avatar), 
+                        alt: "#{user.name}のプロフィール画像",
+                        class: "w-20 h-20 rounded-full object-cover" %>
+                  <% else %>
+                    <div class="w-20 h-20 rounded-full bg-blue-800 flex items-center justify-center">
+                      <span class="text-white text-2xl"><%= user.name[0] %></span>
+                    </div>
+                  <% end %>
+                </div>
+                <div class="px-3 py-8 text-center">
+                  <h3 class="text-base font-semibold text-gray-900 mb-0.5"><%= user.name %></h3>
+                  <div class="text-sm text-gray-600">
+                    <% unless user_type == 'director' %>
+                      <p class="mb-0.5"><%= user.generation %>期</p>
+                    <% end %>
+                    <p><%= user_type == 'director' ? '監督/顧問' : (user_type == 'coach' ? 'コーチ' : '選手') %></p>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
+
+<!-- ユーザー詳細モーダル -->
+<% @users.each do |user| %>
+  <%= render "shared/modal", modal_id: "user-modal-#{user.id}", title: "#{user.name}の詳細情報" do %>
+    <div class="flex items-center space-x-6 mb-6">
+      <div class="flex-shrink-0">
+        <% if user.avatar.attached? %>
+          <%= image_tag url_for(user.avatar), alt: "#{user.name}のプロフィール画像", class: "w-48 h-48 rounded-full object-cover" %>
+        <% else %>
+          <div class="w-48 h-48 rounded-full bg-blue-800 flex items-center justify-center">
+            <span class="text-white text-5xl"><%= user.name[0] %></span>
+          </div>
+        <% end %>
+      </div>
+      <div class="flex-1">
+        <h2 class="text-2xl font-bold text-gray-900"><%= user.name %></h2>
+        <p class="text-gray-500"><%= user.generation %>期</p>
+        <p class="text-gray-500 mb-4"><%= user.birthday.present? ? user.birthday.strftime('%Y年%m月%d日') : '-' %></p>
+        <h3 class="text-lg font-semibold text-gray-900 mb-2">自己紹介</h3>
+        <% if user.bio.present? %>
+          <p class="text-gray-700 whitespace-pre-wrap"><%= user.bio %></p>
+        <% else %>
+          <p class="text-gray-500 italic">自己紹介が設定されていません</p>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- ベストタイム一覧（選手のみ表示） -->
+    <% if user.user_type == 'player' %>
+      <div class="mt-6">
+        <div class="flex items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-900 mr-3">Best Time</h3>
+          <div class="h-0.5 flex-grow bg-gradient-to-r from-blue-800 to-blue-400 rounded-full"></div>
+        </div>
+
+        <div class="mb-4">
+          <div class="flex w-full overflow-x-auto pb-2">
+            <% style_order = { 'fr' => 0, 'br' => 1, 'ba' => 2, 'fly' => 3, 'im' => 4 } %>
+            <% style_titles = { 'fr' => '自由形', 'br' => '平泳ぎ', 'ba' => '背泳ぎ', 'fly' => 'バタフライ', 'im' => '個人メドレー' } %>
+            <% style_header_colors = { 'fr' => 'bg-yellow-50', 'br' => 'bg-green-50', 'ba' => 'bg-red-50', 'fly' => 'bg-blue-50', 'im' => 'bg-purple-50' } %>
+            <% Style.all.group_by(&:style).sort_by { |style_type, _| style_order[style_type] || 5 }.each do |style_type, styles| %>
+              <div class="flex-none mx-1 rounded-lg shadow-sm px-1 py-2 border border-gray-100 flex flex-col <%= style_header_colors[style_type] %>" style="min-width:140px;">
+                <h4 class="text-base font-bold mb-2 text-blue-800 text-center pb-1 border-b border-gray-300">
+                  <%= style_titles[style_type] || style_type %>
+                </h4>
+                <table class="w-full">
+                  <% styles.each do |style| %>
+                    <% best_record = @user_best_records[user.id][style.id] %>
+                    <tr>
+                      <td class="py-2 px-3 text-gray-600 font-medium w-1/2 text-center text-base"><%= style.name_jp.match(/\d+m/)[0] %></td>
+                      <td class="py-2 px-3 w-1/2 text-center">
+                        <div class="group relative">
+                          <span class="<%= best_record&.time.present? ? 'font-semibold text-gray-800' : 'text-gray-400' %> text-base">
+                            <%= best_record&.time.present? ? format_time(best_record.time) : '-' %>
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </table>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+<% end %>
+
+<style>
+.member-type-button.active,
+.generation-button.active {
+  background-color: #dbeafe !important;
+}
+
+.member-type-button:hover,
+.generation-button:hover {
+  background-color: #f3f4f6;
+}
+</style> 
