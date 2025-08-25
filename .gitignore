@@ -33,7 +33,6 @@ backend/log/*
 backend/tmp/*
 !backend/log/.keep
 !backend/tmp/.keep
-!backend/tmp/pids/
 !backend/tmp/pids/.keep
 
 # ストレージ
