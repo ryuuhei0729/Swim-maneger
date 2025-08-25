@@ -57,6 +57,8 @@ backend/yarn-error.log*
 # 認証・秘密鍵
 backend/config/master.key
 backend/config/credentials/*.key
+# 機密な開発用設定ファイル（誤ってコミットされていたが削除済み）
+backend/config/credentials/development2.key
 
 # カバレッジ
 backend/coverage/
