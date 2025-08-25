@@ -18,8 +18,10 @@ jobs:
         with:
           ruby-version: .ruby-version
           bundler-cache: true
+          working-directory: backend
 
       - name: Scan for common Rails security vulnerabilities using static analysis
+        working-directory: backend
         run: bin/brakeman --no-pager
 
   scan_js:
@@ -34,8 +36,10 @@ jobs:
         with:
           ruby-version: .ruby-version
           bundler-cache: true
+          working-directory: backend
 
       - name: Scan for security vulnerabilities in JavaScript dependencies
+        working-directory: backend
         run: bin/importmap audit
 
   lint:
@@ -49,8 +53,10 @@ jobs:
         with:
           ruby-version: .ruby-version
           bundler-cache: true
+          working-directory: backend
 
       - name: Lint code for consistent style
+        working-directory: backend
         run: bundle exec rubocop -A
 
   test:
@@ -84,17 +90,21 @@ jobs:
         with:
           ruby-version: .ruby-version
           bundler-cache: true
+          working-directory: backend
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
           cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
 
       - name: Install JavaScript dependencies
+        working-directory: backend
         run: npm install
 
       - name: Build Tailwind CSS
+        working-directory: backend
         env:
           RAILS_ENV: test
         run: |
@@ -102,6 +112,7 @@ jobs:
           bundle exec rails assets:precompile
 
       - name: Run tests
+        working-directory: backend
         env:
           RAILS_ENV: test
           DATABASE_URL: postgres://postgres:postgres@localhost:5432
@@ -114,5 +125,5 @@ jobs:
         if: failure()
         with:
           name: screenshots
-          path: ${{ github.workspace }}/tmp/screenshots
+          path: ${{ github.workspace }}/backend/tmp/screenshots
           if-no-files-found: ignore

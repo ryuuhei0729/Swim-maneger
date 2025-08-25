@@ -5,42 +5,42 @@
 /.gitignore
 
 # Ignore bundler config.
-/.bundle
+/backend/.bundle
 
 # Ignore all environment files.
 /.env*
 
 # Ignore all default key files.
-/config/master.key
-/config/credentials/*.key
+/backend/config/master.key
+/backend/config/credentials/*.key
 
 # Ignore all logfiles and tempfiles.
-/log/*
-/tmp/*
-!/log/.keep
-!/tmp/.keep
+/backend/log/*
+/backend/tmp/*
+!/backend/log/.keep
+!/backend/tmp/.keep
 
 # Ignore pidfiles, but keep the directory.
-/tmp/pids/*
-!/tmp/pids/.keep
+/backend/tmp/pids/*
+!/backend/tmp/pids/.keep
 
 # Ignore storage (uploaded files in development and any SQLite databases).
-/storage/*
-!/storage/.keep
-/tmp/storage/*
-!/tmp/storage/.keep
+/backend/storage/*
+!/backend/storage/.keep
+/backend/tmp/storage/*
+!/backend/tmp/storage/.keep
 
 # Ignore assets.
-/node_modules/
-/app/assets/builds/*
-!/app/assets/builds/.keep
-/public/assets
+/backend/node_modules/
+/backend/app/assets/builds/*
+!/backend/app/assets/builds/.keep
+/backend/public/assets
 
 # Ignore CI service files.
 /.github
 
 # Ignore Kamal files.
-/config/deploy*.yml
+/backend/config/deploy*.yml
 /.kamal
 
 # Ignore development files
@@ -49,3 +49,13 @@
 # Ignore Docker-related files
 /.dockerignore
 /Dockerfile*
+
+# Ignore mobile directory (Flutter app)
+/mobile/
+
+# Ignore shared directory for Docker builds
+/shared/
+
+# Ignore README and requirements at root level
+/README.md
+/requirements.md

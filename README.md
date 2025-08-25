@@ -27,6 +27,8 @@ swim_manager/
 
 ### バックエンド（Rails API）
 
+#### Docker環境での開発
+
 1. DockerとDocker Composeをインストール
    - [Docker Desktop](https://www.docker.com/products/docker-desktop)をダウンロードしてインストール
 
@@ -43,17 +45,53 @@ swim_manager/
 
 4. データベースのセットアップ（新規ウィンドウを開いて操作）
    ```bash
-   docker-compose exec web rails db:create db:migrate
+   docker-compose exec web rails db:create db:migrate db:seed
    ```
 
 5. ブラウザでアクセス
    - http://localhost:3000 にアクセス
 
-6. 任意のユーザーでログイン
-   - 選手ログインの場合
-        メールアドレス：player1@test　パスワード：123123
-   - 管理者ログインの場合
-        メールアドレス：coach1@test　パスワード：123123
+#### ローカル環境での開発
+
+1. 必要な環境をインストール
+   ```bash
+   # Ruby 3.2.8をインストール（rbenv使用の場合）
+   rbenv install 3.2.8
+   rbenv global 3.2.8
+   
+   # PostgreSQL 15をインストール
+   brew install postgresql@15
+   brew services start postgresql@15
+   ```
+
+2. プロジェクトセットアップ
+   ```bash
+   cd backend
+   bundle install
+   yarn install
+   ```
+
+3. データベースのセットアップ
+   ```bash
+   rails db:create db:migrate db:seed
+   ```
+
+4. 開発サーバーを起動
+   ```bash
+   # Rails + CSS監視を同時に起動
+   bin/dev
+   
+   # または個別に起動
+   rails server -p 3000
+   rails tailwindcss:watch  # 別ターミナルで実行
+   ```
+
+#### テストユーザー情報
+
+- 選手ログインの場合
+     メールアドレス：player1@test　パスワード：123123
+- 管理者ログインの場合
+     メールアドレス：coach1@test　パスワード：123123
 
 ### モバイルアプリ（Flutter）
 
@@ -76,7 +114,9 @@ cd mobile
 
 詳細なAPI仕様書は `shared/docs/` ディレクトリに今後追加予定です。
 
-### トラブルシューティング
+## トラブルシューティング
+
+### Docker環境
 
 - コンテナを停止する場合
   ```bash
@@ -87,4 +127,31 @@ cd mobile
   ```bash
   docker-compose down -v
   docker-compose up --build
+  docker-compose exec web rails db:create db:migrate db:seed
+  ```
+
+- ログを確認する場合
+  ```bash
+  docker-compose logs web
+  ```
+
+### ローカル環境
+
+- サーバーが起動しない場合
+  ```bash
+  # PIDファイルを削除
+  rm -f backend/tmp/pids/server.pid
+  
+  # ポートが使用中の場合
+  lsof -ti:3000 | xargs kill -9
+  ```
+
+- データベース接続エラーの場合
+  ```bash
+  # PostgreSQLが起動していることを確認
+  brew services list | grep postgresql
+  
+  # データベースを再作成
+  cd backend
+  rails db:drop db:create db:migrate db:seed
   ```
