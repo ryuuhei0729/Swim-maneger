@@ -37,3 +37,11 @@
 !/app/assets/builds/.keep
 
 config/credentials/development2.key
+
+
+# Ignore backend directory temporary files
+backend/log/*
+backend/tmp/*
+!backend/tmp/.keep
+backend/storage/*
+!backend/storage/.keep
