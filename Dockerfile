@@ -37,13 +37,13 @@ RUN apt-get update -qq && \
 RUN gem install bundler -v '~> 2.6'
 
 # Install application gems
-COPY Gemfile Gemfile.lock ./
+COPY backend/Gemfile backend/Gemfile.lock ./
 RUN bundle install && \
     rm -rf ~/.bundle/ "${BUNDLE_PATH}"/ruby/*/cache "${BUNDLE_PATH}"/ruby/*/bundler/gems/*/.git && \
     bundle exec bootsnap precompile --gemfile
 
 # Copy application code
-COPY . .
+COPY backend/ .
 
 # Precompile bootsnap code for faster boot times
 RUN bundle exec bootsnap precompile app/ lib/
