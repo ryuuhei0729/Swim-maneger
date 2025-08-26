@@ -1,29 +1,35 @@
 class Api::V1::MypageController < Api::V1::BaseController
   def show
     user = current_user_auth.user
-    records = user.records.includes(:style, :attendance_event).order(created_at: :desc)
-
-    # 各種目のベストタイムを取得（事前に記録をロードしてN+1クエリを回避）
-    best_times = {}
-    styles_with_records = records.group_by(&:style)
     
-    Style.all.each do |style|
-      style_records = styles_with_records[style] || []
-      best_record = style_records.min_by(&:time)
-      best_times[style.name] = {
-        time: best_record&.time,
-        formatted_time: format_swim_time(best_record&.time),
-        record_id: best_record&.id,
-        updated_at: best_record&.updated_at
+    # キャッシュを使用してデータを取得
+    user_data = CacheService.cache_user_info(user.id) do
+      records = user.records.includes(:style, :attendance_event).order(created_at: :desc)
+
+      # 各種目のベストタイムを取得（事前に記録をロードしてN+1クエリを回避）
+      best_times = {}
+      styles_with_records = records.group_by(&:style)
+      
+      Style.all.each do |style|
+        style_records = styles_with_records[style] || []
+        best_record = style_records.min_by(&:time)
+        best_times[style.name] = {
+          time: best_record&.time,
+          formatted_time: format_swim_time(best_record&.time),
+          record_id: best_record&.id,
+          updated_at: best_record&.updated_at
+        }
+      end
+
+      {
+        profile: build_profile_data(user),
+        records: build_records_data(records),
+        best_times: best_times,
+        statistics: build_user_statistics(user, records)
       }
     end
 
-    render_success({
-      profile: build_profile_data(user),
-      records: build_records_data(records),
-      best_times: best_times,
-      statistics: build_user_statistics(user, records)
-    })
+    render_success(user_data)
   end
 
   def update
