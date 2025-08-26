@@ -6,82 +6,62 @@ class CacheService
 
   # ユーザー情報のキャッシュ
   def self.cache_user_info(user_id, &block)
-    cache_key = "user_info:#{user_id}"
-    Rails.cache.fetch(cache_key, expires_in: 30.minutes) do
-      block.call
-    end
+    raise ArgumentError, "Block is required" if block.nil?
+    fetch_with_cache("user_info", [user_id], expires_in: 30.minutes, &block)
   end
 
   # ユーザー一覧のキャッシュ
   def self.cache_users_list(generation = nil, user_type = nil, &block)
-    cache_key = "users_list:#{generation}:#{user_type}"
-    Rails.cache.fetch(cache_key, expires_in: 15.minutes) do
-      block.call
-    end
+    raise ArgumentError, "Block is required" if block.nil?
+    fetch_with_cache("users_list", [generation, user_type], expires_in: 15.minutes, &block)
   end
 
   # イベント情報のキャッシュ
   def self.cache_events_list(date_range = nil, event_type = nil, &block)
-    cache_key = "events_list:#{date_range}:#{event_type}"
-    Rails.cache.fetch(cache_key, expires_in: 10.minutes) do
-      block.call
-    end
+    raise ArgumentError, "Block is required" if block.nil?
+    fetch_with_cache("events_list", [date_range, event_type], expires_in: 10.minutes, &block)
   end
 
   # 出席状況のキャッシュ
   def self.cache_attendance_status(event_id, &block)
-    cache_key = "attendance_status:#{event_id}"
-    Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
-      block.call
-    end
+    raise ArgumentError, "Block is required" if block.nil?
+    fetch_with_cache("attendance_status", [event_id], expires_in: 5.minutes, &block)
   end
 
   # 練習記録のキャッシュ
   def self.cache_practice_logs(user_id = nil, date_range = nil, &block)
-    cache_key = "practice_logs:#{user_id}:#{date_range}"
-    Rails.cache.fetch(cache_key, expires_in: 10.minutes) do
-      block.call
-    end
+    raise ArgumentError, "Block is required" if block.nil?
+    fetch_with_cache("practice_logs", [user_id, date_range], expires_in: 10.minutes, &block)
   end
 
   # 記録のキャッシュ
   def self.cache_records(user_id = nil, style_id = nil, &block)
-    cache_key = "records:#{user_id}:#{style_id}"
-    Rails.cache.fetch(cache_key, expires_in: 15.minutes) do
-      block.call
-    end
+    raise ArgumentError, "Block is required" if block.nil?
+    fetch_with_cache("records", [user_id, style_id], expires_in: 15.minutes, &block)
   end
 
   # 目標のキャッシュ
   def self.cache_objectives(user_id = nil, &block)
-    cache_key = "objectives:#{user_id}"
-    Rails.cache.fetch(cache_key, expires_in: 20.minutes) do
-      block.call
-    end
+    raise ArgumentError, "Block is required" if block.nil?
+    fetch_with_cache("objectives", [user_id], expires_in: 20.minutes, &block)
   end
 
   # お知らせのキャッシュ
   def self.cache_announcements(active_only = true, &block)
-    cache_key = "announcements:#{active_only}"
-    Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
-      block.call
-    end
+    raise ArgumentError, "Block is required" if block.nil?
+    fetch_with_cache("announcements", [active_only], expires_in: 5.minutes, &block)
   end
 
   # 統計情報のキャッシュ
   def self.cache_statistics(stat_type, params = {}, &block)
-    cache_key = "statistics:#{stat_type}:#{params.hash}"
-    Rails.cache.fetch(cache_key, expires_in: 30.minutes) do
-      block.call
-    end
+    raise ArgumentError, "Block is required" if block.nil?
+    fetch_with_cache("statistics", [stat_type, params], expires_in: 30.minutes, &block)
   end
 
   # 管理者ダッシュボードのキャッシュ
   def self.cache_admin_dashboard(&block)
-    cache_key = "admin_dashboard"
-    Rails.cache.fetch(cache_key, expires_in: 5.minutes) do
-      block.call
-    end
+    raise ArgumentError, "Block is required" if block.nil?
+    fetch_with_cache("admin_dashboard", [], expires_in: 5.minutes, &block)
   end
 
   # キャッシュの削除
@@ -149,11 +129,20 @@ class CacheService
 
   # キャッシュ統計情報の取得
   def self.cache_stats
-    {
-      total_keys: Rails.cache.redis.dbsize,
-      memory_usage: Rails.cache.redis.info['used_memory_human'],
-      hit_rate: calculate_hit_rate
-    }
+    if Rails.cache.respond_to?(:redis)
+      {
+        total_keys: Rails.cache.redis.dbsize,
+        memory_usage: Rails.cache.redis.info['used_memory_human'],
+        hit_rate: calculate_hit_rate
+      }
+    else
+      {
+        total_keys: nil,
+        memory_usage: nil,
+        hit_rate: nil,
+        note: "Redis-specific statistics not available for this cache store"
+      }
+    end
   rescue => e
     Rails.logger.error "キャッシュ統計取得エラー: #{e.message}"
     { error: e.message }
@@ -161,7 +150,42 @@ class CacheService
 
   private
 
+  # 安定したキャッシュキーを構築し、Rails.cache.fetchを実行するヘルパー
+  def self.fetch_with_cache(prefix, params, expires_in: DEFAULT_EXPIRY, &block)
+    cache_key = build_stable_cache_key(prefix, params)
+    Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
+  end
+
+  # 安定したキャッシュキーを構築するヘルパー
+  def self.build_stable_cache_key(prefix, params)
+    # パラメータを安定した文字列に変換
+    stable_params = params.map { |param| serialize_param(param) }
+    "#{prefix}:#{stable_params.join(':')}"
+  end
+
+  # パラメータを安定した文字列にシリアライズするヘルパー
+  def self.serialize_param(param)
+    case param
+    when nil
+      "nil"
+    when Range
+      "#{param.begin}-#{param.end}"
+    when Hash
+      # Hashをソートして安定したJSONに変換
+      param.sort.to_h.to_json
+    when Array
+      # 配列の各要素をシリアライズ
+      param.map { |item| serialize_param(item) }.join(",")
+    when Date, DateTime, Time
+      param.iso8601
+    else
+      param.to_s
+    end
+  end
+
   def self.calculate_hit_rate
+    return nil unless Rails.cache.respond_to?(:redis)
+    
     # RedisのINFOコマンドからヒット率を計算
     info = Rails.cache.redis.info
     hits = info['keyspace_hits'].to_i

@@ -1,5 +1,4 @@
-class Api::V1::Admin::SchedulesController < Api::V1::BaseController
-  before_action :check_admin_access
+class Api::V1::Admin::SchedulesController < Api::V1::Admin::BaseController
   before_action :set_attendance_event, only: [:show, :update, :destroy]
 
   # GET /api/v1/admin/schedules
@@ -111,7 +110,10 @@ class Api::V1::Admin::SchedulesController < Api::V1::BaseController
 
     ActiveRecord::Base.transaction do
       params[:preview_data].each do |data|
-        next unless data[:valid] # 無効なデータはスキップ
+        # ActionController::Parametersを安全に処理
+        data = data.to_unsafe_h if data.is_a?(ActionController::Parameters)
+        valid = data.respond_to?(:[]) ? data[:valid] : nil
+        next unless ActiveModel::Type::Boolean.new.cast(valid) # 無効なデータはスキップ
 
         # データの種類に応じてモデルを選択
         if data[:is_competition] && data[:is_attendance]
@@ -180,12 +182,6 @@ class Api::V1::Admin::SchedulesController < Api::V1::BaseController
 
   private
 
-  def check_admin_access
-    unless current_user_auth.user.user_type.in?(["coach", "director", "manager"])
-      render_error("管理者権限が必要です", :forbidden)
-    end
-  end
-
   def set_attendance_event
     @attendance_event = AttendanceEvent.find(params[:id])
   rescue ActiveRecord::RecordNotFound
@@ -250,7 +246,7 @@ class Api::V1::Admin::SchedulesController < Api::V1::BaseController
     
     errors << "タイトルが必須です" if data[:title].blank?
     errors << "日付が必須です" if data[:date].blank?
-    errors << "日付の形式が正しくありません" if data[:date].blank? && !data[:date].nil?
+    errors << "日付の形式が正しくありません" if !data[:date].blank? && parse_date(data[:date]).nil?
     
     errors
   end

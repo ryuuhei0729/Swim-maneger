@@ -1,5 +1,4 @@
-class Api::V1::Admin::PracticesController < Api::V1::BaseController
-  before_action :check_admin_access
+class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
   before_action :set_practice_log, only: [:show, :edit, :update, :destroy]
 
   # GET /api/v1/admin/practices
@@ -280,12 +279,6 @@ class Api::V1::Admin::PracticesController < Api::V1::BaseController
   end
 
   private
-
-  def check_admin_access
-    unless current_user_auth.user.user_type.in?(["coach", "director", "manager"])
-      render_error("管理者権限が必要です", :forbidden)
-    end
-  end
 
   def set_practice_log
     @practice_log = PracticeLog.find(params[:id])

@@ -1,24 +1,17 @@
 module SanitizationHelper
   # HTMLタグを除去してテキストのみを抽出
   def sanitize_html(text)
-    return nil if text.blank?
+    return "" if text.blank?
     
-    # 基本的なHTMLタグを除去
-    text.gsub(/<[^>]*>/, '')
-        .gsub(/&nbsp;/, ' ')
-        .gsub(/&amp;/, '&')
-        .gsub(/&lt;/, '<')
-        .gsub(/&gt;/, '>')
-        .gsub(/&quot;/, '"')
-        .strip
+    # Railsの標準サニタイザーを使用してHTMLを安全に除去
+    ActionView::Base.full_sanitizer.sanitize(text.to_s)
   end
 
   # SQLインジェクション対策用の文字列エスケープ
   def escape_sql_like(string, escape_character = "\\")
     return nil if string.blank?
     
-    pattern = Regexp.union(escape_character, "%", "_")
-    string.gsub(pattern) { |x| escape_character + x }
+    ActiveRecord::Base.sanitize_sql_like(string, escape_character)
   end
 
   # ファイル名のサニタイゼーション
@@ -69,13 +62,9 @@ module SanitizationHelper
 
   # XSS対策用のHTMLエスケープ
   def escape_html(text)
-    return nil if text.blank?
+    return "" if text.blank?
     
-    text.gsub(/&/, '&amp;')
-        .gsub(/</, '&lt;')
-        .gsub(/>/, '&gt;')
-        .gsub(/"/, '&quot;')
-        .gsub(/'/, '&#x27;')
+    ERB::Util.html_escape(text.to_s)
   end
 
   # パスワード強度の検証

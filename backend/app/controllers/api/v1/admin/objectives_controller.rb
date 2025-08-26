@@ -1,10 +1,9 @@
-class Api::V1::Admin::ObjectivesController < Api::V1::BaseController
-  before_action :check_admin_access
+class Api::V1::Admin::ObjectivesController < Api::V1::Admin::BaseController
   before_action :set_objective, only: [:show, :update, :destroy]
 
   # GET /api/v1/admin/objectives
   def index
-    objectives = Objective.includes(:user, :attendance_event, :style, :milestones)
+    objectives = Objective.joins(:attendance_event).includes(:user, :attendance_event, :style, :milestones)
                          .order("attendance_events.date DESC")
 
     # フィルタリング
@@ -157,12 +156,6 @@ class Api::V1::Admin::ObjectivesController < Api::V1::BaseController
   end
 
   private
-
-  def check_admin_access
-    unless current_user_auth.user.user_type.in?(["coach", "director", "manager"])
-      render_error("管理者権限が必要です", :forbidden)
-    end
-  end
 
   def set_objective
     @objective = Objective.find(params[:id])

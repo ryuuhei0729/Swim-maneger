@@ -1,5 +1,4 @@
-class Api::V1::Admin::AnnouncementsController < Api::V1::BaseController
-  before_action :check_admin_access
+class Api::V1::Admin::AnnouncementsController < Api::V1::Admin::BaseController
   before_action :set_announcement, only: [:show, :update, :destroy]
 
   # GET /api/v1/admin/announcements
@@ -125,12 +124,6 @@ class Api::V1::Admin::AnnouncementsController < Api::V1::BaseController
   end
 
   private
-
-  def check_admin_access
-    unless current_user_auth.user.user_type.in?(["coach", "director", "manager"])
-      render_error("管理者権限が必要です", :forbidden)
-    end
-  end
 
   def set_announcement
     @announcement = Announcement.find(params[:id])

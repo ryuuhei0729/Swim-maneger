@@ -1,5 +1,4 @@
-class Api::V1::Admin::DashboardController < Api::V1::BaseController
-  before_action :check_admin_access
+class Api::V1::Admin::DashboardController < Api::V1::Admin::BaseController
 
   # GET /api/v1/admin/dashboard
   def index
@@ -58,12 +57,6 @@ class Api::V1::Admin::DashboardController < Api::V1::BaseController
   end
 
   private
-
-  def check_admin_access
-    unless current_user_auth.user.user_type.in?(["coach", "director", "manager"])
-      render_error("管理者権限が必要です", :forbidden)
-    end
-  end
 
   def calculate_monthly_attendance_rate
     current_month_events = Event.where(date: Date.current.beginning_of_month..Date.current.end_of_month)

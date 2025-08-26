@@ -1,5 +1,4 @@
-class Api::V1::Admin::CompetitionsController < Api::V1::BaseController
-  before_action :check_admin_access
+class Api::V1::Admin::CompetitionsController < Api::V1::Admin::BaseController
   before_action :set_competition, only: [:show, :update_entry_status, :result, :save_results]
 
   # GET /api/v1/admin/competitions
@@ -11,7 +10,7 @@ class Api::V1::Admin::CompetitionsController < Api::V1::BaseController
     all_competitions = Competition.order(date: :desc).limit(20)
     
     # エントリー受付中の大会
-    collecting_entries = Competition.joins(:entries)
+    collecting_entries = Competition.where(entry_status: :open)
                                    .distinct
                                    .order(date: :desc)
 
@@ -49,22 +48,30 @@ class Api::V1::Admin::CompetitionsController < Api::V1::BaseController
   # GET /api/v1/admin/competitions/:id/result
   def result
     # エントリーと関連データを取得
-    entries = @competition.entries.includes(:user, :style).order('users.generation', 'users.name')
+    entries = @competition.entries.joins(:user, :style).includes(:user, :style).references(:user, :style).order('users.generation', 'users.name')
+    
+    # 現在の大会の記録を事前に取得
+    current_records = Record.where(
+      attendance_event_id: @competition.id
+    ).includes(:split_times).index_by { |record| [record.user_id, record.style_id] }
+    
+    # ベストタイムを事前に計算（現在の大会の記録を除外）
+    user_ids = entries.map(&:user_id).uniq
+    style_ids = entries.map(&:style_id).uniq
+    
+    best_records_query = Record.joins(:user, :style)
+                              .where(user_id: user_ids, style_id: style_ids)
+                              .where.not(attendance_event_id: @competition.id)
+                              .select('records.*, ROW_NUMBER() OVER (PARTITION BY user_id, style_id ORDER BY time) as rn')
+    
+    best_records = best_records_query.having('rn = 1')
+                                   .includes(:split_times)
+                                   .index_by { |record| [record.user_id, record.style_id] }
     
     # 各エントリーの記録情報を構築
     entries_with_records = entries.map do |entry|
-      record = Record.find_by(
-        user_id: entry.user_id,
-        attendance_event_id: entry.attendance_event_id,
-        style_id: entry.style_id
-      )
-      
-      # ベストタイムを計算（現在の大会の記録を除外）
-      best_record = entry.user.records
-                        .where(style: entry.style)
-                        .where.not(id: record&.id)
-                        .order(:time)
-                        .first
+      record = current_records[[entry.user_id, entry.style_id]]
+      best_record = best_records[[entry.user_id, entry.style_id]]
       
       best_time_formatted = nil
       if best_record
@@ -246,12 +253,6 @@ class Api::V1::Admin::CompetitionsController < Api::V1::BaseController
   end
 
   private
-
-  def check_admin_access
-    unless current_user_auth.user.user_type.in?(["coach", "director", "manager"])
-      render_error("管理者権限が必要です", :forbidden)
-    end
-  end
 
   def set_competition
     @competition = Competition.find(params[:id])

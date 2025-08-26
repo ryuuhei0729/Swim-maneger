@@ -1,5 +1,4 @@
-class Api::V1::Admin::UsersController < Api::V1::BaseController
-  before_action :check_admin_access
+class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
   before_action :set_user, only: [:show, :update, :destroy]
 
   # GET /api/v1/admin/users
@@ -55,8 +54,8 @@ class Api::V1::Admin::UsersController < Api::V1::BaseController
               user: serialize_user(@user)
             }, "ユーザー情報を更新しました")
           else
-            raise ActiveRecord::Rollback
             render_error("ユーザー認証情報の更新に失敗しました", :unprocessable_entity, user_auth.errors.as_json)
+            raise ActiveRecord::Rollback
           end
         else
           render_success({
@@ -220,12 +219,6 @@ class Api::V1::Admin::UsersController < Api::V1::BaseController
   end
 
   private
-
-  def check_admin_access
-    unless current_user_auth.user.user_type.in?(["coach", "director", "manager"])
-      render_error("管理者権限が必要です", :forbidden)
-    end
-  end
 
   def set_user
     @user = User.find(params[:id])
