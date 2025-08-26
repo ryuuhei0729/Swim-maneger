@@ -1,4 +1,6 @@
 class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
+  include DateParser
+  
   before_action :set_user, only: [:show, :update, :destroy]
 
   # GET /api/v1/admin/users
@@ -115,8 +117,13 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
         preview_data << data
       end
       
+      # 署名付きトークンを生成（有効なデータのみ）
+      valid_data = preview_data.select { |row| row[:valid] }
+      token = generate_import_token(valid_data)
+      
       render_success({
         preview_data: preview_data,
+        import_token: token,
         total_rows: preview_data.count,
         valid_rows: preview_data.count { |row| row[:valid] },
         invalid_rows: preview_data.count { |row| !row[:valid] }
@@ -130,8 +137,18 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
 
   # POST /api/v1/admin/users/import/execute
   def import_execute
-    unless params[:preview_data].present?
-      return render_error("インポートデータが見つかりません", :bad_request)
+    unless params[:import_token].present?
+      return render_error("インポートトークンが見つかりません", :bad_request)
+    end
+
+    # トークンを検証・デコード
+    begin
+      import_data = verify_import_token(params[:import_token])
+    rescue ActiveSupport::MessageVerifier::InvalidSignature
+      return render_error("無効なインポートトークンです", :bad_request)
+    rescue => e
+      Rails.logger.error "インポートトークンの検証中にエラーが発生: #{e.message}"
+      return render_error("インポートトークンの検証に失敗しました", :bad_request)
     end
 
     success_count = 0
@@ -139,8 +156,14 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
     errors = []
 
     User.transaction do
-      params[:preview_data].each do |data|
-        next unless data[:valid] # 無効なデータはスキップ
+      import_data.each do |data|
+        # サーバーサイドでバリデーションを再実行
+        validation_errors = validate_import_user_data(data)
+        if validation_errors.any?
+          error_count += 1
+          errors << "行#{data[:row_number]}: バリデーションエラー - #{validation_errors.join(', ')}"
+          next
+        end
 
         begin
           user = User.new(
@@ -273,29 +296,7 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
     })
   end
 
-  def parse_date(value)
-    return nil if value.blank?
-    
-    case value
-    when Date, DateTime
-      value.to_date
-    when String
-      begin
-        Date.parse(value)
-      rescue ArgumentError
-        nil
-      end
-    when Numeric
-      # Excelの日付シリアル値の場合
-      begin
-        Date.new(1900, 1, 1) + value.to_i - 2
-      rescue
-        nil
-      end
-    else
-      nil
-    end
-  end
+
 
   def validate_import_user_data(data)
     errors = []
@@ -329,5 +330,17 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
     end
     
     errors
+  end
+
+  # インポートデータの署名付きトークンを生成
+  def generate_import_token(data)
+    verifier = ActiveSupport::MessageVerifier.new(Rails.application.secret_key_base)
+    verifier.generate(data, expires_in: 1.hour)
+  end
+
+  # インポートトークンを検証・デコード
+  def verify_import_token(token)
+    verifier = ActiveSupport::MessageVerifier.new(Rails.application.secret_key_base)
+    verifier.verify(token)
   end
 end

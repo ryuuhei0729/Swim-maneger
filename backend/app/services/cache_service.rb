@@ -91,11 +91,25 @@ class CacheService
   end
 
   def self.invalidate_records_cache(user_id = nil)
+    # 記録キャッシュの無効化
     if user_id
       Rails.cache.delete_matched("records:#{user_id}:*")
     else
       Rails.cache.delete_matched("records:*")
     end
+    
+    # ユーザー詳細情報キャッシュの無効化
+    if user_id
+      Rails.cache.delete("user_info:#{user_id}")
+    else
+      Rails.cache.delete_matched("user_info:*")
+    end
+    
+    # ユーザー一覧キャッシュの無効化（ベストタイムなどの情報が含まれるため）
+    Rails.cache.delete_matched("users_list:*")
+    
+    # 統計情報キャッシュの無効化
+    Rails.cache.delete_matched("statistics:*")
   end
 
   def self.invalidate_objectives_cache(user_id = nil)
@@ -119,7 +133,9 @@ class CacheService
   end
 
   def self.invalidate_admin_dashboard_cache
+    # 後方互換: 旧キー "admin_dashboard:" も削除
     Rails.cache.delete("admin_dashboard")
+    Rails.cache.delete("admin_dashboard:")
   end
 
   # 全キャッシュの削除（管理者用）
@@ -159,7 +175,8 @@ class CacheService
   # 安定したキャッシュキーを構築するヘルパー
   def self.build_stable_cache_key(prefix, params)
     # パラメータを安定した文字列に変換
-    stable_params = params.map { |param| serialize_param(param) }
+    stable_params = Array(params).map { |param| serialize_param(param) }
+    return prefix if stable_params.empty?
     "#{prefix}:#{stable_params.join(':')}"
   end
 
@@ -169,17 +186,57 @@ class CacheService
     when nil
       "nil"
     when Range
-      "#{param.begin}-#{param.end}"
+      # Rangeを安定した形式でシリアライズ（inclusive/exclusiveを区別）
+      begin_repr = serialize_param(param.begin)
+      end_repr = serialize_param(param.end)
+      exclusive = param.exclude_end? ? "true" : "false"
+      "#{begin_repr}..#{end_repr}|exclusive:#{exclusive}"
     when Hash
-      # Hashをソートして安定したJSONに変換
-      param.sort.to_h.to_json
+      # ネストしたHashも含めて深いソートを実行
+      deep_sort_hash(param).to_json
     when Array
-      # 配列の各要素をシリアライズ
-      param.map { |item| serialize_param(item) }.join(",")
+      # 配列をJSON配列として安定した形式でシリアライズ
+      param.map { |item| serialize_param(item) }.to_json
     when Date, DateTime, Time
       param.iso8601
     else
-      param.to_s
+      # 非プリミティブオブジェクトの安定したシリアライズ
+      serialize_object(param)
+    end
+  end
+
+  # ネストしたHashを深くソートするヘルパー
+  def self.deep_sort_hash(hash)
+    sorted_hash = {}
+    hash.keys.sort.each do |key|
+      value = hash[key]
+      sorted_hash[serialize_param(key)] = case value
+      when Hash
+        deep_sort_hash(value)
+      when Array
+        value.map { |item| item.is_a?(Hash) ? deep_sort_hash(item) : serialize_param(item) }
+      else
+        serialize_param(value)
+      end
+    end
+    sorted_hash
+  end
+
+  # 非プリミティブオブジェクトの安定したシリアライズ
+  def self.serialize_object(obj)
+    if obj.respond_to?(:cache_key_with_version)
+      obj.cache_key_with_version
+    elsif obj.respond_to?(:cache_key)
+      obj.cache_key
+    elsif obj.respond_to?(:to_param)
+      obj.to_param
+    else
+      # 最後の手段としてクラス名付きでJSONまたはinspect
+      begin
+        "#{obj.class.name}:#{obj.to_json}"
+      rescue
+        "#{obj.class.name}:#{obj.inspect}"
+      end
     end
   end
 

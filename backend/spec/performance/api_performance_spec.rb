@@ -1,10 +1,47 @@
 require 'rails_helper'
 
-RSpec.describe 'API Performance', type: :performance do
+RSpec.describe 'API Performance', type: [:performance, :request] do
   let(:user) { create(:user, :player) }
   let(:user_auth) { create(:user_auth, user: user) }
   let(:admin_user) { create(:user, :coach) }
   let(:admin_auth) { create(:user_auth, user: admin_user) }
+
+  # キャッシュ設定の管理
+  around do |example|
+    # 元の設定を保存
+    original_perform_caching = Rails.application.config.action_controller.perform_caching
+    original_cache_store = Rails.cache
+    
+    begin
+      # テスト用のキャッシュ設定を有効化
+      Rails.application.config.action_controller.perform_caching = true
+      Rails.cache = ActiveSupport::Cache::MemoryStore.new
+      
+      # テストを実行
+      example.run
+    ensure
+      # 元の設定を復元
+      Rails.application.config.action_controller.perform_caching = original_perform_caching
+      Rails.cache = original_cache_store
+    end
+  end
+
+  # Rack::Attackのレート制限を無効化（レート制限テスト用）
+  around(:each, :rate_limit_test) do |example|
+    # 元のRack::Attack設定を保存
+    original_rack_attack_enabled = Rack::Attack.enabled?
+    
+    begin
+      # Rack::Attackを無効化
+      Rack::Attack.enabled = false
+      
+      # テストを実行
+      example.run
+    ensure
+      # 元の設定を復元
+      Rack::Attack.enabled = original_rack_attack_enabled
+    end
+  end
 
   before do
     # テストデータの準備
@@ -94,10 +131,14 @@ RSpec.describe 'API Performance', type: :performance do
         tokens << get_auth_token(auth)
       end
 
-      # 同時にリクエストを送信
+      # 各スレッドで独立したRack::MockRequestインスタンスを使用
       threads = tokens.map do |token|
         Thread.new do
-          get '/api/v1/home', headers: { 'Authorization' => "Bearer #{token}" }
+          mock_request = Rack::MockRequest.new(Rails.application)
+          response = mock_request.get('/api/v1/home', {
+            'HTTP_AUTHORIZATION' => "Bearer #{token}"
+          })
+          response
         end
       end
 
@@ -152,7 +193,7 @@ RSpec.describe 'API Performance', type: :performance do
   end
 
   describe 'API Rate Limiting パフォーマンス' do
-    it 'レート制限下でのパフォーマンス' do
+    it 'レート制限下でのパフォーマンス', :rate_limit_test do
       token = get_auth_token(user_auth)
       
       # 制限内での連続リクエスト
@@ -203,9 +244,9 @@ RSpec.describe 'API Performance', type: :performance do
   end
 
   def measure_response_time
-    start_time = Time.current
+    start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
     yield
-    end_time = Time.current
-    (end_time - start_time) * 1000 # ミリ秒単位で返す
+    end_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    (end_time - start_time) * 1000.0 # ミリ秒単位で返す（浮動小数点）
   end
 end

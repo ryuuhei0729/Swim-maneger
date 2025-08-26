@@ -8,10 +8,10 @@ class Api::V1::MypageController < Api::V1::BaseController
 
       # 各種目のベストタイムを取得（事前に記録をロードしてN+1クエリを回避）
       best_times = {}
-      styles_with_records = records.group_by(&:style)
+      styles_with_records = records.group_by(&:style_id)
       
       Style.all.each do |style|
-        style_records = styles_with_records[style] || []
+        style_records = styles_with_records[style.id] || []
         best_record = style_records.min_by(&:time)
         best_times[style.name] = {
           time: best_record&.time,

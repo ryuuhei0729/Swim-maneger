@@ -1,5 +1,5 @@
 class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
-  before_action :set_attendance_event, only: [:check, :update_check]
+  before_action :set_attendance_event, only: [:update_check]
 
   # GET /api/v1/admin/attendances
   def index
@@ -44,6 +44,12 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
       return render_error("イベントIDが必要です", :bad_request)
     end
 
+    # イベントの存在確認
+    @attendance_event = AttendanceEvent.find(params[:attendance_event_id])
+  rescue ActiveRecord::RecordNotFound
+    return render_error("イベントが見つかりません", :not_found)
+  end
+
     # 「出席」「その他」で登録済みの人を取得
     attendances = @attendance_event.attendances
                                   .includes(:user)
@@ -72,8 +78,11 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
 
   # PATCH /api/v1/admin/attendances/check
   def update_check
-    unless params[:checked_users].present?
-      return render_error("チェック済みユーザー情報が必要です", :bad_request)
+    # Strong Parametersでチェック済みユーザーIDを安全に取得
+    checked_user_ids = safe_checked_user_ids
+    
+    unless checked_user_ids.present?
+      return render_error(I18n.t('api.admin.attendances.errors.checked_users_required'), :bad_request)
     end
 
     # 出席予定者の全ユーザーID
@@ -82,9 +91,6 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
                                            .joins(:user)
                                            .where(users: { user_type: 'player' })
                                            .pluck(:user_id)
-    
-    # チェックされたユーザーID
-    checked_user_ids = params[:checked_users].map(&:to_i)
     
     # チェックされなかった（実際には出席していない）ユーザーID
     unchecked_user_ids = all_present_user_ids - checked_user_ids
@@ -106,60 +112,73 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
           }
         end,
         attendance_event_id: @attendance_event.id
-      }, "#{unchecked_user_ids.count}人の出席状況を確認してください")
+      }, I18n.t('api.admin.attendances.messages.confirm_attendance', count: unchecked_user_ids.count))
     else
       render_success({
         has_unchecked_users: false
-      }, "全員が出席でした。変更はありません。")
+      }, I18n.t('api.admin.attendances.messages.all_present'))
     end
   end
 
   # POST /api/v1/admin/attendances/save_check
   def save_check
-    unless params[:attendance_event_id].present? || params[:updates].present?
-      return render_error("必要なパラメータが不足しています", :bad_request)
+    # Strong Parametersで安全にパラメータを取得
+    save_check_params = attendance_save_check_params
+    
+    unless save_check_params[:attendance_event_id].present? && save_check_params[:updates].present?
+      return render_error(I18n.t('api.admin.attendances.errors.missing_parameters'), :bad_request)
     end
 
-    attendance_event = AttendanceEvent.find(params[:attendance_event_id])
-    updates = params[:updates]
+    # アップデートデータの正規化と検証
+    normalized_updates = normalize_and_validate_updates(save_check_params[:updates])
     
+    if normalized_updates[:errors].any?
+      return render_error(I18n.t('api.admin.attendances.errors.invalid_updates'), :bad_request, { errors: normalized_updates[:errors] })
+    end
+
+    attendance_event = AttendanceEvent.find(save_check_params[:attendance_event_id])
     update_count = 0
     errors = []
 
     ActiveRecord::Base.transaction do
-      updates.each do |update_data|
-        user_id = update_data[:user_id]
+      normalized_updates[:data].each_with_index do |update_data, index|
+        user_id = safe_user_id(update_data[:user_id])
         status = update_data[:status]
         note = update_data[:note]
         
-        next unless user_id.present? && status.present?
+        # 必須フィールドの検証
+        unless user_id.present? && status.present?
+          errors << I18n.t('api.admin.attendances.errors.invalid_update_payload', index: index + 1, reason: 'missing required fields')
+          next
+        end
         
         attendance = Attendance.find_by(user_id: user_id, attendance_event: attendance_event)
         if attendance
           if attendance.update(status: status, note: note || "")
             update_count += 1
           else
-            errors << "ユーザーID #{user_id}: #{attendance.errors.full_messages.join(', ')}"
+            errors << I18n.t('api.admin.attendances.errors.update_failed', user_id: user_id, errors: attendance.errors.full_messages.join(', '))
           end
         else
-          errors << "ユーザーID #{user_id}: 出欠記録が見つかりません"
+          errors << I18n.t('api.admin.attendances.errors.attendance_not_found', user_id: user_id)
         end
       end
 
+      # 実際のレコード更新エラーのみでロールバック
       if errors.any?
         raise ActiveRecord::Rollback
       end
     end
 
     if errors.any?
-      render_error("出席状況の更新中にエラーが発生しました", :unprocessable_entity, { errors: errors })
+      render_error(I18n.t('api.admin.attendances.errors.update_error'), :unprocessable_entity, { errors: errors })
     else
       render_success({
         updated_count: update_count
-      }, "#{update_count}人の出席状況を更新しました")
+      }, I18n.t('api.admin.attendances.messages.attendance_updated', count: update_count))
     end
   rescue ActiveRecord::RecordNotFound
-    render_error("イベントが見つかりません", :not_found)
+    render_error(I18n.t('api.admin.attendances.errors.event_not_found'), :not_found)
   end
 
   # GET /api/v1/admin/attendances/status
@@ -333,5 +352,96 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
       present_count: present_count,
       total_events: total_events
     }
+  end
+
+  # Strong Parameters
+  def attendance_save_check_params
+    params.permit(:attendance_event_id, updates: [:user_id, :status, :note])
+  end
+
+  # セーフなチェック済みユーザーIDの取得
+  def safe_checked_user_ids
+    checked_users = Array(params.fetch(:checked_users, []))
+    checked_users.map do |user_id|
+      safe_user_id(user_id)
+    end.compact
+  end
+
+  # セーフなユーザーIDの変換
+  def safe_user_id(user_id)
+    return nil if user_id.blank?
+    
+    # 文字列に変換してから整数に変換
+    user_id_str = user_id.to_s.strip
+    return nil if user_id_str.empty?
+    
+    # 数値のみを許可
+    return nil unless user_id_str.match?(/\A\d+\z/)
+    
+    user_id_str.to_i
+  rescue => e
+    Rails.logger.warn "Invalid user_id format: #{user_id.inspect}, error: #{e.message}"
+    nil
+  end
+
+  # アップデートデータの正規化と検証
+  def normalize_and_validate_updates(updates_param)
+    errors = []
+    normalized_data = []
+
+    # アップデートデータが存在することを確認
+    unless updates_param.present?
+      errors << I18n.t('api.admin.attendances.errors.updates_missing')
+      return { data: [], errors: errors }
+    end
+
+    # 配列に正規化
+    updates_array = case updates_param
+    when Array
+      updates_param
+    when String
+      begin
+        JSON.parse(updates_param)
+      rescue JSON::ParserError => e
+        errors << I18n.t('api.admin.attendances.errors.invalid_json', error: e.message)
+        return { data: [], errors: errors }
+      end
+    else
+      errors << I18n.t('api.admin.attendances.errors.invalid_updates_format')
+      return { data: [], errors: errors }
+    end
+
+    # 各アップデートエントリを検証
+    updates_array.each_with_index do |update_entry, index|
+      unless update_entry.is_a?(Hash)
+        errors << I18n.t('api.admin.attendances.errors.invalid_update_entry', index: index + 1)
+        next
+      end
+
+      # Strong Parametersで許可されたキーのみを抽出
+      permitted_update = update_entry.permit(:user_id, :status, :note)
+      
+      # 必須フィールドの検証
+      unless permitted_update[:user_id].present?
+        errors << I18n.t('api.admin.attendances.errors.missing_user_id', index: index + 1)
+        next
+      end
+
+      unless permitted_update[:status].present?
+        errors << I18n.t('api.admin.attendances.errors.missing_status', index: index + 1)
+        next
+      end
+
+      # 有効なステータス値の検証
+      valid_statuses = ['present', 'absent', 'other']
+      unless valid_statuses.include?(permitted_update[:status].to_s)
+        errors << I18n.t('api.admin.attendances.errors.invalid_status', index: index + 1, status: permitted_update[:status])
+        next
+      end
+
+      normalized_data << permitted_update
+    end
+
+    { data: normalized_data, errors: errors }
   end
 end

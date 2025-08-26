@@ -34,13 +34,13 @@ components:
           type: integer
           description: 世代
         user_type:
-          type: integer
-          enum: [0, 1, 2, 3]
-          description: ユーザータイプ（0: 選手, 1: マネージャー, 2: コーチ, 3: 監督）
+          type: string
+          enum: ['player', 'manager', 'coach', 'director']
+          description: 'ユーザータイプ（player: 選手, manager: マネージャー, coach: コーチ, director: 監督）'
         gender:
           type: integer
           enum: [0, 1, 2]
-          description: 性別（0: 未設定, 1: 男性, 2: 女性）
+          description: '性別（0: 未設定, 1: 男性, 2: 女性）'
         birthday:
           type: string
           format: date
@@ -74,7 +74,7 @@ components:
         note:
           type: string
           description: メモ
-        type:
+        event_type:
           type: string
           description: イベントタイプ
         is_attendance:
@@ -145,6 +145,7 @@ paths:
         - 認証
       summary: ログイン
       description: ユーザーのログイン処理
+      security: []
       requestBody:
         required: true
         content:

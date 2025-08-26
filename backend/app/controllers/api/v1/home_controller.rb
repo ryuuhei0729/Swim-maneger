@@ -10,6 +10,64 @@ class Api::V1::HomeController < Api::V1::BaseController
 
   private
 
+  def build_calendar_data
+    events = Event.where(date: Date.current.beginning_of_month..Date.current.end_of_month)
+                  .order(:date)
+    
+    events.map { |event| event_serializer(event) }
+  end
+
+  def build_announcements_data
+    announcements = Announcement.where(is_active: true)
+                               .where('published_at <= ?', Time.current)
+                               .order(published_at: :desc)
+                               .limit(5)
+    
+    announcements.map { |announcement| announcement_serializer(announcement) }
+  end
+
+  def build_today_birthdays_data
+    today = Date.current
+    birthday_users = User.where(user_type: 'player')
+                        .where("EXTRACT(month FROM birthday) = ? AND EXTRACT(day FROM birthday) = ?", 
+                               today.month, today.day)
+                        .order(:name)
+    
+    birthday_users.map { |user| birthday_user_serializer(user) }
+  end
+
+  def build_best_times_data
+    best_records = Record.includes(:style)
+                        .group(:style_id)
+                        .select('style_id, MIN(time) as min_time')
+                        .map do |min_record|
+      record = Record.includes(:style)
+                    .where(style_id: min_record.style_id)
+                    .where(time: min_record.min_time)
+                    .first
+      
+      {
+        style: record.style,
+        record: record
+      }
+    end
+    
+    best_records.map { |best_record_data| best_record_serializer(best_record_data) }
+  end
+
+  def format_swim_time(time_in_seconds)
+    return nil if time_in_seconds.blank?
+    
+    minutes = (time_in_seconds / 60).to_i
+    seconds = time_in_seconds % 60
+    
+    if minutes > 0
+      format("%d:%05.2f", minutes, seconds)
+    else
+      format("%.2f", seconds)
+    end
+  end
+
   def announcement_serializer(announcement)
     {
       id: announcement.id,
@@ -34,7 +92,7 @@ class Api::V1::HomeController < Api::V1::BaseController
       id: event.id,
       title: event.title,
       date: event.date,
-      type: event.type,
+      event_type: event.type,
       place: event.place
     }
   end
@@ -46,7 +104,7 @@ class Api::V1::HomeController < Api::V1::BaseController
     {
       style_name: style.name_jp,
       time: record.time,
-      formatted_time: record.formatted_time,
+      formatted_time: format_swim_time(record.time),
       note: record.note
     }
   end

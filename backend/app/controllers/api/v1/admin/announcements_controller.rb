@@ -54,12 +54,14 @@ class Api::V1::Admin::AnnouncementsController < Api::V1::Admin::BaseController
   def toggle_active
     set_announcement
     
-    @announcement.update!(is_active: !@announcement.is_active)
-    
-    status_message = @announcement.is_active? ? "公開" : "非公開"
-    render_success({
-      announcement: serialize_announcement(@announcement)
-    }, "お知らせを#{status_message}にしました")
+    if @announcement.update(is_active: !@announcement.is_active)
+      status_message = @announcement.is_active? ? "公開" : "非公開"
+      render_success({
+        announcement: serialize_announcement(@announcement)
+      }, "お知らせを#{status_message}にしました")
+    else
+      render_error(@announcement.errors.full_messages.join(", "), :unprocessable_entity)
+    end
   end
 
   # POST /api/v1/admin/announcements/bulk_action
@@ -128,7 +130,7 @@ class Api::V1::Admin::AnnouncementsController < Api::V1::Admin::BaseController
   def set_announcement
     @announcement = Announcement.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render_error("お知らせが見つかりません", :not_found)
+    render_error("お知らせが見つかりません", :not_found) and return
   end
 
   def announcement_params

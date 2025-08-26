@@ -93,7 +93,7 @@ RSpec.describe Admin::SchedulesController, type: :request do
       json_response = JSON.parse(response.body)
       expect(json_response['title']).to eq(event.title)
       expect(json_response['date']).to eq(event.date.strftime('%Y-%m-%d'))
-      expect(json_response['type']).to eq(event.class.name)
+      expect(json_response['event_type']).to eq(event.class.name)
       expect(json_response['note']).to eq(event.note)
       expect(json_response['place']).to eq(event.place)
     end

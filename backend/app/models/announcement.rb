@@ -15,10 +15,8 @@ class Announcement < ApplicationRecord
   # 公開日時を設定するコールバック
   before_validation :set_published_at, on: :create
 
-  # キャッシュ無効化のコールバック
-  after_create :invalidate_announcements_cache
-  after_update :invalidate_announcements_cache
-  after_destroy :invalidate_announcements_cache
+  # キャッシュ無効化のコールバック（トランザクションコミット後に実行）
+  after_commit :invalidate_announcements_cache, on: [:create, :update, :destroy]
 
   private
 
@@ -33,6 +31,16 @@ class Announcement < ApplicationRecord
   end
 
   def invalidate_announcements_cache
+    return unless announcements_cache_affecting_changes?
+    
     CacheService.invalidate_announcements_cache
+  end
+
+  def announcements_cache_affecting_changes?
+    # お知らせのキャッシュに影響する属性の変更をチェック
+    saved_change_to_is_active? ||
+    saved_change_to_published_at? ||
+    saved_change_to_title? ||
+    saved_change_to_content?
   end
 end

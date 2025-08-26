@@ -71,7 +71,7 @@ export default class extends Controller {
     this.updateUrlParameter('tab', currentTab)
     
     // ページをリロード
-    window.location.href = window.location.href
+    window.location.reload()
   }
 
   updateUrlParameter(key, value) {

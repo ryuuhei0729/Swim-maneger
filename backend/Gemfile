@@ -83,6 +83,9 @@ group :test do
   gem "factory_bot_rails"
   gem "faker"
   gem "rails-controller-testing"
+  
+  # Database query measurement for performance testing
+  gem "rspec-sqlimit"
 end
 
 gem "tailwindcss-rails", "~> 4.3"

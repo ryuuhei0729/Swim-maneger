@@ -98,6 +98,29 @@ ja:
       invalid: "は正しい形式で入力してください"
       too_short: "は%{count}文字以上で入力してください"
       too_long: "は%{count}文字以下で入力してください"
+  api:
+    admin:
+      attendances:
+        errors:
+          checked_users_required: "チェック済みユーザー情報が必要です"
+          missing_parameters: "必要なパラメータが不足しています"
+          event_not_found: "イベントが見つかりません"
+          update_failed: "ユーザーID %{user_id}: %{errors}"
+          attendance_not_found: "ユーザーID %{user_id}: 出欠記録が見つかりません"
+          update_error: "出席状況の更新中にエラーが発生しました"
+          invalid_updates: "アップデートデータが無効です"
+          updates_missing: "アップデートデータが提供されていません"
+          invalid_json: "JSONの形式が正しくありません: %{error}"
+          invalid_updates_format: "アップデートデータの形式が正しくありません"
+          invalid_update_entry: "インデックス %{index} のアップデートエントリが無効です"
+          missing_user_id: "インデックス %{index} でユーザーIDが不足しています"
+          missing_status: "インデックス %{index} でステータスが不足しています"
+          invalid_status: "インデックス %{index} で無効なステータス '%{status}' が指定されています"
+          invalid_update_payload: "インデックス %{index} のアップデートペイロードが無効です: %{reason}"
+        messages:
+          confirm_attendance: "%{count}人の出席状況を確認してください"
+          all_present: "全員が出席でした。変更はありません。"
+          attendance_updated: "%{count}人の出席状況を更新しました"
       not_a_number: "は数値で入力してください"
       confirmation: "は%{attribute}と一致しません"
       inclusion: "は無効な値です"

@@ -60,7 +60,14 @@ class Api::V1::BaseController < ActionController::API
 
   # 管理者権限チェック
   def require_admin!
-    unless current_user_auth&.user&.admin?
+    # nil安全性チェック
+    if current_user_auth.nil? || current_user_auth.user.nil?
+      render_error('管理者権限が必要です', :forbidden)
+      return
+    end
+    
+    # 管理者権限チェック
+    unless current_user_auth.user.admin?
       render_error('管理者権限が必要です', :forbidden)
       return
     end

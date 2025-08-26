@@ -4,6 +4,7 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
   # GET /api/v1/admin/practices
   def index
     practice_logs = PracticeLog.includes(attendance_event: { attendances: :user })
+                               .joins(:attendance_event)
                                .order("attendance_events.date DESC")
                                .limit(20)
     
@@ -96,7 +97,7 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
   # GET /api/v1/admin/practices/time_setup
   def time_setup
     today = Date.today
-    attendance_events = Event.order(date: :desc)
+    attendance_events = AttendanceEvent.order(date: :desc)
     default_event = attendance_events.where("date <= ?", today).first || attendance_events.first
     
     render_success({
@@ -164,40 +165,49 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
 
   # POST /api/v1/admin/practices/attendees
   def manage_attendees
+    event_id = params[:event_id]&.to_i
     action_type = params[:action_type] # 'add' or 'remove'
     attendee_id = params[:attendee_id]&.to_i
-    session_key = params[:session_key] || 'practice_attendees'
 
-    unless action_type.in?(['add', 'remove']) && attendee_id.present?
+    unless event_id.present? && action_type.in?(['add', 'remove']) && attendee_id.present?
       return render_error("無効なパラメータです", :bad_request)
     end
 
-    case action_type
-    when 'add'
-      session[:additional_attendees] ||= []
-      unless session[:additional_attendees].include?(attendee_id)
-        session[:additional_attendees] << attendee_id
+    event = AttendanceEvent.find(event_id)
+    user = User.find(attendee_id)
+
+    ActiveRecord::Base.transaction do
+      case action_type
+      when 'add'
+        # 既存の出席記録を確認
+        attendance = event.attendances.find_or_initialize_by(user: user)
+        if attendance.new_record?
+          attendance.status = 'present'
+          attendance.save!
+        elsif attendance.status == 'absent'
+          attendance.update!(status: 'present')
+        end
+        
+      when 'remove'
+        # 出席記録を欠席に変更
+        attendance = event.attendances.find_or_initialize_by(user: user)
+        attendance.status = 'absent'
+        attendance.save!
       end
-      # 削除リストからも除去
-      session[:removed_attendees] ||= []
-      session[:removed_attendees].delete(attendee_id)
-      
-    when 'remove'
-      session[:removed_attendees] ||= []
-      unless session[:removed_attendees].include?(attendee_id)
-        session[:removed_attendees] << attendee_id
-      end
-      # 追加リストからも除去
-      session[:additional_attendees] ||= []
-      session[:additional_attendees].delete(attendee_id)
     end
+
+    # 更新後の参加者リストを取得
+    updated_attendees = get_current_attendees(event)
 
     render_success({
       action: action_type,
       attendee_id: attendee_id,
-      additional_attendees: session[:additional_attendees] || [],
-      removed_attendees: session[:removed_attendees] || []
+      current_attendees: updated_attendees.map { |user| serialize_user_basic(user) }
     }, "参加者リストを更新しました")
+  rescue ActiveRecord::RecordNotFound
+    render_error("イベントまたはユーザーが見つかりません", :not_found)
+  rescue => e
+    render_error("参加者リストの更新に失敗しました", :unprocessable_entity)
   end
 
   # GET /api/v1/admin/practices/register_setup
@@ -239,40 +249,25 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
 
     event = AttendanceEvent.find(params[:event_id])
     
-    # 基本の出席者
-    base_attendees = event.attendances.includes(:user)
-                         .where(status: ["present", "other"])
-                         .joins(:user)
-                         .where(users: { user_type: "player" })
-                         .map(&:user)
-                         .sort_by { |user| [user.generation, user.name] }
+    # 現在の参加者リストを取得
+    current_attendees = get_current_attendees(event)
     
-    # セッションから追加・削除情報を取得
-    removed_attendee_ids = session[:removed_attendees] || []
-    additional_attendee_ids = session[:additional_attendees] || []
-    
-    # 削除された参加者を除外
-    filtered_attendees = base_attendees.reject { |user| removed_attendee_ids.include?(user.id) }
-    
-    # 追加された参加者を追加
-    if additional_attendee_ids.any?
-      additional_attendees = User.where(id: additional_attendee_ids, user_type: 'player')
-                                .order(:generation, :name)
-      filtered_attendees = (filtered_attendees + additional_attendees).uniq
-    end
+    # 欠席者のIDリストを取得
+    absent_attendee_ids = event.attendances.includes(:user)
+                               .where(status: "absent")
+                               .joins(:user)
+                               .where(users: { user_type: "player" })
+                               .pluck(:user_id)
 
     # 出席可能な全ユーザー（追加候補用）
     all_players = User.where(user_type: 'player').order(:generation, :name)
-    available_for_add = all_players.reject { |user| filtered_attendees.include?(user) }
+    available_for_add = all_players.reject { |user| current_attendees.include?(user) }
 
     render_success({
       event: serialize_event_basic(event),
-      current_attendees: filtered_attendees.map { |user| serialize_user_basic(user) },
+      current_attendees: current_attendees.map { |user| serialize_user_basic(user) },
       available_for_add: available_for_add.map { |user| serialize_user_basic(user) },
-      session_info: {
-        removed_attendees: removed_attendee_ids,
-        additional_attendees: additional_attendee_ids
-      }
+      absent_attendee_ids: absent_attendee_ids
     })
   rescue ActiveRecord::RecordNotFound
     render_error("イベントが見つかりません", :not_found)
@@ -386,5 +381,14 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
     else
       format("%.2f", seconds)
     end
+  end
+
+  def get_current_attendees(event)
+    event.attendances.includes(:user)
+         .where(status: ["present", "other"])
+         .joins(:user)
+         .where(users: { user_type: "player" })
+         .map(&:user)
+         .sort_by { |user| [user.generation, user.name] }
   end
 end

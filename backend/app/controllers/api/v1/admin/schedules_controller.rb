@@ -1,4 +1,6 @@
 class Api::V1::Admin::SchedulesController < Api::V1::Admin::BaseController
+  include DateParser
+  
   before_action :set_attendance_event, only: [:show, :update, :destroy]
 
   # GET /api/v1/admin/schedules
@@ -189,7 +191,14 @@ class Api::V1::Admin::SchedulesController < Api::V1::Admin::BaseController
   end
 
   def schedule_params
-    params.require(:schedule).permit(:title, :date, :place, :note, :is_competition, :is_attendance)
+    permitted_params = params.require(:schedule).permit(:title, :date, :place, :note, :is_competition, :is_attendance, :event_type)
+    
+    # event_typeをtypeにマッピング
+    if permitted_params[:event_type].present?
+      permitted_params[:type] = permitted_params.delete(:event_type)
+    end
+    
+    permitted_params
   end
 
   def serialize_schedule(event)
@@ -199,6 +208,7 @@ class Api::V1::Admin::SchedulesController < Api::V1::Admin::BaseController
       date: event.date,
       place: event.place,
       note: event.note,
+      event_type: event.type,
       is_competition: event.is_competition,
       is_attendance: event.is_attendance,
       created_at: event.created_at,
@@ -206,29 +216,7 @@ class Api::V1::Admin::SchedulesController < Api::V1::Admin::BaseController
     }
   end
 
-  def parse_date(value)
-    return nil if value.blank?
-    
-    case value
-    when Date, DateTime
-      value.to_date
-    when String
-      begin
-        Date.parse(value)
-      rescue ArgumentError
-        nil
-      end
-    when Numeric
-      # Excelの日付シリアル値の場合
-      begin
-        Date.new(1900, 1, 1) + value.to_i - 2
-      rescue
-        nil
-      end
-    else
-      nil
-    end
-  end
+
 
   def parse_boolean(value)
     return false if value.blank?

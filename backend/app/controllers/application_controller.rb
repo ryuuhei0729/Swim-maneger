@@ -29,4 +29,17 @@ class ApplicationController < ActionController::Base
   def render_unprocessable_entity(exception)
     render file: "#{Rails.root}/app/views/errors/unprocessable_entity.html.erb", status: :unprocessable_entity, layout: "error"
   end
+
+  # JSONレスポンス用ヘルパーメソッド
+  def render_success(message, status: :ok, code: nil)
+    payload = { success: true, message: message }
+    payload[:code] = code if code.present?
+    render json: payload, status: status
+  end
+
+  def render_error(message, status: :bad_request, code: nil)
+    payload = { success: false, message: message }
+    payload[:code] = code if code.present?
+    render json: payload, status: status
+  end
 end

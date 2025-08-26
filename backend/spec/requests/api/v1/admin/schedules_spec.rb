@@ -165,25 +165,31 @@ RSpec.describe "Api::V1::Admin::Schedules", type: :request do
   end
 
   describe "POST /api/v1/admin/schedules/import/preview" do
-    let(:file) { fixture_file_upload('files/schedule_import_test.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') }
+    let(:file) { fixture_file_upload('schedule_import_test.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') }
     
     context "有効なファイルの場合" do
       it "プレビューデータを返す" do
         # テスト用のファイルを模擬
-        allow(Roo::Excelx).to receive(:new).and_return(double(
-          sheet: double(
-            each_row_streaming: [
-              [
-                double(value: "練習1"),
-                double(value: Date.today + 1.day),
-                double(value: "プール"),
-                double(value: "テスト"),
-                double(value: false),
-                double(value: true)
-              ]
-            ]
-          )
-        ))
+        xlsx_double = double
+        sheet_double = double
+        
+        # シートの行データを設定
+        allow(sheet_double).to receive(:each_row_streaming).and_return([
+          [
+            double(value: "練習1"),
+            double(value: Date.today + 1.day),
+            double(value: "プール"),
+            double(value: "テスト"),
+            double(value: false),
+            double(value: true)
+          ]
+        ])
+        
+        # xlsx_doubleがsheetメソッドを引数付きで呼び出せるように設定
+        allow(xlsx_double).to receive(:sheet).with(any_args).and_return(sheet_double)
+        
+        # Roo::Excelx.newがxlsx_doubleを返すように設定
+        allow(Roo::Excelx).to receive(:new).and_return(xlsx_double)
         
         post "/api/v1/admin/schedules/import/preview", params: { file: file }, headers: headers
         

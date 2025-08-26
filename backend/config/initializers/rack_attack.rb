@@ -9,7 +9,7 @@ class Rack::Attack
 
   # ログイン試行制限
   throttle('login/ip', limit: 5, period: 20.seconds) do |req|
-    req.ip if req.path == '/user_auths/sign_in' && req.post?
+    req.ip if (req.path == '/user_auths/sign_in' || req.path == '/api/v1/auth/login') && req.post?
   end
 
   # 管理者APIレート制限

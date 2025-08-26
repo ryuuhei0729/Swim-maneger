@@ -59,14 +59,13 @@ class Api::V1::Admin::CompetitionsController < Api::V1::Admin::BaseController
     user_ids = entries.map(&:user_id).uniq
     style_ids = entries.map(&:style_id).uniq
     
-    best_records_query = Record.joins(:user, :style)
-                              .where(user_id: user_ids, style_id: style_ids)
-                              .where.not(attendance_event_id: @competition.id)
-                              .select('records.*, ROW_NUMBER() OVER (PARTITION BY user_id, style_id ORDER BY time) as rn')
-    
-    best_records = best_records_query.having('rn = 1')
-                                   .includes(:split_times)
-                                   .index_by { |record| [record.user_id, record.style_id] }
+    best_records = Record.joins(:user, :style)
+                        .where(user_id: user_ids, style_id: style_ids)
+                        .where.not(attendance_event_id: @competition.id)
+                        .distinct_on(:user_id, :style_id)
+                        .order(:user_id, :style_id, :time)
+                        .includes(:split_times)
+                        .index_by { |record| [record.user_id, record.style_id] }
     
     # 各エントリーの記録情報を構築
     entries_with_records = entries.map do |entry|
