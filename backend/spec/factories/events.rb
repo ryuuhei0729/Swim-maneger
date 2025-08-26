@@ -16,5 +16,16 @@ FactoryBot.define do
     trait :today do
       date { Date.current }
     end
+
+    trait :practice do
+      type { 'Practice' }
+      is_attendance { true }
+    end
+
+    trait :competition do
+      type { 'Competition' }
+      is_competition { true }
+      is_attendance { true }
+    end
   end
 end

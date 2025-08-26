@@ -1,0 +1,530 @@
+openapi: 3.0.1
+info:
+  title: Swim Manager API
+  description: 水泳選手マネジメントシステムのAPI仕様書
+  version: 1.0.0
+  contact:
+    name: 開発チーム
+    email: dev@swimmanager.com
+
+servers:
+  - url: http://localhost:3000/api/v1
+    description: 開発環境
+  - url: https://api.swimmanager.com/api/v1
+    description: 本番環境
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ユーザーID
+        name:
+          type: string
+          description: ユーザー名
+        generation:
+          type: integer
+          description: 世代
+        user_type:
+          type: integer
+          enum: [0, 1, 2, 3]
+          description: ユーザータイプ（0: 選手, 1: マネージャー, 2: コーチ, 3: 監督）
+        gender:
+          type: integer
+          enum: [0, 1, 2]
+          description: 性別（0: 未設定, 1: 男性, 2: 女性）
+        birthday:
+          type: string
+          format: date
+          description: 誕生日
+        bio:
+          type: string
+          description: 自己紹介
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: イベントID
+        title:
+          type: string
+          description: イベントタイトル
+        date:
+          type: string
+          format: date
+          description: イベント日
+        place:
+          type: string
+          description: 場所
+        note:
+          type: string
+          description: メモ
+        type:
+          type: string
+          description: イベントタイプ
+        is_attendance:
+          type: boolean
+          description: 出席管理の有無
+        is_competition:
+          type: boolean
+          description: 大会かどうか
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Objective:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: 目標ID
+        user_id:
+          type: integer
+          description: ユーザーID
+        attendance_event_id:
+          type: integer
+          description: イベントID
+        style_id:
+          type: integer
+          description: 泳法ID
+        target_time:
+          type: number
+          format: float
+          description: 目標タイム
+        quantity_note:
+          type: string
+          description: 量的目標のメモ
+        quality_title:
+          type: string
+          description: 質的目標のタイトル
+        quality_note:
+          type: string
+          description: 質的目標のメモ
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          description: エラーメッセージ
+        errors:
+          type: object
+          description: 詳細なエラー情報
+
+paths:
+  /auth/login:
+    post:
+      tags:
+        - 認証
+      summary: ログイン
+      description: ユーザーのログイン処理
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: メールアドレス
+                password:
+                  type: string
+                  description: パスワード
+      responses:
+        '200':
+          description: ログイン成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
+                        description: 認証トークン
+                      user:
+                        $ref: '#/components/schemas/User'
+        '401':
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /auth/logout:
+    delete:
+      tags:
+        - 認証
+      summary: ログアウト
+      description: ユーザーのログアウト処理
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: ログアウト成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: ログアウトしました
+
+  /home:
+    get:
+      tags:
+        - 一般機能
+      summary: ホーム画面
+      description: ホーム画面の情報を取得
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      announcements:
+                        type: array
+                        items:
+                          type: object
+                      birthday_users:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+                      events:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Event'
+                      best_times:
+                        type: array
+                        items:
+                          type: object
+
+  /members:
+    get:
+      tags:
+        - 一般機能
+      summary: メンバー一覧
+      description: メンバー一覧を取得
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: generation
+          in: query
+          description: 世代でフィルタ
+          required: false
+          schema:
+            type: integer
+        - name: user_type
+          in: query
+          description: ユーザータイプでフィルタ
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      users:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+
+  /mypage:
+    get:
+      tags:
+        - 一般機能
+      summary: マイページ情報取得
+      description: 現在のユーザーのマイページ情報を取得
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+
+    patch:
+      tags:
+        - 一般機能
+      summary: マイページ情報更新
+      description: 現在のユーザーのマイページ情報を更新
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                    bio:
+                      type: string
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: 更新しました
+
+  /objectives:
+    get:
+      tags:
+        - 目標管理
+      summary: 目標一覧
+      description: 現在のユーザーの目標一覧を取得
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      objectives:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Objective'
+
+    post:
+      tags:
+        - 目標管理
+      summary: 目標作成
+      description: 新しい目標を作成
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - objective
+              properties:
+                objective:
+                  type: object
+                  required:
+                    - attendance_event_id
+                    - style_id
+                    - target_time
+                    - quantity_note
+                    - quality_title
+                    - quality_note
+                  properties:
+                    attendance_event_id:
+                      type: integer
+                    style_id:
+                      type: integer
+                    target_time:
+                      type: number
+                      format: float
+                    quantity_note:
+                      type: string
+                    quality_title:
+                      type: string
+                    quality_note:
+                      type: string
+      responses:
+        '201':
+          description: 作成成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      objective:
+                        $ref: '#/components/schemas/Objective'
+
+  /admin/dashboard:
+    get:
+      tags:
+        - 管理者機能
+      summary: 管理者ダッシュボード
+      description: 管理者ダッシュボードの情報を取得
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      statistics:
+                        type: object
+                      recent_activities:
+                        type: array
+                        items:
+                          type: object
+        '403':
+          description: 権限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /admin/users:
+    get:
+      tags:
+        - 管理者機能
+      summary: ユーザー一覧（管理者）
+      description: 管理者用のユーザー一覧を取得
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: ページ番号
+          required: false
+          schema:
+            type: integer
+            default: 1
+        - name: per_page
+          in: query
+          description: 1ページあたりの件数
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      users:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+                      pagination:
+                        type: object
+                        properties:
+                          current_page:
+                            type: integer
+                          total_pages:
+                            type: integer
+                          total_count:
+                            type: integer
+        '403':
+          description: 権限不足
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+security:
+  - BearerAuth: []

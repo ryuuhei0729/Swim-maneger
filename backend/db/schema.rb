@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_24_145453) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_26_153248) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -49,6 +49,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_145453) do
     t.datetime "published_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["is_active", "published_at"], name: "index_announcements_on_active_and_published"
     t.index ["is_active"], name: "index_announcements_on_is_active"
     t.index ["published_at", "is_active"], name: "index_announcements_on_published_at_and_is_active"
     t.index ["published_at"], name: "index_announcements_on_published_at"
@@ -61,7 +62,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_145453) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "status"
+    t.index ["attendance_event_id", "status"], name: "index_attendance_on_event_and_status"
     t.index ["attendance_event_id"], name: "index_attendance_on_attendance_event_id"
+    t.index ["status", "created_at"], name: "index_attendance_on_status_and_created_at"
     t.index ["user_id", "attendance_event_id"], name: "index_attendance_on_user_id_and_attendance_event_id", unique: true
     t.index ["user_id", "status"], name: "index_attendance_on_user_id_and_status"
     t.index ["user_id"], name: "index_attendance_on_user_id"
@@ -76,9 +79,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_145453) do
     t.text "note"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["attendance_event_id", "entry_time"], name: "index_entries_on_event_and_time"
     t.index ["attendance_event_id", "user_id", "style_id"], name: "index_entries_unique_combination", unique: true
     t.index ["attendance_event_id"], name: "index_entries_on_attendance_event_id"
     t.index ["style_id"], name: "index_entries_on_style_id"
+    t.index ["user_id", "attendance_event_id", "style_id"], name: "index_entries_on_user_event_style"
     t.index ["user_id"], name: "index_entries_on_user_id"
   end
 
@@ -95,9 +100,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_145453) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["date", "type"], name: "index_events_on_date_and_type"
+    t.index ["date"], name: "index_events_date_attendance_only", where: "(is_attendance = true)"
     t.index ["date"], name: "index_events_on_date"
     t.index ["is_attendance"], name: "index_events_on_is_attendance"
+    t.index ["is_competition", "entry_status"], name: "index_events_on_competition_entry_status"
     t.index ["is_competition"], name: "index_events_on_is_competition"
+    t.index ["type", "date", "is_attendance"], name: "index_events_on_type_date_attendance"
     t.index ["type", "date"], name: "index_events_on_type_and_date"
     t.index ["type"], name: "index_events_on_type"
   end
@@ -119,6 +127,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_145453) do
     t.text "note", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["objective_id", "limit_date"], name: "index_milestones_on_objective_and_limit_date"
     t.index ["objective_id"], name: "index_milestones_on_objective_id"
     t.check_constraint "milestone_type::text = ANY (ARRAY['quality'::character varying::text, 'quantity'::character varying::text])", name: "check_milestone_type"
   end
@@ -135,6 +144,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_145453) do
     t.datetime "updated_at", null: false
     t.index ["attendance_event_id"], name: "index_objectives_on_attendance_event_id"
     t.index ["style_id"], name: "index_objectives_on_style_id"
+    t.index ["user_id", "attendance_event_id"], name: "index_objectives_on_user_and_event"
     t.index ["user_id"], name: "index_objectives_on_user_id"
   end
 
@@ -150,6 +160,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_145453) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["attendance_event_id"], name: "index_practice_logs_on_attendance_event_id"
+    t.index ["style", "created_at"], name: "index_practice_logs_on_style_and_created_at"
     t.index ["style"], name: "index_practice_logs_on_style"
   end
 
@@ -161,9 +172,11 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_145453) do
     t.decimal "time", precision: 10, scale: 2, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["practice_log_id", "rep_number", "set_number"], name: "index_practice_times_on_log_rep_set"
     t.index ["practice_log_id", "user_id", "rep_number", "set_number"], name: "index_practice_times_on_unique_combination", unique: true
     t.index ["practice_log_id", "user_id"], name: "index_practice_times_on_practice_log_and_user"
     t.index ["practice_log_id"], name: "index_practice_times_on_practice_log_id"
+    t.index ["user_id", "created_at"], name: "index_practice_times_on_user_and_created_at"
     t.index ["user_id"], name: "index_practice_times_on_user_id"
   end
 
@@ -187,6 +200,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_145453) do
     t.datetime "updated_at", null: false
     t.index ["attendance_event_id"], name: "index_race_goals_on_attendance_event_id"
     t.index ["style_id"], name: "index_race_goals_on_style_id"
+    t.index ["user_id", "attendance_event_id"], name: "index_race_goals_on_user_and_event"
     t.index ["user_id"], name: "index_race_goals_on_user_id"
   end
 
@@ -197,6 +211,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_145453) do
     t.text "note", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["race_goal_id", "created_at"], name: "index_race_reviews_on_goal_and_created"
     t.index ["race_goal_id"], name: "index_race_reviews_on_race_goal_id"
     t.index ["style_id"], name: "index_race_reviews_on_style_id"
   end
@@ -210,9 +225,12 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_145453) do
     t.bigint "attendance_event_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["attendance_event_id", "created_at"], name: "index_records_on_event_created"
     t.index ["attendance_event_id"], name: "index_records_on_attendance_event_id"
     t.index ["style_id", "time"], name: "index_records_on_style_id_and_time"
     t.index ["style_id"], name: "index_records_on_style_id"
+    t.index ["time"], name: "index_records_time_competition_only", where: "(attendance_event_id IS NOT NULL)"
+    t.index ["user_id", "style_id", "created_at"], name: "index_records_on_user_style_created"
     t.index ["user_id", "style_id", "time"], name: "index_records_on_user_style_time"
     t.index ["user_id", "style_id"], name: "index_records_on_user_id_and_style_id"
     t.index ["user_id", "time"], name: "index_records_on_user_id_and_time"
@@ -224,6 +242,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_145453) do
     t.text "data"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["session_id", "updated_at"], name: "index_sessions_on_id_and_updated"
     t.index ["session_id"], name: "index_sessions_on_session_id", unique: true
     t.index ["updated_at"], name: "index_sessions_on_updated_at"
   end
@@ -276,6 +295,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_24_145453) do
     t.integer "user_type"
     t.index "EXTRACT(month FROM birthday), EXTRACT(day FROM birthday)", name: "index_users_on_birthday_month_day"
     t.index ["generation", "user_type"], name: "index_users_on_generation_and_user_type"
+    t.index ["name", "generation"], name: "index_users_on_name_and_generation"
+    t.index ["name"], name: "index_users_name_players_only", where: "(user_type = 0)"
+    t.index ["user_type", "generation"], name: "index_users_on_user_type_and_generation"
     t.check_constraint "gender = ANY (ARRAY[0, 1, 2])", name: "check_gender"
     t.check_constraint "user_type = ANY (ARRAY[0, 1, 2, 3])", name: "check_user_type"
   end

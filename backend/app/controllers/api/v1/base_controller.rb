@@ -1,7 +1,9 @@
 class Api::V1::BaseController < ActionController::API
   include ActionController::HttpAuthentication::Token::ControllerMethods
+  include SanitizationHelper
 
   before_action :authenticate_user_auth!
+  before_action :set_security_headers
 
   protected
 
@@ -45,6 +47,45 @@ class Api::V1::BaseController < ActionController::API
   end
 
   rescue_from ActiveRecord::RecordInvalid do |e|
-    render_error('Validation failed', :unprocessable_entity, e.record.errors.as_json)
+    render_error('Validation failed', :unprocessable_content, e.record.errors.as_json)
+  end
+
+  # セキュリティヘッダーの設定
+  def set_security_headers
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+  end
+
+  # 管理者権限チェック
+  def require_admin!
+    unless current_user_auth&.user&.admin?
+      render_error('管理者権限が必要です', :forbidden)
+    end
+  end
+
+  # パラメータのサニタイゼーション
+  def sanitize_params(params)
+    params.each do |key, value|
+      if value.is_a?(String)
+        params[key] = sanitize_html(value)
+      elsif value.is_a?(Hash)
+        params[key] = sanitize_params(value)
+      end
+    end
+    params
+  end
+
+  # ログ出力の強化
+  def log_api_request(action, params = {})
+    Rails.logger.info({
+      timestamp: Time.current,
+      user_id: current_user_auth&.user&.id,
+      action: action,
+      params: params.except('password', 'authentication_token'),
+      ip_address: request.remote_ip,
+      user_agent: request.user_agent
+    }.to_json)
   end
 end 
