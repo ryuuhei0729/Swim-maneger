@@ -93,4 +93,31 @@ class HomeController < ApplicationController
       time.present? ? time.to_f : Float::INFINITY
     end
   end
+
+  # 泳法別のCSSクラスを取得するヘルパーメソッド
+  def style_header_class(style)
+    case style
+    when 'fr' then 'bg-header-freestyle'
+    when 'br' then 'bg-header-breaststroke'
+    when 'ba' then 'bg-header-backstroke'
+    when 'fly' then 'bg-header-butterfly'
+    when 'im' then 'bg-header-individual-medley'
+    else 'bg-header-gray'
+    end
+  end
+
+  def style_cell_class(style, is_current_user = false)
+    return 'bg-current-user' if is_current_user
+    
+    case style
+    when 'fr' then 'bg-freestyle-light'
+    when 'br' then 'bg-breaststroke-light'
+    when 'ba' then 'bg-backstroke-light'
+    when 'fly' then 'bg-butterfly-light'
+    when 'im' then 'bg-individual-medley-light'
+    else 'bg-gray-default'
+    end
+  end
+
+  helper_method :style_header_class, :style_cell_class
 end
