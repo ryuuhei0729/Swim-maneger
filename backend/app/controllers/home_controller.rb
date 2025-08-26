@@ -19,16 +19,14 @@ class HomeController < ApplicationController
         @user_attendance_by_event[attendance.attendance_event_id] = attendance
       end
 
-    # 誕生日データを取得
+    # 誕生日データを取得（モデルスコープを活用）
     @birthdays_by_date = {}
-    User.where(user_type: :player).each do |user|
-      # その月の誕生日を取得（年は考慮しない）
-      next unless user.birthday.present?
+    birthday_users = User.players.birthday_in_month(@current_month.month)
+    
+    birthday_users.each do |user|
       birthday_this_month = Date.new(@current_month.year, user.birthday.month, user.birthday.day)
-      if birthday_this_month.month == @current_month.month
-        @birthdays_by_date[birthday_this_month] ||= []
-        @birthdays_by_date[birthday_this_month] << user
-      end
+      @birthdays_by_date[birthday_this_month] ||= []
+      @birthdays_by_date[birthday_this_month] << user
     end
 
     # イベントを日付ごとにグループ化
@@ -42,10 +40,11 @@ class HomeController < ApplicationController
     @announcements = Announcement.active.where("published_at <= ?", Time.current).order(published_at: :desc)
 
     today = Date.current
-    @birthday_users = User.where("EXTRACT(month FROM birthday) = ? AND EXTRACT(day FROM birthday) = ?", today.month, today.day)
+    @birthday_users = User.players.birthday_in_month(today.month)
+                         .where("EXTRACT(day FROM birthday) = ?", today.day)
 
     # ベストタイム表示で使うコントローラー
-    @players = User.where(user_type: :player).order(generation: :asc)
+    @players = User.players.order(generation: :asc)
     @male_players = @players.select { |p| p.male? }
     @female_players = @players.select { |p| p.female? }
     @default_tab = params[:tab] || (current_user_auth.user.male? ? "male" : "female")
@@ -59,17 +58,23 @@ class HomeController < ApplicationController
       }
     end
 
-    # 各選手のベストタイムを取得
+    # 各選手のベストタイムを取得（N+1問題を解決）
     @best_times = {}
+    
+    # 全選手の全記録を一括取得（eager loading）
+    all_records = Record.includes(:style, :user)
+                       .where(user_id: @players.pluck(:id))
+                       .order(:time)
+    
+    # 選手とスタイル別にグループ化してベストタイムを抽出
+    records_by_user_and_style = all_records.group_by { |r| [r.user_id, r.style.name] }
+    
     @players.each do |player|
       @best_times[player.id] = {}
       @events.each do |event|
-        best_record = player.records
-          .joins(:style)
-          .where(styles: { name: event[:id] })
-          .order(:time)
-          .first
-        @best_times[player.id][event[:id]] = best_record&.time
+        key = [player.id, event[:id]]
+        records = records_by_user_and_style[key] || []
+        @best_times[player.id][event[:id]] = records.first&.time
       end
     end
 

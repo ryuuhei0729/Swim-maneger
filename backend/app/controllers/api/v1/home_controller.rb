@@ -20,18 +20,17 @@ class Api::V1::HomeController < Api::V1::BaseController
       .where(date: current_month.beginning_of_month..current_month.end_of_month)
       .order(date: :asc)
 
-    # 誕生日データを取得
+    # 誕生日データを取得（SQLレベルで月フィルタリング）
     birthdays_by_date = {}
-    User.where(user_type: :player).each do |user|
-      next unless user.birthday
-      
-      # その月の誕生日を取得（年は考慮しない）
+    birthday_users = User.where(user_type: :player)
+                        .where("EXTRACT(month FROM birthday) = ?", current_month.month)
+                        .where.not(birthday: nil)
+    
+    birthday_users.each do |user|
       birthday_this_month = Date.new(current_month.year, user.birthday.month, user.birthday.day)
-      if birthday_this_month.month == current_month.month
-        date_key = birthday_this_month.to_s
-        birthdays_by_date[date_key] ||= []
-        birthdays_by_date[date_key] << format_birthday_user(user, birthday_this_month)
-      end
+      date_key = birthday_this_month.to_s
+      birthdays_by_date[date_key] ||= []
+      birthdays_by_date[date_key] << format_birthday_user(user, birthday_this_month)
     end
 
     # 両方のイベントを日付ごとにグループ化してマージ
@@ -44,11 +43,16 @@ class Api::V1::HomeController < Api::V1::BaseController
       events_by_date[date_key] << format_general_event(event)
     end
 
+    # ユーザーの出席情報を事前に一括取得してN+1を回避
+    user_attendances = current_user_auth.user.attendance
+                                          .where(attendance_event: attendance_events)
+                                          .index_by(&:attendance_event_id)
+    
     # 出席イベントを追加
     attendance_events.each do |event|
       date_key = event.date.to_s
       events_by_date[date_key] ||= []
-      events_by_date[date_key] << format_attendance_event(event)
+      events_by_date[date_key] << format_attendance_event(event, user_attendances[event.id])
     end
 
     {
@@ -116,16 +120,23 @@ class Api::V1::HomeController < Api::V1::BaseController
       }
     end
 
-    # 各選手のベストタイムを取得
+    # 各選手のベストタイムを取得（N+1問題を解決）
     best_times = {}
+    
+    # 全選手の全記録を一括取得（eager loading）
+    all_records = Record.includes(:style, :user)
+                       .where(user_id: players.pluck(:id))
+                       .order(:time)
+    
+    # 選手とスタイル別にグループ化してベストタイムを抽出
+    records_by_user_and_style = all_records.group_by { |r| [r.user_id, r.style.name] }
+    
     players.each do |player|
       best_times[player.id] = {}
       styles.each do |style|
-        best_record = player.records
-          .joins(:style)
-          .where(styles: { name: style[:id] })
-          .order(:time)
-          .first
+        key = [player.id, style[:id]]
+        records = records_by_user_and_style[key] || []
+        best_record = records.first
         best_times[player.id][style[:id]] = {
           time: best_record&.time,
           formatted_time: format_swim_time(best_record&.time),
@@ -169,9 +180,7 @@ class Api::V1::HomeController < Api::V1::BaseController
     }
   end
 
-  def format_attendance_event(event)
-    user_attendance = current_user_auth.user.attendance.find_by(attendance_event: event)
-    
+  def format_attendance_event(event, user_attendance = nil)
     {
       id: event.id,
       title: event.title,

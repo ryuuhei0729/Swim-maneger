@@ -36,41 +36,10 @@ class Admin::PracticesController < Admin::BaseController
     
     PracticeLog.transaction do
       @practice_log.update!(practice_log_params)
-
-      # 既存のタイムを削除
-      @practice_log.practice_times.destroy_all
-
-      # 新しいタイムを保存
-      times_params = params.require(:times)
-      times_params.each do |user_id, set_data|
-        set_data.each do |set_number, rep_data|
-          rep_data.each do |rep_number, time|
-            next if time.blank?
-
-            # 時間を秒に変換 (MM:SS.ss or SS.ss)
-            total_seconds = 0.0
-            if time.include?(":")
-              minutes, seconds_part = time.split(":", 2)
-              total_seconds = minutes.to_i * 60 + seconds_part.to_f
-            else
-              total_seconds = time.to_f
-            end
-
-            PracticeTime.create!(
-              user_id: user_id,
-              practice_log_id: @practice_log.id,
-              set_number: set_number,
-              rep_number: rep_number,
-              time: total_seconds
-            )
-          end
-        end
-      end
-
+      update_practice_times_for_log(@practice_log, params[:times]) if params[:times].present?
       redirect_to admin_practice_path, notice: "練習記録を更新しました。"
     rescue ActiveRecord::RecordInvalid => e
-      @styles = PracticeLog::STYLE_OPTIONS
-      @practice_times_by_user = @practice_log.practice_times.group_by(&:user)
+      prepare_edit_view
       flash.now[:alert] = "更新に失敗しました: #{@practice_log.errors.full_messages.join(', ')}"
       render :edit, status: :unprocessable_entity
     end
@@ -144,57 +113,10 @@ class Admin::PracticesController < Admin::BaseController
 
     PracticeLog.transaction do
       @practice_log.save!
-
-      # timesパラメータが存在するかチェック
-      if params[:times].present?
-        times_params = params[:times]
-        times_params.each do |user_id, set_data|
-        set_data.each do |set_number, rep_data|
-          rep_data.each do |rep_number, time|
-            next if time.blank?
-
-            # 時間を秒に変換 (MM:SS.ss or SS.ss)
-            total_seconds = 0.0
-            if time.include?(":")
-              minutes, seconds_part = time.split(":", 2)
-              total_seconds = minutes.to_i * 60 + seconds_part.to_f
-            else
-              total_seconds = time.to_f
-            end
-
-            PracticeTime.create!(
-              user_id: user_id,
-              practice_log_id: @practice_log.id,
-              set_number: set_number,
-              rep_number: rep_number,
-              time: total_seconds
-            )
-          end
-        end
-      end
-      end
-
+      create_practice_times_for_log(@practice_log, params[:times]) if params[:times].present?
       redirect_to admin_practice_path, notice: "練習タイムとメニューを保存しました。"
     rescue ActiveRecord::RecordInvalid => e
-      # 失敗した場合、必要なインスタンス変数を再設定して元のページをレンダリング
-      @styles = PracticeLog::STYLE_OPTIONS
-      @attendance_events = AttendanceEvent.order(date: :desc)
-      @default_event = @attendance_events.find_by(id: practice_log_params[:attendance_event_id]) || @attendance_events.first
-
-      # モーダルを再表示するためのパラメータも設定
-      @laps = @practice_log.rep_count || 1
-      @sets = @practice_log.set_count || 1
-      @show_modal = true
-      if practice_log_params[:attendance_event_id].present?
-        @event = AttendanceEvent.find(practice_log_params[:attendance_event_id])
-        @attendees = @event.attendances.includes(:user)
-                          .where(status: [ "present", "other" ])
-                          .joins(:user)
-                          .where(users: { user_type: "player" })
-                          .map(&:user)
-                          .sort_by { |user| [ user.generation, user.name ] }
-      end
-
+      prepare_time_view
       flash.now[:alert] = "保存に失敗しました: #{@practice_log.errors.full_messages.join(', ')}"
       render :time, status: :unprocessable_entity
     end
@@ -248,6 +170,66 @@ class Admin::PracticesController < Admin::BaseController
   end
 
   private
+
+  def update_practice_times_for_log(practice_log, times_params)
+    # 既存のタイムを削除
+    practice_log.practice_times.destroy_all
+
+    # 新しいタイムを保存
+    create_practice_times_from_params(practice_log, times_params)
+  end
+
+  def create_practice_times_for_log(practice_log, times_params)
+    create_practice_times_from_params(practice_log, times_params)
+  end
+
+  def create_practice_times_from_params(practice_log, times_params)
+    times_params.each do |user_id, set_data|
+      set_data.each do |set_number, rep_data|
+        rep_data.each do |rep_number, time|
+          next if time.blank?
+
+          total_seconds = helpers.parse_time_to_seconds(time)
+
+          PracticeTime.create!(
+            user_id: user_id,
+            practice_log_id: practice_log.id,
+            set_number: set_number,
+            rep_number: rep_number,
+            time: total_seconds
+          )
+        end
+      end
+    end
+  end
+
+  def prepare_edit_view
+    @styles = PracticeLog::STYLE_OPTIONS
+    @practice_times_by_user = @practice_log.practice_times.group_by(&:user)
+  end
+
+  def prepare_time_view
+    @styles = PracticeLog::STYLE_OPTIONS
+    @attendance_events = AttendanceEvent.order(date: :desc)
+    @default_event = @attendance_events.find_by(id: practice_log_params[:attendance_event_id]) || @attendance_events.first
+
+    # モーダル再表示用パラメータ
+    @laps = @practice_log.rep_count || 1
+    @sets = @practice_log.set_count || 1
+    @show_modal = true
+    
+    prepare_attendees_data if practice_log_params[:attendance_event_id].present?
+  end
+
+  def prepare_attendees_data
+    @event = AttendanceEvent.find(practice_log_params[:attendance_event_id])
+    @attendees = @event.attendances.includes(:user)
+                      .where(status: ["present", "other"])
+                      .joins(:user)
+                      .where(users: { user_type: "player" })
+                      .map(&:user)
+                      .sort_by { |user| [user.generation, user.name] }
+  end
 
   def practice_log_params
     params.require(:practice_log).permit(:attendance_event_id, :style, :rep_count, :set_count, :distance, :circle, :note)

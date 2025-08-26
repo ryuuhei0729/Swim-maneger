@@ -1,12 +1,20 @@
 class Api::V1::RacesController < Api::V1::BaseController
   def index
+    user_id = current_user_auth.user.id
+    
     practice_logs = PracticeLog.includes(:practice_times, :attendance_event)
-                              .where(practice_times: { user_id: current_user_auth.user.id })
+                              .where(practice_times: { user_id: user_id })
                               .order(created_at: :desc)
+
+    # 事前にユーザーのタイム数を一括取得してN+1を回避
+    practice_times_count = {}
+    practice_logs.each do |log|
+      practice_times_count[log.id] = log.practice_times.select { |pt| pt.user_id == user_id }.count
+    end
 
     render_success({
       total_count: practice_logs.count,
-      practice_logs: practice_logs.map { |log| format_practice_log(log) }
+      practice_logs: practice_logs.map { |log| format_practice_log(log, practice_times_count[log.id]) }
     })
   end
 
@@ -29,7 +37,7 @@ class Api::V1::RacesController < Api::V1::BaseController
 
   private
 
-  def format_practice_log(log)
+  def format_practice_log(log, times_count = nil)
     {
       id: log.id,
       date: log.attendance_event.date,
@@ -42,7 +50,7 @@ class Api::V1::RacesController < Api::V1::BaseController
       circle: log.circle,
       note: log.note,
       created_at: log.created_at,
-      times_count: log.practice_times.where(user_id: current_user_auth.user.id).count
+      times_count: times_count || log.practice_times.where(user_id: current_user_auth.user.id).count
     }
   end
 
@@ -97,16 +105,6 @@ class Api::V1::RacesController < Api::V1::BaseController
     times.sum(&:time) / times.count.to_f
   end
 
-  def format_time_display(seconds)
-    return "-" if seconds.nil? || seconds.zero?
-
-    minutes = (seconds / 60).floor
-    remaining_seconds = (seconds % 60).round(2)
-
-    if minutes.zero?
-      sprintf("%05.2f", remaining_seconds)
-    else
-      sprintf("%d:%05.2f", minutes, remaining_seconds)
-    end
-  end
+  # 時間フォーマット関連のヘルパーメソッドをinclude
+  include TimeHelper
 end 

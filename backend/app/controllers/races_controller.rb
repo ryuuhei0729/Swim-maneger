@@ -43,92 +43,45 @@ class RacesController < ApplicationController
   end
 
   def submit_entry
-    @user = current_user_auth.user
-
-    # バリデーション
-    unless params[:competition_id].present?
-      render json: { success: false, message: "大会を選択してください。" }
-      return
-    end
-
-    @event = Competition.find(params[:competition_id])
-
-    # 選択された種目とタイム
+    return render_entry_error("大会を選択してください。") unless params[:competition_id].present?
+    
     selected_styles = params[:selected_styles] || {}
-
-    if selected_styles.empty?
-      render json: { success: false, message: "エントリーする種目を選択してください。" }
-      return
-    end
+    return render_entry_error("エントリーする種目を選択してください。") if selected_styles.empty?
 
     begin
-      Entry.transaction do
-        # その大会の既存エントリーを全て削除
-        deleted_count = @user.entries.where(attendance_event: @event).count
-        @user.entries.where(attendance_event: @event).destroy_all
-        
-        # 新規エントリーを作成
-        success_count = 0
-        selected_styles.each do |style_id, time_str|
-          next if time_str.blank?
-
-          style = Style.find(style_id)
-
-          # 時間を秒に変換
-          entry_time = parse_time_to_seconds(time_str)
-
-          # 新規エントリーを作成
-          Entry.create!(
-            user: @user,
-            attendance_event: @event,
-            style: style,
-            entry_time: entry_time
-          )
-
-          success_count += 1
-        end
-
-        # 結果メッセージを表示
-        if deleted_count > 0
-          render json: {
-            success: true,
-            message: "#{success_count}種目のエントリーを提出しました。"
-          }
-        else
-          render json: {
-            success: true,
-            message: "#{success_count}種目のエントリーを提出しました。"
-          }
-        end
-      end
+      success_count = process_entry_submission(selected_styles)
+      render json: { success: true, message: "#{success_count}種目のエントリーを提出しました。" }
     rescue ActiveRecord::RecordInvalid => e
-      render json: { success: false, message: "エントリーに失敗しました: #{e.message}" }
+      render_entry_error("エントリーに失敗しました: #{e.message}")
     rescue => e
-      render json: { success: false, message: "エラーが発生しました: #{e.message}" }
+      Rails.logger.error "Entry submission failed: #{e.message}"
+      render_entry_error("エラーが発生しました: #{e.message}")
     end
   end
 
   def delete_entry
-    @user = current_user_auth.user
-    @entry = @user.entries.find(params[:id])
+    entry = current_user_auth.user.entries.find(params[:id])
 
-    if @entry.destroy
+    if entry.destroy
       render json: { success: true, message: "エントリーを削除しました。" }
     else
       render json: { success: false, message: "エントリーの削除に失敗しました。" }
     end
   rescue ActiveRecord::RecordNotFound
     render json: { success: false, message: "エントリーが見つかりません。" }
+  rescue => e
+    Rails.logger.error "Entry deletion failed: #{e.message}"
+    render json: { success: false, message: "システムエラーが発生しました。" }
   end
 
   def get_current_entries
-    @user = current_user_auth.user
     competition_id = params[:competition_id]
     
-    @entries = @user.entries.includes(:style)
-                    .where(attendance_event_id: competition_id)
+    entries = current_user_auth.user.entries
+                                   .includes(:style)
+                                   .by_event_id(competition_id)
     
-    entries_data = @entries.map do |entry|
+    entries_data = entries.map do |entry|
       {
         style_id: entry.style_id,
         entry_time: entry.formatted_entry_time
@@ -137,48 +90,46 @@ class RacesController < ApplicationController
     
     render json: { entries: entries_data }
   rescue => e
+    Rails.logger.error "Failed to get current entries: #{e.message}"
     render json: { entries: [] }
   end
 
   private
 
-  def format_time_display(seconds)
-    return "-" if seconds.nil? || seconds.zero?
+  def process_entry_submission(selected_styles)
+    event = Competition.find(params[:competition_id])
+    user = current_user_auth.user
+    
+    Entry.transaction do
+      # 既存のエントリーを削除
+      user.entries.where(attendance_event: event).destroy_all
+      
+      # 新規エントリーを作成
+      success_count = 0
+      selected_styles.each do |style_id, time_str|
+        next if time_str.blank?
 
-    minutes = (seconds / 60).floor
-    remaining_seconds = (seconds % 60).round(2)
+        style = Style.find(style_id)
+        entry_time = helpers.parse_time_to_seconds(time_str)
 
-    if minutes.zero?
-      sprintf("%05.2f", remaining_seconds)
-    else
-      sprintf("%d:%05.2f", minutes, remaining_seconds)
+        Entry.create!(
+          user: user,
+          attendance_event: event,
+          style: style,
+          entry_time: entry_time
+        )
+
+        success_count += 1
+      end
+      
+      success_count
     end
   end
 
-  def parse_time_to_seconds(time_str)
-    return 0.0 if time_str.blank?
-
-    # MM:SS.ss または SS.ss 形式をパース
-    if time_str.include?(":")
-      minutes, seconds_part = time_str.split(":", 2)
-      minutes.to_i * 60 + seconds_part.to_f
-    else
-      time_str.to_f
-    end
+  def render_entry_error(message)
+    render json: { success: false, message: message }
   end
 
-  def format_time(seconds)
-    return "-" if seconds.nil? || seconds.zero?
-
-    minutes = (seconds / 60).floor
-    remaining_seconds = (seconds % 60).round(2)
-
-    if minutes.zero?
-      sprintf("%05.2f", remaining_seconds)
-    else
-      sprintf("%d:%05.2f", minutes, remaining_seconds)
-    end
-  end
-
-  helper_method :format_time_display, :format_time
+  # 時間フォーマット関連のヘルパーメソッドをinclude
+  include TimeHelper
 end

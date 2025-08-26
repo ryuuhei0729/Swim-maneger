@@ -9,7 +9,8 @@ class Admin::BaseController < ApplicationController
   private
 
   def check_admin_access
-    unless current_user_auth.user.user_type.in?(["coach", "director", "manager"])
+    unless current_user_auth.user.admin?
+      Rails.logger.warn "Unauthorized admin access attempt by user #{current_user_auth.user.id}"
       redirect_to home_path, alert: "このページにアクセスする権限がありません。"
     end
   end

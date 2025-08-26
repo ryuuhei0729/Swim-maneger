@@ -53,19 +53,35 @@ class User < ApplicationRecord
     avatar.attached? ? avatar : nil
   end
 
+  # スコープの追加
+  scope :players, -> { where(user_type: :player) }
+  scope :admins, -> { where(user_type: [:coach, :director, :manager]) }
+  scope :by_generation, ->(gen) { where(generation: gen) }
+  scope :birthday_in_month, ->(month) { where("EXTRACT(month FROM birthday) = ?", month).where.not(birthday: nil) }
+
   def best_time_notes
+    # N+1問題を回避するため、一度にすべての記録を取得
+    records_by_style = records.includes(:style).group_by(&:style)
+    
     best_notes = {}
     Style.all.each do |style|
-      best_record = records.where(style: style).order(:time).first
+      style_records = records_by_style[style] || []
+      best_record = style_records.min_by(&:time)
       best_notes[style.name] = best_record&.note
     end
     best_notes
   end
 
-  # 指定した種目のベストタイムを取得するメソッド
+  # 指定した種目のベストタイムを取得するメソッド（最適化版）
   def best_time_for_style(style)
-    best_record = records.where(style: style).order(:time).first
-    best_record&.time
+    records.where(style: style).minimum(:time)
+  end
+
+  # 全種目のベストタイムを効率的に取得
+  def best_times_by_style
+    records.joins(:style)
+           .group('styles.name')
+           .minimum(:time)
   end
 
   # 指定した種目のベストタイムをフォーマットして取得するメソッド
@@ -73,12 +89,13 @@ class User < ApplicationRecord
     best_time = best_time_for_style(style)
     return nil unless best_time
     
-    minutes = (best_time / 60).to_i
-    seconds = (best_time % 60).round(2)
-    if minutes > 0
-      "#{minutes}:#{format('%05.2f', seconds)}"
+    minutes = (best_time / 60).floor
+    remaining_seconds = (best_time % 60).round(2)
+
+    if minutes.zero?
+      sprintf("%05.2f", remaining_seconds)
     else
-      format('%.2f', seconds)
+      sprintf("%d:%05.2f", minutes, remaining_seconds)
     end
   end
 
