@@ -110,6 +110,9 @@ class CacheService
     
     # 統計情報キャッシュの無効化
     Rails.cache.delete_matched("statistics:*")
+    
+    # ベストタイムキャッシュの無効化（ホーム画面用）
+    Rails.cache.delete_matched("best_times_*")
   end
 
   def self.invalidate_objectives_cache(user_id = nil)
