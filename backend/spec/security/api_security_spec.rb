@@ -22,14 +22,14 @@ RSpec.describe 'API Security', type: :request do
       # トークンを生成してから無効化
       token = get_auth_token(user_auth)
       user_auth.update!(authentication_token: nil) # トークンを無効化
-      
+
       get '/api/v1/home', headers: { 'Authorization' => "Bearer #{token}" }
       expect(response).to have_http_status(:unauthorized)
     end
 
     it '一般ユーザーでの管理者機能アクセス拒否' do
       token = get_auth_token(user_auth)
-      
+
       get '/api/v1/admin/dashboard', headers: { 'Authorization' => "Bearer #{token}" }
       expect(response).to have_http_status(:forbidden)
     end
@@ -39,13 +39,13 @@ RSpec.describe 'API Security', type: :request do
     it 'HTMLタグのエスケープ' do
       token = get_auth_token(user_auth)
       malicious_input = '<script>alert("xss")</script><img src="x" onerror="alert(1)">'
-      
-      patch '/api/v1/mypage', 
+
+      patch '/api/v1/mypage',
             params: { user: { bio: malicious_input } },
             headers: { 'Authorization' => "Bearer #{token}" }
-      
+
       expect(response).to have_http_status(:ok)
-      
+
       # レスポンスにスクリプトが含まれていないことを確認
       response_body = response.body
       expect(response_body).not_to include('<script>')
@@ -56,11 +56,11 @@ RSpec.describe 'API Security', type: :request do
     it 'JavaScriptイベントハンドラーの無効化' do
       token = get_auth_token(user_auth)
       malicious_input = 'javascript:alert("xss")'
-      
-      patch '/api/v1/mypage', 
+
+      patch '/api/v1/mypage',
             params: { user: { bio: malicious_input } },
             headers: { 'Authorization' => "Bearer #{token}" }
-      
+
       expect(response).to have_http_status(:ok)
       expect(response.body).not_to include('javascript:')
     end
@@ -75,11 +75,11 @@ RSpec.describe 'API Security', type: :request do
         "'; INSERT INTO users VALUES (999, 'hacker'); --",
         "' UNION SELECT * FROM users --"
       ]
-      
+
       malicious_inputs.each do |input|
-        get "/api/v1/members?search=#{input}", 
+        get "/api/v1/members?search=#{input}",
             headers: { 'Authorization' => "Bearer #{token}" }
-        
+
         expect(response).to have_http_status(:ok)
         # データベースが正常に動作していることを確認
         expect(User.count).to be > 0
@@ -88,13 +88,13 @@ RSpec.describe 'API Security', type: :request do
 
     it 'パラメータ化クエリの使用' do
       token = get_auth_token(user_auth)
-      
+
       # 特殊文字を含む検索
       special_chars = "';--/*()[]{}\"'`~!@#$%^&*()_+-="
-      
-      get "/api/v1/members?search=#{special_chars}", 
+
+      get "/api/v1/members?search=#{special_chars}",
           headers: { 'Authorization' => "Bearer #{token}" }
-      
+
       expect(response).to have_http_status(:ok)
       expect(User.count).to be > 0
     end
@@ -103,12 +103,12 @@ RSpec.describe 'API Security', type: :request do
   describe 'CSRF対策テスト' do
     it 'APIエンドポイントでのCSRF保護' do
       token = get_auth_token(user_auth)
-      
+
       # CSRFトークンなしでのPOSTリクエスト
-      post '/api/v1/objectives', 
+      post '/api/v1/objectives',
            params: { objective: { title: 'test' } },
            headers: { 'Authorization' => "Bearer #{token}" }
-      
+
       # APIではCSRFトークンが不要であることを確認
       expect(response).not_to have_http_status(:unprocessable_entity)
     end
@@ -117,33 +117,33 @@ RSpec.describe 'API Security', type: :request do
   describe '入力値検証テスト' do
     it '不正なパラメータの拒否' do
       token = get_auth_token(user_auth)
-      
+
       # 不正なパラメータ
       invalid_params = [
         { user: { email: 'invalid-email' } },
         { user: { generation: 'not-a-number' } },
         { user: { user_type: 999 } }
       ]
-      
+
       invalid_params.each do |params|
-        patch '/api/v1/mypage', 
+        patch '/api/v1/mypage',
               params: params,
               headers: { 'Authorization' => "Bearer #{token}" }
-        
+
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end
 
     it 'ファイルアップロードの検証' do
       token = get_auth_token(user_auth)
-      
+
       # 不正なファイルタイプ
       malicious_file = fixture_file_upload('malicious.php', 'application/x-php')
-      
-      patch '/api/v1/mypage', 
+
+      patch '/api/v1/mypage',
             params: { user: { avatar: malicious_file } },
             headers: { 'Authorization' => "Bearer #{token}" }
-      
+
       expect(response).to have_http_status(:unprocessable_entity)
     end
   end
@@ -151,7 +151,7 @@ RSpec.describe 'API Security', type: :request do
   describe 'レート制限テスト' do
     it 'APIレート制限の動作' do
       token = get_auth_token(user_auth)
-      
+
       # 制限内でのリクエスト
       10.times do
         get '/api/v1/home', headers: { 'Authorization' => "Bearer #{token}" }
@@ -161,7 +161,7 @@ RSpec.describe 'API Security', type: :request do
 
     it 'ログイン試行制限' do
       limit = 5
-      
+
       # 制限前の5回は認証失敗だが429ではないことを確認
       limit.times do
         post '/api/v1/auth/login', params: {
@@ -171,7 +171,7 @@ RSpec.describe 'API Security', type: :request do
         expect(response).not_to have_http_status(:too_many_requests)
         expect(response).to have_http_status(:unauthorized)
       end
-      
+
       # 6回目で制限がかかることを確認
       post '/api/v1/auth/login', params: {
         email: user_auth.email,
@@ -184,27 +184,34 @@ RSpec.describe 'API Security', type: :request do
   describe 'セッション管理テスト' do
     it 'セッションタイムアウト' do
       token = get_auth_token(user_auth)
-      
+
       # 期限切れトークンのシミュレーション
       # 実際の認証フローで期限切れトークンが拒否されることをテスト
       expired_user_auth = UserAuth.find_by(authentication_token: token)
       expired_user_auth.update!(authentication_token: nil) # トークンを無効化
-      
+
       get '/api/v1/home', headers: { 'Authorization' => "Bearer #{token}" }
       expect(response).to have_http_status(:unauthorized)
     end
 
     it '同時セッション制限' do
-      # 複数のトークンを生成
+      # 複数のトークンを生成（UserAuthモデルは認証トークンを上書きするため、最新のトークンのみ有効）
       tokens = []
       3.times do
         tokens << get_auth_token(user_auth)
       end
-      
-      # 全てのトークンが有効であることを確認
-      tokens.each do |token|
+
+      # 最新のトークンのみが有効であることを確認
+      tokens.each_with_index do |token, index|
         get '/api/v1/home', headers: { 'Authorization' => "Bearer #{token}" }
-        expect(response).to have_http_status(:ok)
+
+        if index == tokens.length - 1
+          # 最新のトークン（最後に生成されたトークン）は有効
+          expect(response).to have_http_status(:ok)
+        else
+          # 古いトークンは無効（unauthorizedまたはforbidden）
+          expect(response).to have_http_status(:unauthorized)
+        end
       end
     end
   end
@@ -212,9 +219,9 @@ RSpec.describe 'API Security', type: :request do
   describe 'データ漏洩対策テスト' do
     it '機密情報の除外' do
       token = get_auth_token(user_auth)
-      
+
       get '/api/v1/mypage', headers: { 'Authorization' => "Bearer #{token}" }
-      
+
       response_body = response.body
       # 機密情報が含まれていないことを確認
       expect(response_body).not_to include('password')
@@ -225,10 +232,10 @@ RSpec.describe 'API Security', type: :request do
 
     it 'エラーメッセージでの情報漏洩防止' do
       token = get_auth_token(user_auth)
-      
+
       # 存在しないリソースへのアクセス
       get '/api/v1/users/999999', headers: { 'Authorization' => "Bearer #{token}" }
-      
+
       # 詳細なエラー情報が含まれていないことを確認
       expect(response.body).not_to include('ActiveRecord::RecordNotFound')
       expect(response.body).not_to include('database')
@@ -238,9 +245,9 @@ RSpec.describe 'API Security', type: :request do
   describe 'HTTPセキュリティヘッダーテスト' do
     it 'セキュリティヘッダーの設定' do
       token = get_auth_token(user_auth)
-      
+
       get '/api/v1/home', headers: { 'Authorization' => "Bearer #{token}" }
-      
+
       # セキュリティヘッダーの確認
       expect(response.headers['X-Content-Type-Options']).to eq('nosniff')
       expect(response.headers['X-Frame-Options']).to eq('DENY')
@@ -253,22 +260,22 @@ RSpec.describe 'API Security', type: :request do
     it 'ユーザーIDの改ざん防止' do
       token = get_auth_token(user_auth)
       other_user = create(:user, :player)
-      
+
       # 他のユーザーの情報にアクセスしようとする
-      get "/api/v1/users/#{other_user.id}", 
+      get "/api/v1/users/#{other_user.id}",
           headers: { 'Authorization' => "Bearer #{token}" }
-      
+
       expect(response).to have_http_status(:forbidden)
     end
 
     it '管理者権限の不正取得防止' do
       token = get_auth_token(user_auth)
-      
+
       # 管理者機能にアクセスしようとする
-      patch "/api/v1/users/#{user.id}", 
+      patch "/api/v1/users/#{user.id}",
             params: { user: { user_type: 3 } }, # director
             headers: { 'Authorization' => "Bearer #{token}" }
-      
+
       expect(response).to have_http_status(:forbidden)
     end
   end
@@ -282,20 +289,20 @@ RSpec.describe 'API Security', type: :request do
           password: 'wrong_password'
         }
       end
-      
+
       # アカウントがロックされることを確認
       expect(response).to have_http_status(:too_many_requests)
     end
 
     it 'パスワード強度の検証' do
-      weak_passwords = ['123456', 'password', 'qwerty', 'abc123']
-      
+      weak_passwords = [ '123456', 'password', 'qwerty', 'abc123' ]
+
       weak_passwords.each do |password|
         post '/api/v1/auth/login', params: {
           email: user_auth.email,
           password: password
         }
-        
+
         # 弱いパスワードでのログインが拒否されることを確認
         expect(response).to have_http_status(:unauthorized)
       end
