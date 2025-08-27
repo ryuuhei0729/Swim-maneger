@@ -93,6 +93,9 @@ GEM
     bcrypt_pbkdf (1.1.1-arm64-darwin)
     bcrypt_pbkdf (1.1.1-x86_64-darwin)
     benchmark (0.4.1)
+    benchmark-malloc (0.2.0)
+    benchmark-perf (0.6.0)
+    benchmark-trend (0.4.0)
     bigdecimal (3.2.2)
     bindex (0.8.1)
     bootsnap (1.18.4)
@@ -196,6 +199,7 @@ GEM
       net-smtp
     marcel (1.0.4)
     matrix (0.4.2)
+    memory_profiler (1.1.0)
     mini_mime (1.1.5)
     minitest (5.25.5)
     msgpack (1.8.0)
@@ -322,6 +326,11 @@ GEM
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
       rspec-mocks (~> 3.13.0)
+    rspec-benchmark (0.6.0)
+      benchmark-malloc (~> 0.2)
+      benchmark-perf (~> 0.6)
+      benchmark-trend (~> 0.4)
+      rspec (>= 3.0)
     rspec-core (3.13.5)
       rspec-support (~> 3.13.0)
     rspec-expectations (3.13.5)
@@ -485,6 +494,7 @@ DEPENDENCIES
   jbuilder
   kamal
   kaminari
+  memory_profiler
   pg (~> 1.6)
   propshaft
   puma (>= 5.0)
@@ -492,6 +502,7 @@ DEPENDENCIES
   rails (~> 8.0.2)
   rails-controller-testing
   roo
+  rspec-benchmark
   rspec-rails
   rspec-sqlimit
   rubocop-rails-omakase

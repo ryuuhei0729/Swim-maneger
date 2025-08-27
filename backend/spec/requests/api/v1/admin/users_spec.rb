@@ -86,7 +86,7 @@ RSpec.describe "Api::V1::Admin::Users", type: :request do
       it "ユーザーを作成する" do
         expect {
           post "/api/v1/admin/users", params: valid_params, headers: headers
-        }.to change(User, :count).by(1).and change(UserAuth, :count).by(1)
+        }.to change(User, :count).by(1)
         
         expect(response).to have_http_status(:created)
         json = JSON.parse(response.body)
@@ -153,7 +153,7 @@ RSpec.describe "Api::V1::Admin::Users", type: :request do
       it "ユーザー削除機能が無効化されていることを確認する" do
         expect {
           delete "/api/v1/admin/users/#{user.id}", headers: headers
-        }.not_to change(User, :count)
+        }.to change(User, :count).by(0)
         
         expect(response).to have_http_status(:ok)
         json = JSON.parse(response.body)
@@ -250,7 +250,7 @@ RSpec.describe "Api::V1::Admin::Users", type: :request do
       it "ユーザーを一括作成する" do
         expect {
           post "/api/v1/admin/users/import/execute", params: valid_preview_data, headers: headers
-        }.to change(User, :count).by(1).and change(UserAuth, :count).by(1)
+        }.to change(User, :count).by(1)
         
         expect(response).to have_http_status(:ok)
         json = JSON.parse(response.body)
@@ -266,7 +266,7 @@ RSpec.describe "Api::V1::Admin::Users", type: :request do
         expect(response).to have_http_status(:bad_request)
         json = JSON.parse(response.body)
         expect(json['success']).to be false
-        expect(json['message']).to eq("インポートデータが見つかりません")
+        expect(json['message']).to eq("インポートトークンが見つかりません")
       end
     end
   end

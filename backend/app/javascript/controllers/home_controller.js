@@ -5,27 +5,42 @@ export default class extends Controller {
   static values = { defaultTab: String }
 
   connect() {
+    // バウンドされたハンドラーを作成（一度だけ）
+    this.boundHandleTabClick = this.handleTabClick.bind(this)
+    this.boundHandleSortClick = this.handleSortClick.bind(this)
+    
     this.initializeTabs()
     this.initializeSortHeaders()
+  }
+
+  disconnect() {
+    // イベントリスナーをクリーンアップ
+    this.tabTargets.forEach((tab) => {
+      tab.removeEventListener('click', this.boundHandleTabClick)
+    })
+    
+    this.sortHeaderTargets.forEach((header) => {
+      header.removeEventListener('click', this.boundHandleSortClick)
+    })
   }
 
   initializeTabs() {
     this.tabTargets.forEach((tab, index) => {
       // 既存のイベントリスナーを削除
-      tab.removeEventListener('click', this.handleTabClick)
+      tab.removeEventListener('click', this.boundHandleTabClick)
       
       // 新しいイベントリスナーを追加
-      tab.addEventListener('click', this.handleTabClick.bind(this))
+      tab.addEventListener('click', this.boundHandleTabClick)
     })
   }
 
   initializeSortHeaders() {
     this.sortHeaderTargets.forEach((header, index) => {
       // 既存のイベントリスナーを削除
-      header.removeEventListener('click', this.handleSortClick)
+      header.removeEventListener('click', this.boundHandleSortClick)
       
       // 新しいイベントリスナーを追加
-      header.addEventListener('click', this.handleSortClick.bind(this))
+      header.addEventListener('click', this.boundHandleSortClick)
     })
   }
 

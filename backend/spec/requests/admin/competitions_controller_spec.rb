@@ -29,7 +29,7 @@ RSpec.describe Admin::CompetitionsController, type: :request do
     before { sign_in coach_auth }
 
     it 'エントリー一覧がJSONで返される' do
-      get admin_show_entries_path(event_id: event.id), headers: { 'Accept' => 'application/json' }
+      get admin_show_entries_path(competition_id: event.id), headers: { 'Accept' => 'application/json' }
       expect(response).to have_http_status(:ok)
       expect(response.content_type).to include('application/json')
     end

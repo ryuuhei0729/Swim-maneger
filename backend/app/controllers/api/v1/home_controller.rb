@@ -91,7 +91,7 @@ class Api::V1::HomeController < Api::V1::BaseController
       id: event.id,
       title: event.title,
       date: event.date,
-      event_type: event.type,
+      event_type: event.class.name,
       place: event.place
     }
   end

@@ -5,7 +5,17 @@ class HomeController < ApplicationController
     start_time = Time.current
     
     # 現在の月を取得
-    @current_month = params[:month] ? Date.parse(params[:month]) : Date.current.beginning_of_month
+    @current_month = if params[:month].present?
+      begin
+        Date.parse(params[:month])
+      rescue ArgumentError => e
+        Rails.logger.warn "Invalid date format in params[:month]: #{params[:month]}, error: #{e.message}"
+        flash.now[:warning] = "無効な日付形式です。現在の月を表示します。"
+        Date.current.beginning_of_month
+      end
+    else
+      Date.current.beginning_of_month
+    end
 
     # イベントを取得
     all_events = Event.where(date: @current_month.beginning_of_month..@current_month.end_of_month)

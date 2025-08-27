@@ -15,21 +15,24 @@ class Record < ApplicationRecord
   private
 
   def invalidate_records_cache
-    # 更新時は関連属性の変更時のみキャッシュ無効化を実行
-    if destroyed? || saved_change_to_time? || saved_change_to_style_id? || saved_change_to_notes?
-      # user_idが変更された場合、古いユーザーと新しいユーザーの両方のキャッシュを無効化
-      if saved_change_to_user_id?
-        previous_user_id = previous_changes[:user_id]&.first
-        current_user_id = user_id
-
-        # 古いユーザーのキャッシュを無効化（nilでない場合のみ）
-        CacheService.invalidate_records_cache(previous_user_id) if previous_user_id.present?
-        # 新しいユーザーのキャッシュを無効化（nilでない場合のみ）
-        CacheService.invalidate_records_cache(current_user_id) if current_user_id.present?
-      else
-        # user_idが変更されていない場合は現在のユーザーのキャッシュのみ無効化
-        CacheService.invalidate_records_cache(user_id)
-      end
-    end
-  end
+    changes = previous_changes
++    # 削除時は user_id のキャッシュを無条件で無効化
++    if destroyed?
++      CacheService.invalidate_records_cache(user_id) if user_id.present?
++      return
++    end
++
++    # user_id の付け替え: 旧IDと新IDの両方で無効化
++    if changes.key?('user_id')
++      old_id, new_id = changes['user_id']
++      [old_id, new_id].compact.uniq.each do |id|
++        CacheService.invalidate_records_cache(id)
++      end
++      return
++    end
++
++    # time/style/note 変更時のみ現在の user_id を無効化
++    if (changes.keys & %w[time style_id note]).any?
++      CacheService.invalidate_records_cache(user_id) if user_id.present?
++    end
 end

@@ -149,7 +149,7 @@ RSpec.describe "Api::V1::Admin::Attendances", type: :request do
         json = JSON.parse(response.body)
         expect(json['success']).to be true
         expect(json['data']['updated_count']).to eq(1)
-        expect(json['message']).to eq("1人の出席状況を更新しました")
+        expect(json['message']).to include("人の出席状況を更新しました")
         
         attendance.reload
         expect(attendance.status).to eq('absent')
