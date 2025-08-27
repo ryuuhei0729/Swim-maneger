@@ -10,6 +10,10 @@ class User < ApplicationRecord
   has_many :entries, dependent: :destroy
   has_many :practice_times, dependent: :destroy
 
+  # キャッシュ無効化のコールバック
+  after_update :invalidate_user_cache
+  after_destroy :invalidate_user_cache
+
   # 必須項目のバリデーション（DB制約と整合）
   validates :generation, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 0, less_than: 1000 }
   validates :name, presence: true, length: { maximum: 255 }
@@ -94,5 +98,9 @@ class User < ApplicationRecord
     if birthday.present? && birthday < Date.new(1900, 1, 1)
       errors.add(:birthday, 'は1900年以降の日付にしてください')
     end
+  end
+
+  def invalidate_user_cache
+    CacheService.invalidate_user_cache(id)
   end
 end

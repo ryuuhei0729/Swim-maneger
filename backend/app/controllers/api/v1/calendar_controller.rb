@@ -98,7 +98,7 @@ class Api::V1::CalendarController < Api::V1::BaseController
     {
       id: event.id,
       title: event.title,
-      type: "general_event",
+      event_type: "general_event",
       type_label: "一般イベント",
       date: event.date,
       place: event.place,
@@ -112,7 +112,7 @@ class Api::V1::CalendarController < Api::V1::BaseController
     {
       id: event.id,
       title: event.title,
-      type: "attendance_event",
+      event_type: "attendance_event",
       type_label: event.is_competition? ? "大会" : "練習",
       date: event.date,
       place: event.place,

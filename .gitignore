@@ -59,6 +59,9 @@ backend/config/master.key
 backend/config/credentials/*.key
 # 機密な開発用設定ファイル（誤ってコミットされていたが削除済み）
 backend/config/credentials/development2.key
+# 認証情報のバックアップファイル
+backend/config/credentials.yml.enc.backup*
+backend/config/master.key.backup*
 
 # カバレッジ
 backend/coverage/

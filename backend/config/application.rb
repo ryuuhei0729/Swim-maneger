@@ -28,5 +28,11 @@ module SwimManager
 
     # libディレクトリを自動ロードパスに追加
     config.autoload_paths << Rails.root.join("app/lib")
+
+    # レスポンス圧縮の設定
+    config.middleware.use Rack::Deflater
+
+    # セキュリティヘッダーの設定
+    config.middleware.use Rack::Attack
   end
 end

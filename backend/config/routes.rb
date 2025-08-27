@@ -28,36 +28,113 @@ Rails.application.routes.draw do
       patch 'mypage', to: 'mypage#update'
       resources :objectives, only: [:index, :show, :create, :update, :destroy], controller: 'objective'
       
+      # 練習記録
+      resources :practice, only: [:index, :show] do
+        member do
+          get 'practice_times', to: 'practice#practice_times'
+        end
+      end
+      
       # 管理者機能
-      get 'admin', to: 'admin/base#index'
+      namespace :admin do
+        get 'dashboard', to: 'dashboard#index'
+        get '', to: 'dashboard#index' # admin/のルートもダッシュボードに
+      end
       
       # ユーザー管理
-      get 'admin/users', to: 'admin/users#index'
-      post 'admin/users', to: 'admin/users#create'
+      namespace :admin do
+        resources :users do
+          collection do
+            post 'import/preview', to: 'users#import_preview'
+            post 'import/execute', to: 'users#import_execute'
+            get 'import/template', to: 'users#import_template'
+          end
+        end
+      end
       
       # お知らせ管理
-      get 'admin/announcements', to: 'admin/announcements#index'
-      post 'admin/announcements', to: 'admin/announcements#create'
-      patch 'admin/announcements/:id', to: 'admin/announcements#update'
-      delete 'admin/announcements/:id', to: 'admin/announcements#destroy'
+      namespace :admin do
+        resources :announcements do
+          member do
+            patch 'toggle_active', to: 'announcements#toggle_active'
+          end
+          collection do
+            post 'bulk_action', to: 'announcements#bulk_action'
+            get 'statistics', to: 'announcements#statistics'
+          end
+        end
+      end
       
       # スケジュール管理
-      get 'admin/schedules', to: 'admin/schedules#index'
-      post 'admin/schedules', to: 'admin/schedules#create'
-      patch 'admin/schedules/:id', to: 'admin/schedules#update'
-      delete 'admin/schedules/:id', to: 'admin/schedules#destroy'
-      get 'admin/schedules/:id', to: 'admin/schedules#edit'
+      namespace :admin do
+        resources :schedules, except: [:new, :edit] do
+          collection do
+            post 'import/preview', to: 'schedules#import_preview'
+            post 'import/execute', to: 'schedules#import_execute'
+            get 'import/template', to: 'schedules#import_template'
+          end
+        end
+      end
       
+      # 大会管理
+      namespace :admin do
+        resources :competitions, only: [:index, :show] do
+          member do
+            patch 'entry_status', to: 'competitions#update_entry_status'
+            get 'result', to: 'competitions#result'
+            post 'save_results', to: 'competitions#save_results'
+          end
+          collection do
+            post 'entry/start', to: 'competitions#start_entry_collection'
+          end
+        end
+        get 'competitions/:competition_id/entries', to: 'competitions#show_entries'
+      end
+
+      # 出欠管理
+      namespace :admin do
+        resources :attendances, only: [:index] do
+          collection do
+            get 'check', to: 'attendances#check'
+            patch 'check', to: 'attendances#update_check'
+            post 'save_check', to: 'attendances#save_check'
+            get 'status', to: 'attendances#status'
+            patch 'status', to: 'attendances#update_status'
+          end
+        end
+      end
+
       # 目標管理
-      get 'admin/objectives', to: 'admin/objectives#index'
+      namespace :admin do
+        resources :objectives do
+          member do
+            post 'milestones', to: 'objectives#create_milestone'
+          end
+          collection do
+            get 'dashboard', to: 'objectives#dashboard'
+          end
+        end
+        
+        # マイルストーン管理
+        patch 'objectives/milestones/:milestone_id', to: 'objectives#update_milestone'
+        delete 'objectives/milestones/:milestone_id', to: 'objectives#destroy_milestone'
+        post 'objectives/milestones/:milestone_id/review', to: 'objectives#create_milestone_review'
+      end
       
       # 練習管理
-      get 'admin/practices', to: 'admin/practices#index'
-      get 'admin/practice_time_setup', to: 'admin/practices#time'
-      post 'admin/practice_time_preview', to: 'admin/practices#time'
-      post 'admin/practice_logs', to: 'admin/practices#create_time'
-      get 'admin/practice_register_setup', to: 'admin/practices#register'
-      post 'admin/practice_register', to: 'admin/practices#create_register'
+      namespace :admin do
+        resources :practices do
+          collection do
+            get 'time_setup', to: 'practices#time_setup'
+            post 'time_preview', to: 'practices#time_preview'
+            post 'time_save', to: 'practices#time_save'
+            post 'attendees', to: 'practices#manage_attendees'
+            get 'attendees_list', to: 'practices#attendees_list'
+            get 'register_setup', to: 'practices#register_setup'
+            post 'register', to: 'practices#create_register'
+          end
+        end
+      end
     end
   end
 

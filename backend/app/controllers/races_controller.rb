@@ -47,7 +47,7 @@ class RacesController < ApplicationController
 
     # バリデーション
     unless params[:competition_id].present?
-      render json: { success: false, message: "大会を選択してください。" }
+      render_error("大会を選択してください。", status: :bad_request, code: "MISSING_COMPETITION")
       return
     end
 
@@ -57,7 +57,7 @@ class RacesController < ApplicationController
     selected_styles = params[:selected_styles] || {}
 
     if selected_styles.empty?
-      render json: { success: false, message: "エントリーする種目を選択してください。" }
+      render_error("エントリーする種目を選択してください。", status: :bad_request, code: "MISSING_STYLES")
       return
     end
 
@@ -89,22 +89,12 @@ class RacesController < ApplicationController
         end
 
         # 結果メッセージを表示
-        if deleted_count > 0
-          render json: {
-            success: true,
-            message: "#{success_count}種目のエントリーを提出しました。"
-          }
-        else
-          render json: {
-            success: true,
-            message: "#{success_count}種目のエントリーを提出しました。"
-          }
-        end
+        render_success("#{success_count}種目のエントリーを提出しました。", status: :ok, code: "ENTRY_SUBMITTED")
       end
     rescue ActiveRecord::RecordInvalid => e
-      render json: { success: false, message: "エントリーに失敗しました: #{e.message}" }
+      render_error("エントリーに失敗しました: #{e.message}", status: :unprocessable_entity, code: "VALIDATION_ERROR")
     rescue => e
-      render json: { success: false, message: "エラーが発生しました: #{e.message}" }
+      render_error("エラーが発生しました: #{e.message}", status: :internal_server_error, code: "INTERNAL_ERROR")
     end
   end
 
@@ -113,12 +103,12 @@ class RacesController < ApplicationController
     @entry = @user.entries.find(params[:id])
 
     if @entry.destroy
-      render json: { success: true, message: "エントリーを削除しました。" }
+      render_success("エントリーを削除しました。", status: :ok, code: "ENTRY_DELETED")
     else
-      render json: { success: false, message: "エントリーの削除に失敗しました。" }
+      render_error("エントリーの削除に失敗しました。", status: :unprocessable_entity, code: "DELETE_FAILED")
     end
   rescue ActiveRecord::RecordNotFound
-    render json: { success: false, message: "エントリーが見つかりません。" }
+    render_error("エントリーが見つかりません。", status: :not_found, code: "ENTRY_NOT_FOUND")
   end
 
   def get_current_entries

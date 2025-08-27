@@ -30,8 +30,12 @@ gem "ffaker"
 # ページネーション用のgem
 gem "kaminari"
 
+# レート制限用のgem
+gem "rack-attack"
+
 # Excel操作用のgem
 gem "rubyXL"
+gem "roo"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
@@ -79,6 +83,9 @@ group :test do
   gem "factory_bot_rails"
   gem "faker"
   gem "rails-controller-testing"
+  
+  # Database query measurement for performance testing
+  gem "rspec-sqlimit"
 end
 
 gem "tailwindcss-rails", "~> 4.3"

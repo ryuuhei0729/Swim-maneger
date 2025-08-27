@@ -15,6 +15,9 @@ class Announcement < ApplicationRecord
   # 公開日時を設定するコールバック
   before_validation :set_published_at, on: :create
 
+  # キャッシュ無効化のコールバック（トランザクションコミット後に実行）
+  after_commit :invalidate_announcements_cache, on: [:create, :update, :destroy]
+
   private
 
   def set_published_at
@@ -25,5 +28,19 @@ class Announcement < ApplicationRecord
     if published_at.present? && published_at.beginning_of_minute < Time.current.beginning_of_minute
       errors.add(:published_at, "は現在日時以降を指定してください")
     end
+  end
+
+  def invalidate_announcements_cache
+    return unless announcements_cache_affecting_changes?
+    
+    CacheService.invalidate_announcements_cache
+  end
+
+  def announcements_cache_affecting_changes?
+    # お知らせのキャッシュに影響する属性の変更をチェック
+    saved_change_to_is_active? ||
+    saved_change_to_published_at? ||
+    saved_change_to_title? ||
+    saved_change_to_content?
   end
 end
