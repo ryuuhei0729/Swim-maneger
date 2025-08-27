@@ -47,13 +47,13 @@ export default class extends Controller {
   handleTabClick(e) {
     e.preventDefault()
     e.stopPropagation()
-    this.switchTab(e.target)
+    this.switchTab(e.currentTarget)
   }
 
   handleSortClick(e) {
     e.preventDefault()
     e.stopPropagation()
-    this.handleSort(e.target)
+    this.handleSort(e.currentTarget)
   }
 
   switchTab(clickedTab) {

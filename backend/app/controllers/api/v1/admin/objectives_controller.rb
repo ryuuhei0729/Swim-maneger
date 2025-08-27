@@ -5,7 +5,7 @@ class Api::V1::Admin::ObjectivesController < Api::V1::Admin::BaseController
   def index
     objectives = Objective.includes(:user, :attendance_event, :style, :milestones)
                          .joins(:attendance_event)
-                         .order("attendance_events.date DESC")
+                         .order("objectives.created_at DESC")
 
     # フィルタリング
     objectives = filter_objectives(objectives)
@@ -337,29 +337,4 @@ class Api::V1::Admin::ObjectivesController < Api::V1::Admin::BaseController
     end
   end
 
-  private
-
-  def filter_objectives(objectives)
-    objectives = objectives.where(user_id: params[:user_id]) if params[:user_id].present?
-    objectives = objectives.where(attendance_event_id: params[:event_id]) if params[:event_id].present?
-    objectives = objectives.where(style_id: params[:style_id]) if params[:style_id].present?
-    objectives
-  end
-
-  def calculate_statistics(objectives)
-    {
-      total: objectives.count,
-      by_user_type: objectives.joins(:user).group('users.user_type').count,
-      by_style: objectives.joins(:style).group('styles.name_jp').count
-    }
-  end
-
-  def analyze_achievement_status
-    # 達成状況の分析ロジック
-    {
-      high_achievement: 0,
-      medium_achievement: 0,
-      low_achievement: 0
-    }
-  end
 end
