@@ -64,14 +64,66 @@ class CacheService
     fetch_with_cache("admin_dashboard", [], expires_in: 5.minutes, &block)
   end
 
+  # APIレスポンスキャッシュ（新規追加）
+  def self.cache_api_response(endpoint, params = {}, expires_in: 10.minutes, &block)
+    raise ArgumentError, "Block is required" if block.nil?
+    cache_key = "api_response:#{endpoint}:#{Digest::MD5.hexdigest(params.to_json)}"
+    Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
+  end
+
+  # 重いクエリのバックグラウンド処理用キャッシュ
+  def self.cache_heavy_query(query_name, params = {}, expires_in: 1.hour, &block)
+    raise ArgumentError, "Block is required" if block.nil?
+    cache_key = "heavy_query:#{query_name}:#{Digest::MD5.hexdigest(params.to_json)}"
+    
+    # キャッシュに存在しない場合はバックグラウンドで処理
+    unless Rails.cache.exist?(cache_key)
+      Rails.cache.write("#{cache_key}:processing", true, expires_in: 5.minutes)
+      
+      # バックグラウンドジョブで処理を実行
+      HeavyQueryJob.perform_later(query_name, params, cache_key)
+      
+      # 処理中はデフォルト値を返す
+      return yield if block_given?
+    end
+    
+    Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
+  end
+
+  # 統計データの事前計算キャッシュ
+  def self.cache_precomputed_stats(stat_type, date_range = nil, expires_in: 30.minutes, &block)
+    raise ArgumentError, "Block is required" if block.nil?
+    cache_key = "precomputed_stats:#{stat_type}:#{date_range&.to_json}"
+    Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
+  end
+
+  # ページネーション結果のキャッシュ
+  def self.cache_paginated_results(resource, page, per_page, filters = {}, expires_in: 15.minutes, &block)
+    raise ArgumentError, "Block is required" if block.nil?
+    cache_key = "paginated:#{resource}:#{page}:#{per_page}:#{Digest::MD5.hexdigest(filters.to_json)}"
+    Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
+  end
+
+  # 検索結果のキャッシュ
+  def self.cache_search_results(query, filters = {}, expires_in: 10.minutes, &block)
+    raise ArgumentError, "Block is required" if block.nil?
+    cache_key = "search:#{Digest::MD5.hexdigest(query)}:#{Digest::MD5.hexdigest(filters.to_json)}"
+    Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
+  end
+
   # キャッシュの削除
   def self.invalidate_user_cache(user_id)
     Rails.cache.delete("user_info:#{user_id}")
     Rails.cache.delete_matched("users_list:*")
+    # APIレスポンスキャッシュも無効化
+    Rails.cache.delete_matched("api_response:*")
   end
 
   def self.invalidate_events_cache
     Rails.cache.delete_matched("events_list:*")
+    # 関連するAPIレスポンスキャッシュも無効化
+    Rails.cache.delete_matched("api_response:calendar:*")
+    Rails.cache.delete_matched("api_response:home:*")
   end
 
   def self.invalidate_attendance_cache(event_id = nil)
@@ -80,6 +132,8 @@ class CacheService
     else
       Rails.cache.delete_matched("attendance_status:*")
     end
+    # 関連するAPIレスポンスキャッシュも無効化
+    Rails.cache.delete_matched("api_response:attendance:*")
   end
 
   def self.invalidate_practice_cache(user_id = nil)
@@ -88,62 +142,59 @@ class CacheService
     else
       Rails.cache.delete_matched("practice_logs:*")
     end
+    # 関連するAPIレスポンスキャッシュも無効化
+    Rails.cache.delete_matched("api_response:practice:*")
   end
 
   def self.invalidate_records_cache(user_id = nil)
-    # 記録キャッシュの無効化
     if user_id
       Rails.cache.delete_matched("records:#{user_id}:*")
     else
       Rails.cache.delete_matched("records:*")
     end
-    
-    # ユーザー詳細情報キャッシュの無効化
-    if user_id
-      Rails.cache.delete("user_info:#{user_id}")
-    else
-      Rails.cache.delete_matched("user_info:*")
-    end
-    
-    # ユーザー一覧キャッシュの無効化（ベストタイムなどの情報が含まれるため）
-    Rails.cache.delete_matched("users_list:*")
-    
-    # 統計情報キャッシュの無効化
-    Rails.cache.delete_matched("statistics:*")
-    
-    # ベストタイムキャッシュの無効化（ホーム画面用）
-    Rails.cache.delete_matched("best_times_*")
+    # 関連するAPIレスポンスキャッシュも無効化
+    Rails.cache.delete_matched("api_response:members:*")
+    Rails.cache.delete_matched("api_response:home:*")
+    Rails.cache.delete_matched("api_response:mypage:*")
   end
 
   def self.invalidate_objectives_cache(user_id = nil)
     if user_id
-      Rails.cache.delete("objectives:#{user_id}")
+      Rails.cache.delete_matched("objectives:#{user_id}:*")
     else
       Rails.cache.delete_matched("objectives:*")
     end
+    # 関連するAPIレスポンスキャッシュも無効化
+    Rails.cache.delete_matched("api_response:objectives:*")
   end
 
   def self.invalidate_announcements_cache
     Rails.cache.delete_matched("announcements:*")
+    # 関連するAPIレスポンスキャッシュも無効化
+    Rails.cache.delete_matched("api_response:home:*")
+    Rails.cache.delete_matched("api_response:announcements:*")
   end
 
   def self.invalidate_statistics_cache(stat_type = nil)
     if stat_type
       Rails.cache.delete_matched("statistics:#{stat_type}:*")
+      Rails.cache.delete_matched("precomputed_stats:#{stat_type}:*")
     else
       Rails.cache.delete_matched("statistics:*")
+      Rails.cache.delete_matched("precomputed_stats:*")
     end
   end
 
   def self.invalidate_admin_dashboard_cache
-    # 後方互換: 旧キー "admin_dashboard:" も削除
-    Rails.cache.delete("admin_dashboard")
-    Rails.cache.delete("admin_dashboard:")
+    Rails.cache.delete_matched("admin_dashboard:*")
+    # 関連するAPIレスポンスキャッシュも無効化
+    Rails.cache.delete_matched("api_response:admin/dashboard:*")
   end
 
-  # 全キャッシュの削除（管理者用）
+  # 全キャッシュのクリア（開発・テスト用）
   def self.clear_all_cache
     Rails.cache.clear
+    Rails.logger.info "全キャッシュをクリアしました"
   end
 
   # キャッシュ統計情報の取得
@@ -152,7 +203,10 @@ class CacheService
       {
         total_keys: Rails.cache.redis.dbsize,
         memory_usage: Rails.cache.redis.info['used_memory_human'],
-        hit_rate: calculate_hit_rate
+        hit_rate: calculate_hit_rate,
+        api_response_cache: count_cache_keys("api_response:*"),
+        heavy_query_cache: count_cache_keys("heavy_query:*"),
+        precomputed_stats_cache: count_cache_keys("precomputed_stats:*")
       }
     else
       {
@@ -165,6 +219,51 @@ class CacheService
   rescue => e
     Rails.logger.error "キャッシュ統計取得エラー: #{e.message}"
     { error: e.message }
+  end
+
+  # キャッシュキー数のカウント
+  def self.count_cache_keys(pattern)
+    return nil unless Rails.cache.respond_to?(:redis)
+    Rails.cache.redis.keys(pattern).count
+  rescue => e
+    Rails.logger.error "キャッシュキーカウントエラー: #{e.message}"
+    nil
+  end
+
+  # キャッシュヒット率の計算
+  def self.calculate_hit_rate
+    return nil unless Rails.cache.respond_to?(:redis)
+    
+    info = Rails.cache.redis.info
+    hits = info['keyspace_hits'].to_i
+    misses = info['keyspace_misses'].to_i
+    total = hits + misses
+    
+    total > 0 ? (hits.to_f / total * 100).round(2) : 0
+  rescue => e
+    Rails.logger.error "キャッシュヒット率計算エラー: #{e.message}"
+    nil
+  end
+
+  # キャッシュの有効期限を延長
+  def self.extend_cache_expiry(cache_key, additional_time = 1.hour)
+    Rails.cache.redis.expire(cache_key, additional_time.to_i) if Rails.cache.respond_to?(:redis)
+  rescue => e
+    Rails.logger.error "キャッシュ有効期限延長エラー: #{e.message}"
+  end
+
+  # キャッシュの優先度設定
+  def self.set_cache_priority(cache_key, priority = :normal)
+    priority_expiry = case priority
+                     when :high then 1.hour
+                     when :normal then 30.minutes
+                     when :low then 5.minutes
+                     else 30.minutes
+                     end
+    
+    Rails.cache.redis.expire(cache_key, priority_expiry.to_i) if Rails.cache.respond_to?(:redis)
+  rescue => e
+    Rails.logger.error "キャッシュ優先度設定エラー: #{e.message}"
   end
 
   private
@@ -241,21 +340,5 @@ class CacheService
         "#{obj.class.name}:#{obj.inspect}"
       end
     end
-  end
-
-  def self.calculate_hit_rate
-    return nil unless Rails.cache.respond_to?(:redis)
-    
-    # RedisのINFOコマンドからヒット率を計算
-    info = Rails.cache.redis.info
-    hits = info['keyspace_hits'].to_i
-    misses = info['keyspace_misses'].to_i
-    total = hits + misses
-    
-    return 0 if total == 0
-    (hits.to_f / total * 100).round(2)
-  rescue => e
-    Rails.logger.error "ヒット率計算エラー: #{e.message}"
-    0
   end
 end
