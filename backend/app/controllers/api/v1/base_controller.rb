@@ -1,6 +1,9 @@
 class Api::V1::BaseController < ApplicationController
   include SanitizationHelper
   
+  # APIコントローラーではCSRF保護を無効化（JWT認証を使用するため）
+  skip_forgery_protection
+
   before_action :authenticate_user_auth!
   before_action :log_api_request
   after_action :log_api_response
@@ -10,7 +13,7 @@ class Api::V1::BaseController < ApplicationController
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
   rescue_from ActiveRecord::RecordInvalid, with: :handle_validation_error
   rescue_from ActionController::ParameterMissing, with: :handle_parameter_missing
-  rescue_from Pundit::NotAuthorizedError, with: :handle_unauthorized
+  rescue_from "Pundit::NotAuthorizedError", with: :handle_unauthorized
 
   private
 
@@ -69,7 +72,7 @@ class Api::V1::BaseController < ApplicationController
 
   def render_error(message, status: :bad_request, errors: nil)
     response_data = {
-      success: false,
+      success: false, 
       message: message,
       errors: errors,
       timestamp: Time.current.iso8601,
@@ -278,15 +281,30 @@ class Api::V1::BaseController < ApplicationController
   end
 
   def sanitize_params(params)
-    # 機密情報を除去
-    sanitized = params.deep_dup
-    sensitive_keys = ['password', 'password_confirmation', 'token', 'secret']
-    
-    sensitive_keys.each do |key|
-      sanitized.delete(key) if sanitized.key?(key)
+    # 機密情報を再帰的に除去
+    recursive_sanitize(params)
+  end
+
+  def recursive_sanitize(obj)
+    case obj
+    when Hash
+      obj.each_with_object({}) do |(key, value), sanitized|
+        # 機密キーかどうかをチェック（文字列・シンボル両方に対応）
+        key_str = key.to_s.downcase
+        unless sensitive_key?(key_str)
+          sanitized[key] = recursive_sanitize(value)
+        end
+      end
+    when Array
+      obj.map { |item| recursive_sanitize(item) }
+    else
+      obj
     end
-    
-    sanitized
+  end
+
+  def sensitive_key?(key_str)
+    sensitive_keys = %w[password password_confirmation token secret api_key access_token]
+    sensitive_keys.any? { |sensitive| key_str.include?(sensitive) }
   end
 
   # API統計情報の取得

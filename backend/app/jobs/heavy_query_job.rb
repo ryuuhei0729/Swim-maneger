@@ -4,6 +4,10 @@ class HeavyQueryJob < ApplicationJob
   def perform(query_name, params, cache_key)
     Rails.logger.info "重いクエリ処理開始: #{query_name}"
     
+    # パラメータのキー種別を正規化（シンボル→文字列）
+    params = params.respond_to?(:deep_stringify_keys) ? params.deep_stringify_keys : params
+    processing_key = "#{cache_key}:processing"
+    
     begin
       # クエリ名に応じて適切な処理を実行
       result = case query_name
@@ -32,7 +36,9 @@ class HeavyQueryJob < ApplicationJob
       
     rescue => e
       Rails.logger.error "重いクエリ処理エラー: #{query_name} - #{e.message}"
-      Rails.cache.delete("#{cache_key}:processing")
+    ensure
+      # 成功/失敗を問わず処理中フラグを確実に削除
+      Rails.cache.delete(processing_key)
     end
   end
 
@@ -160,15 +166,23 @@ class HeavyQueryJob < ApplicationJob
   end
 
   def calculate_practice_statistics(start_date, end_date)
+    # 各練習の参加者数を取得
+    participant_counts = PracticeLog.joins(:practice_times)
+                                   .where(created_at: start_date..end_date)
+                                   .group('practice_logs.id')
+                                   .count('practice_times.id')
+                                   .values
+
+    # 安全な平均値計算
+    average_participants = if participant_counts.empty?
+                            0
+                          else
+                            (participant_counts.sum.to_f / participant_counts.size).round(2)
+                          end
+
     {
       total_practices: PracticeLog.where(created_at: start_date..end_date).count,
-      average_participants: PracticeLog.joins(:practice_times)
-                                      .where(created_at: start_date..end_date)
-                                      .group('practice_logs.id')
-                                      .average('practice_times.count')
-                                      .values
-                                      .compact
-                                      .sum / PracticeLog.where(created_at: start_date..end_date).count
+      average_participants: average_participants
     }
   end
 
@@ -226,12 +240,11 @@ class HeavyQueryJob < ApplicationJob
   end
 
   def calculate_attendance_by_generation(start_date, end_date)
-    User.joins(:attendances)
-        .joins(:attendance_events)
-        .where(user_type: 'player')
-        .where(attendance_events: { date: start_date..end_date })
-        .group(:generation)
-        .count
+    Attendance.joins(:user, :attendance_event)
+              .where(users: { user_type: 'player' })
+              .where(attendance_events: { date: start_date..end_date })
+              .group('users.generation')
+              .count
   end
 
   def calculate_attendance_by_event_type(start_date, end_date)

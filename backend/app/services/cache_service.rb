@@ -67,47 +67,61 @@ class CacheService
   # APIレスポンスキャッシュ（新規追加）
   def self.cache_api_response(endpoint, params = {}, expires_in: 10.minutes, &block)
     raise ArgumentError, "Block is required" if block.nil?
-    cache_key = "api_response:#{endpoint}:#{Digest::MD5.hexdigest(params.to_json)}"
+    normalized_params = normalize_filters(params)
+    cache_key = "api_response:#{endpoint}:#{Digest::MD5.hexdigest(normalized_params)}"
     Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
   end
 
   # 重いクエリのバックグラウンド処理用キャッシュ
   def self.cache_heavy_query(query_name, params = {}, expires_in: 1.hour, &block)
     raise ArgumentError, "Block is required" if block.nil?
-    cache_key = "heavy_query:#{query_name}:#{Digest::MD5.hexdigest(params.to_json)}"
+    normalized_params = normalize_filters(params)
+    cache_key = "heavy_query:#{query_name}:#{Digest::MD5.hexdigest(normalized_params)}"
+    processing_key = "#{cache_key}:processing"
     
-    # キャッシュに存在しない場合はバックグラウンドで処理
-    unless Rails.cache.exist?(cache_key)
-      Rails.cache.write("#{cache_key}:processing", true, expires_in: 5.minutes)
-      
-      # バックグラウンドジョブで処理を実行
-      HeavyQueryJob.perform_later(query_name, params, cache_key)
-      
-      # 処理中はデフォルト値を返す
-      return yield if block_given?
+    # まず結果キャッシュをチェック
+    if Rails.cache.exist?(cache_key)
+      return Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
     end
     
-    Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
+    # 処理中フラグをチェック
+    if Rails.cache.exist?(processing_key)
+      # 既に処理中の場合はデフォルト値を返す
+      return yield if block_given?
+      return nil
+    end
+    
+    # 処理中フラグを設定（重複実行を防止）
+    Rails.cache.write(processing_key, true, expires_in: 5.minutes)
+    
+    # バックグラウンドジョブで処理を実行
+    HeavyQueryJob.perform_later(query_name, params, cache_key)
+    
+    # 処理中はデフォルト値を返す
+    return yield if block_given?
+    return nil
   end
 
   # 統計データの事前計算キャッシュ
   def self.cache_precomputed_stats(stat_type, date_range = nil, expires_in: 30.minutes, &block)
     raise ArgumentError, "Block is required" if block.nil?
-    cache_key = "precomputed_stats:#{stat_type}:#{date_range&.to_json}"
+    cache_key = "precomputed_stats:#{stat_type}:#{serialize_param(date_range)}"
     Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
   end
 
   # ページネーション結果のキャッシュ
   def self.cache_paginated_results(resource, page, per_page, filters = {}, expires_in: 15.minutes, &block)
     raise ArgumentError, "Block is required" if block.nil?
-    cache_key = "paginated:#{resource}:#{page}:#{per_page}:#{Digest::MD5.hexdigest(filters.to_json)}"
+    normalized_filters = normalize_filters(filters)
+    cache_key = "paginated:#{resource}:#{page}:#{per_page}:#{Digest::MD5.hexdigest(normalized_filters)}"
     Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
   end
 
   # 検索結果のキャッシュ
   def self.cache_search_results(query, filters = {}, expires_in: 10.minutes, &block)
     raise ArgumentError, "Block is required" if block.nil?
-    cache_key = "search:#{Digest::MD5.hexdigest(query)}:#{Digest::MD5.hexdigest(filters.to_json)}"
+    normalized_filters = normalize_filters(filters)
+    cache_key = "search:#{Digest::MD5.hexdigest(query)}:#{Digest::MD5.hexdigest(serialize_param(filters))}"
     Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
   end
 
@@ -280,6 +294,37 @@ class CacheService
     stable_params = Array(params).map { |param| serialize_param(param) }
     return prefix if stable_params.empty?
     "#{prefix}:#{stable_params.join(':')}"
+  end
+
+  # フィルターパラメータを正規化するヘルパー
+  def self.normalize_filters(filters)
+    # nilを空ハッシュに変換
+    filters = {} if filters.nil?
+    
+    # 安定したソートで正規化されたJSONを生成
+    canonical_json = canonicalize_hash(filters).to_json
+    canonical_json
+  end
+
+  # ハッシュを正規化（安定したソート）
+  def self.canonicalize_hash(obj)
+    case obj
+    when Hash
+      # キーをソートして安定した順序を保証
+      sorted_keys = obj.keys.sort_by(&:to_s)
+      sorted_keys.each_with_object({}) do |key, result|
+        result[key] = canonicalize_hash(obj[key])
+      end
+    when Array
+      # 配列の各要素を正規化
+      obj.map { |item| canonicalize_hash(item) }
+    when String, Numeric, TrueClass, FalseClass, NilClass
+      # プリミティブ型はそのまま返す
+      obj
+    else
+      # その他の型は文字列に変換
+      obj.to_s
+    end
   end
 
   # パラメータを安定した文字列にシリアライズするヘルパー

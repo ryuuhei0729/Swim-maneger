@@ -363,7 +363,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserResponse'
-        '400':
+        '422':
           description: バリデーションエラー
           content:
             application/json:

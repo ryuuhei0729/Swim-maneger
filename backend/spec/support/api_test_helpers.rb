@@ -415,7 +415,22 @@ module ApiTestHelpers
     concurrent_requests(count) do
       responses << block.call
     end
-    expect(responses.all? { |r| r.success? }).to be true
+    
+    # 各レスポンスの成功判定を堅牢に行う
+    successful_responses = responses.all? do |response|
+      if response.respond_to?(:successful?)
+        response.successful?
+      elsif response.respond_to?(:status)
+        # HTTPステータスコードが200-299の範囲内かチェック
+        status = response.status
+        status >= 200 && status < 300
+      else
+        # フォールバック: success?メソッドを使用
+        response.respond_to?(:success?) ? response.success? : false
+      end
+    end
+    
+    expect(successful_responses).to be true
   end
 
   # タイムアウトテスト用ヘルパー
