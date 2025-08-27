@@ -3,8 +3,9 @@ class Api::V1::Admin::ObjectivesController < Api::V1::Admin::BaseController
 
   # GET /api/v1/admin/objectives
   def index
-    objectives = Objective.joins(:attendance_event).includes(:user, :attendance_event, :style, :milestones)
-                         .order("attendance_events.date DESC")
+    objectives = Objective.includes(:user, :attendance_event, :style, :milestones)
+                         .joins(:attendance_event)
+                         .order("objectives.created_at DESC")
 
     # フィルタリング
     objectives = filter_objectives(objectives)
@@ -335,4 +336,5 @@ class Api::V1::Admin::ObjectivesController < Api::V1::Admin::BaseController
       format("%.2f", seconds)
     end
   end
+
 end

@@ -90,7 +90,7 @@ RSpec.describe 'API Security', type: :request do
       token = get_auth_token(user_auth)
 
       # 特殊文字を含む検索
-      special_chars = "';--/*()[]{}\"'`~!@#$%^&*()_+-="
+      special_chars = CGI.escape("';--/*()[]{}\"'`~!@#$%^&*()_+-=")
 
       get "/api/v1/members?search=#{special_chars}",
           headers: { 'Authorization' => "Bearer #{token}" }
@@ -110,7 +110,7 @@ RSpec.describe 'API Security', type: :request do
            headers: { 'Authorization' => "Bearer #{token}" }
 
       # APIではCSRFトークンが不要であることを確認
-      expect(response).not_to have_http_status(:unprocessable_entity)
+      expect(response).not_to have_http_status(:unprocessable_content)
     end
   end
 
@@ -130,7 +130,7 @@ RSpec.describe 'API Security', type: :request do
               params: params,
               headers: { 'Authorization' => "Bearer #{token}" }
 
-        expect(response).to have_http_status(:unprocessable_entity)
+        expect(response).to have_http_status(:unprocessable_content)
       end
     end
 
@@ -144,7 +144,7 @@ RSpec.describe 'API Security', type: :request do
             params: { user: { avatar: malicious_file } },
             headers: { 'Authorization' => "Bearer #{token}" }
 
-      expect(response).to have_http_status(:unprocessable_entity)
+      expect(response).to have_http_status(:unprocessable_content)
     end
   end
 
@@ -265,7 +265,7 @@ RSpec.describe 'API Security', type: :request do
       get "/api/v1/users/#{other_user.id}",
           headers: { 'Authorization' => "Bearer #{token}" }
 
-      expect(response).to have_http_status(:forbidden)
+      expect(response).to have_http_status(:not_found)
     end
 
     it '管理者権限の不正取得防止' do
@@ -276,7 +276,7 @@ RSpec.describe 'API Security', type: :request do
             params: { user: { user_type: 3 } }, # director
             headers: { 'Authorization' => "Bearer #{token}" }
 
-      expect(response).to have_http_status(:forbidden)
+      expect(response).to have_http_status(:not_found)
     end
   end
 

@@ -263,7 +263,7 @@ RSpec.describe "Api::V1::Admin::Practices", type: :request do
 
   describe "POST /api/v1/admin/practices/register" do
     let!(:attendance_event) { create(:attendance_event, title: "練習1", date: Date.today) }
-    let(:menu_image) { fixture_file_upload('files/test_image.jpg', 'image/jpeg') }
+    let(:menu_image) { fixture_file_upload('test_image.jpg', 'image/jpeg') }
     
     context "有効なパラメータの場合" do
       it "練習メニュー画像を更新する" do

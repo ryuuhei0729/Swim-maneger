@@ -9,6 +9,8 @@ abort("The Rails environment is running in production mode!") if Rails.env.produ
 # return unless Rails.env.test?
 require 'rspec/rails'
 require 'rspec-sqlimit'
+require 'rspec-benchmark'
+require 'memory_profiler'
 # Add additional requires below this line. Rails is not loaded until this point!
 
 # Requires supporting ruby files with custom matchers and macros, etc, in
@@ -81,8 +83,16 @@ RSpec.configure do |config|
   # SQL測定の設定
   config.before(:suite) do
     # SQL測定の初期化
-    RSpec::Sqlimit.configure do |config|
-      config.enabled = true
+    if defined?(RSpec::Sqlimit)
+      RSpec::Sqlimit.configure do |config|
+        config.enabled = true
+      end
     end
+  end
+
+  # テスト環境でのレート制限を無効化
+  config.before(:each) do
+    Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
+    Rack::Attack.cache.store.clear
   end
 end

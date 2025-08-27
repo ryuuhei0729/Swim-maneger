@@ -62,7 +62,7 @@ class Api::V1::Admin::CompetitionsController < Api::V1::Admin::BaseController
     best_records = Record.joins(:user, :style)
                         .where(user_id: user_ids, style_id: style_ids)
                         .where.not(attendance_event_id: @competition.id)
-                        .distinct_on(:user_id, :style_id)
+                        .select('DISTINCT ON (user_id, style_id) *')
                         .order(:user_id, :style_id, :time)
                         .includes(:split_times)
                         .index_by { |record| [record.user_id, record.style_id] }

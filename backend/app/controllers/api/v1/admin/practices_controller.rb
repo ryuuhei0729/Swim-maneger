@@ -3,7 +3,7 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
 
   # GET /api/v1/admin/practices
   def index
-    practice_logs = PracticeLog.includes(attendance_event: { attendances: :user })
+    practice_logs = PracticeLog.includes(:attendance_event, attendance_event: { attendances: :user })
                                .joins(:attendance_event)
                                .order("attendance_events.date DESC")
                                .limit(20)

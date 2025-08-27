@@ -29,17 +29,17 @@ RSpec.describe 'API Performance', type: [:performance, :request] do
   # Rack::Attackのレート制限を無効化（レート制限テスト用）
   around(:each, :rate_limit_test) do |example|
     # 元のRack::Attack設定を保存
-    original_rack_attack_enabled = Rack::Attack.enabled?
+    original_rack_attack_cache = Rack::Attack.cache.store
     
     begin
       # Rack::Attackを無効化
-      Rack::Attack.enabled = false
+      Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new
       
       # テストを実行
       example.run
     ensure
       # 元の設定を復元
-      Rack::Attack.enabled = original_rack_attack_enabled
+      Rack::Attack.cache.store = original_rack_attack_cache
     end
   end
 

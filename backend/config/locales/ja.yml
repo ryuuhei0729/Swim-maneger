@@ -98,6 +98,7 @@ ja:
       invalid: "は正しい形式で入力してください"
       too_short: "は%{count}文字以上で入力してください"
       too_long: "は%{count}文字以下で入力してください"
+      required_for_absence_or_other: "欠席またはその他の場合は理由を入力してください"
   api:
     admin:
       attendances:

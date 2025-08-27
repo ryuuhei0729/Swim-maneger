@@ -2,26 +2,28 @@ class HomeController < ApplicationController
   before_action :authenticate_user_auth!
 
   def index
-    # カレンダーの表示で使うコントローラー
-    @current_month = Date.current
-
-    # STI構造では全てのイベントをEventテーブルから取得
-    all_events = Event
-      .where(date: @current_month.beginning_of_month..@current_month.end_of_month)
-      .order(date: :asc)
-
-    # ログインユーザーの出席情報を取得
-    @user_attendance_by_event = {}
-    current_user_auth.user.attendance
-      .joins(:attendance_event)
-      .where(events: { date: @current_month.beginning_of_month..@current_month.end_of_month })
-      .each do |attendance|
-        @user_attendance_by_event[attendance.attendance_event_id] = attendance
+    start_time = Time.current
+    
+    # 現在の月を取得
+    @current_month = if params[:month].present?
+      begin
+        Date.parse(params[:month])
+      rescue ArgumentError => e
+        Rails.logger.warn "Invalid date format in params[:month]: #{params[:month]}, error: #{e.message}"
+        flash.now[:warning] = "無効な日付形式です。現在の月を表示します。"
+        Date.current.beginning_of_month
       end
+    else
+      Date.current.beginning_of_month
+    end
 
-    # 誕生日データを取得
+    # イベントを取得
+    all_events = Event.where(date: @current_month.beginning_of_month..@current_month.end_of_month)
+                     .order(:date, :created_at)
+
+    # 誕生日ユーザーを取得
     @birthdays_by_date = {}
-    User.where(user_type: :player).each do |user|
+    User.all.each do |user|
       # その月の誕生日を取得（年は考慮しない）
       next unless user.birthday.present?
       birthday_this_month = Date.new(@current_month.year, user.birthday.month, user.birthday.day)
@@ -59,18 +61,38 @@ class HomeController < ApplicationController
       }
     end
 
-    # 各選手のベストタイムを取得
+    # ベストタイム取得の最適化（N+1問題の解決）
     @best_times = {}
-    @players.each do |player|
-      @best_times[player.id] = {}
-      @events.each do |event|
-        best_record = player.records
-          .joins(:style)
-          .where(styles: { name: event[:id] })
-          .order(:time)
-          .first
-        @best_times[player.id][event[:id]] = best_record&.time
+    
+    # キャッシュキーを生成（選手数と泳法数が変更された場合のみキャッシュを無効化）
+    cache_key = "best_times_#{@players.count}_#{@events.count}_#{Record.maximum(:updated_at)&.to_i}"
+    
+    @best_times = Rails.cache.fetch(cache_key, expires_in: 1.hour) do
+      best_times_hash = {}
+      
+      # 全選手のベストタイムを1回のクエリで取得
+      best_records = Record.joins(:style, :user)
+                          .where(users: { user_type: :player })
+                          .select('records.*, styles.name as style_name, users.id as user_id')
+                          .order('users.id, styles.name, records.time')
+      
+      # 選手IDと泳法名でグループ化してベストタイムを抽出
+      best_records_by_user_and_style = {}
+      best_records.each do |record|
+        key = "#{record.user_id}_#{record.style_name}"
+        best_records_by_user_and_style[key] = record.time unless best_records_by_user_and_style.key?(key)
       end
+      
+      # 結果をハッシュに格納
+      @players.each do |player|
+        best_times_hash[player.id] = {}
+        @events.each do |event|
+          key = "#{player.id}_#{event[:id]}"
+          best_times_hash[player.id][event[:id]] = best_records_by_user_and_style[key]
+        end
+      end
+      
+      best_times_hash
     end
 
     # 並び替え処理
@@ -84,9 +106,20 @@ class HomeController < ApplicationController
       @male_players_by_generation = @male_players.group_by(&:generation)
       @female_players_by_generation = @female_players.group_by(&:generation)
     end
+    
+    # パフォーマンスログ出力
+    end_time = Time.current
+    duration = (end_time - start_time) * 1000 # ミリ秒
+    Rails.logger.info "Home#index 実行時間: #{duration.round(2)}ms"
   end
 
   private
+  
+  # キャッシュをクリアするメソッド
+  def clear_best_times_cache
+    Rails.cache.delete_matched("best_times_*")
+  end
+  
   def sort_players_by_time(players, sort_by)
     players.sort_by do |player|
       time = @best_times[player.id][sort_by]

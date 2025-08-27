@@ -29,7 +29,7 @@ class Rack::Attack
 
   # ログ出力
   ActiveSupport::Notifications.subscribe("rack.attack") do |name, start, finish, request_id, req|
-    if req.env["rack.attack.match_type"] == :throttle
+    if req.is_a?(Rack::Attack::Request) && req.env["rack.attack.match_type"] == :throttle
       Rails.logger.warn "Rack::Attack throttled request: #{req.ip} - #{req.path}"
     end
   end

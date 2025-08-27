@@ -86,6 +86,10 @@ group :test do
   
   # Database query measurement for performance testing
   gem "rspec-sqlimit"
+  
+  # Performance testing gems
+  gem "rspec-benchmark"
+  gem "memory_profiler"
 end
 
 gem "tailwindcss-rails", "~> 4.3"
