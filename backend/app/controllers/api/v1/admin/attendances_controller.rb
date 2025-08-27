@@ -184,9 +184,9 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
 
   # GET /api/v1/admin/attendances/status
   def status
-    # 出欠受付管理画面用のデータを取得
-    attendance_events = AttendanceEvent.order(date: :desc)
-    competitions = Competition.order(date: :desc)
+    # 出欠受付管理画面用のデータを取得（N+1問題を回避するためeager loadingを使用）
+    attendance_events = AttendanceEvent.includes(:attendances).order(date: :desc)
+    competitions = Competition.includes(:entries).order(date: :desc)
 
     render_success({
       attendance_events: attendance_events.map do |event|
@@ -195,7 +195,7 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
           title: event.title,
           date: event.date,
           attendance_status: event.attendance_status,
-          attendances_count: event.attendances.count
+          attendances_count: event.attendances.size
         }
       end,
       competitions: competitions.map do |competition|
@@ -205,7 +205,7 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
           date: competition.date,
           attendance_status: competition.attendance_status,
           entry_status: competition.entry_status,
-          entries_count: competition.entries.count
+          entries_count: competition.entries.size
         }
       end,
       status_options: {
