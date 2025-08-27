@@ -10,27 +10,45 @@ export default class extends Controller {
   }
 
   initializeTabs() {
-    this.tabTargets.forEach(tab => {
-      tab.addEventListener('click', (e) => {
-        e.preventDefault()
-        this.switchTab(tab)
-      })
+    this.tabTargets.forEach((tab, index) => {
+      // 既存のイベントリスナーを削除
+      tab.removeEventListener('click', this.handleTabClick)
+      
+      // 新しいイベントリスナーを追加
+      tab.addEventListener('click', this.handleTabClick.bind(this))
     })
   }
 
   initializeSortHeaders() {
-    this.sortHeaderTargets.forEach(header => {
-      header.addEventListener('click', (e) => {
-        e.preventDefault()
-        this.handleSort(header)
-      })
+    this.sortHeaderTargets.forEach((header, index) => {
+      // 既存のイベントリスナーを削除
+      header.removeEventListener('click', this.handleSortClick)
+      
+      // 新しいイベントリスナーを追加
+      header.addEventListener('click', this.handleSortClick.bind(this))
     })
+  }
+
+  handleTabClick(e) {
+    e.preventDefault()
+    e.stopPropagation()
+    this.switchTab(e.target)
+  }
+
+  handleSortClick(e) {
+    e.preventDefault()
+    e.stopPropagation()
+    this.handleSort(e.target)
   }
 
   switchTab(clickedTab) {
     const targetId = clickedTab.dataset.tabsTarget
     const target = document.querySelector(targetId)
     const tabId = clickedTab.id.replace('-tab', '')
+    
+    if (!target) {
+      return
+    }
     
     // Hide all tab contents
     this.tabContentTargets.forEach(content => {

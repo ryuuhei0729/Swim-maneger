@@ -83,17 +83,17 @@
 
   <div class="mb-4 border-b border-gray-200">
     <div class="flex items-center justify-between">
-      <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="genderTabs" role="tablist">
-        <li class="mr-2" role="presentation">
-          <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'all' ? 'border-blue-600 text-blue-600 bg-blue-100' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="all-tab" data-tabs-target="#all" data-home-target="tab" type="button" role="tab" aria-controls="all" aria-selected="<%= @default_tab == 'all' %>">全体</button>
-        </li>
-        <li class="mr-2" role="presentation">
-          <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'male' ? 'border-blue-600 text-blue-600 bg-blue-100' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="male-tab" data-tabs-target="#male" data-home-target="tab" type="button" role="tab" aria-controls="male" aria-selected="<%= @default_tab == 'male' %>">男子</button>
-        </li>
-        <li class="mr-2" role="presentation">
-          <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'female' ? 'border-blue-600 text-blue-600 bg-blue-100' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="female-tab" data-tabs-target="#female" data-home-target="tab" type="button" role="tab" aria-controls="female" aria-selected="<%= @default_tab == 'female' %>">女子</button>
-        </li>
-      </ul>
+              <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="genderTabs" role="tablist">
+          <li class="mr-2" role="presentation">
+            <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'all' ? 'border-blue-600 text-blue-600 bg-blue-100' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="all-tab" data-tabs-target="#all" data-home-target="tab" type="button" role="tab" aria-controls="all" aria-selected="<%= @default_tab == 'all' %>">全体</button>
+          </li>
+          <li class="mr-2" role="presentation">
+            <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'male' ? 'border-blue-600 text-blue-600 bg-blue-100' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="male-tab" data-tabs-target="#male" data-home-target="tab" type="button" role="tab" aria-controls="male" aria-selected="<%= @default_tab == 'male' %>">男子</button>
+          </li>
+          <li class="mr-2" role="presentation">
+            <button class="inline-block p-4 border-b-2 rounded-t-lg <%= @default_tab == 'female' ? 'border-blue-600 text-blue-600 bg-blue-100' : 'border-transparent hover:text-gray-600 hover:border-gray-300' %>" id="female-tab" data-tabs-target="#female" data-home-target="tab" type="button" role="tab" aria-controls="female" aria-selected="<%= @default_tab == 'female' %>">女子</button>
+          </li>
+        </ul>
       <div class="text-sm text-red-600">
         <p>※種目をクリックすると、タイム順（昇順）に並び替えられます</p>
       </div>

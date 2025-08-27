@@ -1,1 +1,76 @@
 @import "tailwindcss";
+
+/* 泳法別背景色クラス */
+.bg-freestyle {
+  background-color: #fde047; /* yellow-200 */
+}
+
+.bg-freestyle-light {
+  background-color: #fefce8; /* yellow-50 */
+}
+
+.bg-breaststroke {
+  background-color: #86efac; /* green-200 */
+}
+
+.bg-breaststroke-light {
+  background-color: #f0fdf4; /* green-50 */
+}
+
+.bg-backstroke {
+  background-color: #fca5a5; /* red-200 */
+}
+
+.bg-backstroke-light {
+  background-color: #fef2f2; /* red-50 */
+}
+
+.bg-butterfly {
+  background-color: #93c5fd; /* blue-200 */
+}
+
+.bg-butterfly-light {
+  background-color: #eff6ff; /* blue-50 */
+}
+
+.bg-individual-medley {
+  background-color: #d8b4fe; /* purple-200 */
+}
+
+.bg-individual-medley-light {
+  background-color: #faf5ff; /* purple-50 */
+}
+
+.bg-gray-default {
+  background-color: #f3f4f6; /* gray-100 */
+}
+
+/* 現在のユーザー用の背景色 */
+.bg-current-user {
+  background-color: #dbeafe; /* blue-100 */
+}
+
+/* テーブルヘッダー用の泳法別クラス */
+.bg-header-freestyle {
+  background-color: #fde047; /* yellow-200 */
+}
+
+.bg-header-breaststroke {
+  background-color: #86efac; /* green-200 */
+}
+
+.bg-header-backstroke {
+  background-color: #fca5a5; /* red-200 */
+}
+
+.bg-header-butterfly {
+  background-color: #93c5fd; /* blue-200 */
+}
+
+.bg-header-individual-medley {
+  background-color: #d8b4fe; /* purple-200 */
+}
+
+.bg-header-gray {
+  background-color: #f3f4f6; /* gray-100 */
+}
