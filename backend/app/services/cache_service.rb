@@ -84,15 +84,12 @@ class CacheService
       return Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
     end
     
-    # 処理中フラグをチェック
-    if Rails.cache.exist?(processing_key)
+    # 処理中フラグをアトミックに設定（重複実行を防止）
+    unless Rails.cache.write(processing_key, true, expires_in: 5.minutes, unless_exist: true)
       # 既に処理中の場合はデフォルト値を返す
       return yield if block_given?
       return nil
     end
-    
-    # 処理中フラグを設定（重複実行を防止）
-    Rails.cache.write(processing_key, true, expires_in: 5.minutes)
     
     # バックグラウンドジョブで処理を実行
     HeavyQueryJob.perform_later(query_name, params, cache_key)
@@ -127,7 +124,7 @@ class CacheService
 
   # キャッシュの削除
   def self.invalidate_user_cache(user_id)
-    Rails.cache.delete("user_info:#{user_id}")
+    Rails.cache.delete(build_stable_cache_key("user_info", user_id))
     Rails.cache.delete_matched("users_list:*")
     # APIレスポンスキャッシュも無効化
     Rails.cache.delete_matched("api_response:*")
@@ -152,7 +149,7 @@ class CacheService
 
   def self.invalidate_practice_cache(user_id = nil)
     if user_id
-      Rails.cache.delete_matched("practice_logs:#{user_id}:*")
+      Rails.cache.delete_matched("practice_logs:#{serialize_param(user_id)}:*")
     else
       Rails.cache.delete_matched("practice_logs:*")
     end
@@ -162,7 +159,7 @@ class CacheService
 
   def self.invalidate_records_cache(user_id = nil)
     if user_id
-      Rails.cache.delete_matched("records:#{user_id}:*")
+      Rails.cache.delete_matched("records:#{serialize_param(user_id)}:*")
     else
       Rails.cache.delete_matched("records:*")
     end
@@ -174,7 +171,7 @@ class CacheService
 
   def self.invalidate_objectives_cache(user_id = nil)
     if user_id
-      Rails.cache.delete_matched("objectives:#{user_id}:*")
+      Rails.cache.delete_matched("objectives:#{serialize_param(user_id)}:*")
     else
       Rails.cache.delete_matched("objectives:*")
     end
@@ -191,8 +188,9 @@ class CacheService
 
   def self.invalidate_statistics_cache(stat_type = nil)
     if stat_type
-      Rails.cache.delete_matched("statistics:#{stat_type}:*")
-      Rails.cache.delete_matched("precomputed_stats:#{stat_type}:*")
+      serialized = serialize_param(stat_type)
+      Rails.cache.delete_matched("statistics:#{serialized}:*")
+      Rails.cache.delete_matched("precomputed_stats:#{serialized}:*")
     else
       Rails.cache.delete_matched("statistics:*")
       Rails.cache.delete_matched("precomputed_stats:*")
@@ -200,6 +198,7 @@ class CacheService
   end
 
   def self.invalidate_admin_dashboard_cache
+    Rails.cache.delete("admin_dashboard")
     Rails.cache.delete_matched("admin_dashboard:*")
     # 関連するAPIレスポンスキャッシュも無効化
     Rails.cache.delete_matched("api_response:admin/dashboard:*")
@@ -238,7 +237,15 @@ class CacheService
   # キャッシュキー数のカウント
   def self.count_cache_keys(pattern)
     return nil unless Rails.cache.respond_to?(:redis)
-    Rails.cache.redis.scan_each(match: pattern).count
+    
+    # キャッシュネームスペースを検出
+    namespace = detect_cache_namespace
+    namespaced_pattern = namespace ? "#{namespace}:#{pattern}" : pattern
+    
+    # Redis接続を使用してSCANを実行
+    Rails.cache.redis.with do |conn|
+      conn.scan_each(match: namespaced_pattern).count
+    end
   rescue => e
     Rails.logger.error "キャッシュキーカウントエラー: #{e.message}"
     nil
@@ -261,13 +268,24 @@ class CacheService
 
   # キャッシュの有効期限を延長
   def self.extend_cache_expiry(cache_key, additional_time = 1.hour)
-    Rails.cache.redis.expire(cache_key, additional_time.to_i) if Rails.cache.respond_to?(:redis)
+    # まずtouchメソッドがサポートされているかチェック
+    if Rails.cache.respond_to?(:touch)
+      Rails.cache.touch(cache_key, expires_in: additional_time)
+    else
+      # touchがサポートされていない場合は、値を安全に再読み込みして再書き込み
+      value = Rails.cache.read(cache_key)
+      if value
+        Rails.cache.write(cache_key, value, expires_in: additional_time)
+      end
+    end
   rescue => e
     Rails.logger.error "キャッシュ有効期限延長エラー: #{e.message}"
   end
 
   # キャッシュの優先度設定
   def self.set_cache_priority(cache_key, priority = :normal)
+    return unless cache_key
+    
     priority_expiry = case priority
                      when :high then 1.hour
                      when :normal then 30.minutes
@@ -275,7 +293,7 @@ class CacheService
                      else 30.minutes
                      end
     
-    Rails.cache.redis.expire(cache_key, priority_expiry.to_i) if Rails.cache.respond_to?(:redis)
+    extend_cache_expiry(cache_key, priority_expiry.to_i)
   rescue => e
     Rails.logger.error "キャッシュ優先度設定エラー: #{e.message}"
   end
@@ -385,5 +403,35 @@ class CacheService
         "#{obj.class.name}:#{obj.inspect}"
       end
     end
+  end
+
+  # キャッシュネームスペースを検出するヘルパー
+  def self.detect_cache_namespace
+    cache_store = Rails.cache
+    
+    # Redis::Storeの場合
+    if cache_store.respond_to?(:redis) && cache_store.redis.respond_to?(:namespace)
+      return cache_store.redis.namespace
+    end
+    
+    # ActiveSupport::Cache::RedisCacheStoreの場合
+    if cache_store.respond_to?(:options) && cache_store.options[:namespace]
+      return cache_store.options[:namespace]
+    end
+    
+    # その他のRedisベースのキャッシュストア
+    if cache_store.respond_to?(:redis) && cache_store.redis.respond_to?(:client)
+      # Redisクライアントからネームスペースを取得を試行
+      client = cache_store.redis.client
+      if client.respond_to?(:namespace)
+        return client.namespace
+      end
+    end
+    
+    # ネームスペースが見つからない場合はnilを返す
+    nil
+  rescue => e
+    Rails.logger.warn "キャッシュネームスペース検出エラー: #{e.message}"
+    nil
   end
 end

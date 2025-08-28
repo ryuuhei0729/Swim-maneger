@@ -92,9 +92,11 @@ class RacesController < ApplicationController
         render_success("#{success_count}種目のエントリーを提出しました。", status: :ok, code: "ENTRY_SUBMITTED")
       end
     rescue ActiveRecord::RecordInvalid => e
-      render_error("エントリーに失敗しました: #{e.message}", status: :unprocessable_entity, code: "VALIDATION_ERROR")
+      Rails.logger.error "エントリー作成中にバリデーションエラー: #{e.message}"
+      render_error("エントリーに失敗しました", status: :unprocessable_entity, code: "VALIDATION_ERROR")
     rescue => e
-      render_error("エラーが発生しました: #{e.message}", status: :internal_server_error, code: "INTERNAL_ERROR")
+      Rails.logger.error "エントリー作成中にエラーが発生: #{e.message}"
+      render_error("エラーが発生しました", status: :internal_server_error, code: "INTERNAL_ERROR")
     end
   end
 

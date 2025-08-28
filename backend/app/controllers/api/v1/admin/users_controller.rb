@@ -131,7 +131,7 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
       
     rescue => e
       Rails.logger.error "ユーザーインポートプレビュー処理中にエラーが発生: #{e.message}"
-      render_error("ファイルの処理中にエラーが発生しました: #{e.message}", status: :unprocessable_entity)
+      render_error("ファイルの処理中にエラーが発生しました", status: :unprocessable_entity)
     end
   end
 
@@ -206,7 +206,7 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
     end
 
     if error_count > 0
-      render_error("一括インポートに失敗しました", status: :unprocessable_entity, errors: { errors: errors })
+      render_error("一括インポートに失敗しました", status: :unprocessable_entity, errors: errors)
     else
       render_success({
         imported_count: success_count

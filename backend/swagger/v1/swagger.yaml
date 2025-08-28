@@ -67,7 +67,6 @@ paths:
         - 認証
       summary: ユーザーログアウト
       description: 現在のセッションを終了し、JWTトークンを無効化
-      security: []
       responses:
         '200':
           description: ログアウト成功

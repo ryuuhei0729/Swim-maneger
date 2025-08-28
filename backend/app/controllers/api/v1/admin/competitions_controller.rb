@@ -179,7 +179,7 @@ class Api::V1::Admin::CompetitionsController < Api::V1::Admin::BaseController
     end
 
     if error_count > 0
-      render_error("結果の保存中にエラーが発生しました", status: :unprocessable_entity, errors: { errors: errors })
+      render_error("結果の保存中にエラーが発生しました", status: :unprocessable_entity, errors: errors)
     else
       render_success({
         saved_count: success_count

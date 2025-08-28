@@ -49,7 +49,9 @@ class Api::V1::MypageController < Api::V1::BaseController
         decoded_image = decode_base64_image(params[:avatar_base64])
         user.avatar.attach(decoded_image)
       rescue => e
-        render_error("画像の処理に失敗しました: #{e.message}", status: :unprocessable_entity)
+        Rails.logger.error "画像処理中にエラーが発生: #{e.message}"
+        Rails.logger.error "バックトレース: #{e.backtrace.join("\n")}"
+        render_error("画像の処理に失敗しました", status: :unprocessable_entity)
         return
       end
     end

@@ -134,7 +134,7 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
     normalized_updates = normalize_and_validate_updates(save_check_params[:updates])
 
     if normalized_updates[:errors].any?
-      return render_error(I18n.t("api.admin.attendances.errors.invalid_updates"), status: :bad_request, errors: { errors: normalized_updates[:errors] })
+      return render_error(I18n.t("api.admin.attendances.errors.invalid_updates"), status: :bad_request, errors: normalized_updates[:errors])
     end
 
     attendance_event = AttendanceEvent.find(save_check_params[:attendance_event_id])
@@ -172,7 +172,7 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
     end
 
     if errors.any?
-      render_error(I18n.t("api.admin.attendances.errors.update_error"), status: :unprocessable_entity, errors: { errors: errors })
+      render_error(I18n.t("api.admin.attendances.errors.update_error"), status: :unprocessable_entity, errors: errors)
     else
       render_success({
         updated_count: update_count
@@ -260,7 +260,7 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
     end
 
     if errors.any?
-      render_error("出欠受付状況の更新中にエラーが発生しました", status: :unprocessable_entity, errors: { errors: errors })
+      render_error("出欠受付状況の更新中にエラーが発生しました", status: :unprocessable_entity, errors: errors)
     else
       render_success({
         updated_count: updated_count

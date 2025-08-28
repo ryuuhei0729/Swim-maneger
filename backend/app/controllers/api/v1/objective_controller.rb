@@ -23,7 +23,7 @@ class Api::V1::ObjectiveController < Api::V1::BaseController
         objective: build_objective_data(objective)
       }, :created)
     else
-      render_error("目標の設定に失敗しました", status: :unprocessable_entity, errors: objective.errors)
+      render_error("目標の設定に失敗しました", status: :unprocessable_entity, errors: objective.errors.full_messages)
     end
   end
 
@@ -52,10 +52,10 @@ class Api::V1::ObjectiveController < Api::V1::BaseController
         objective: build_objective_data(objective.reload)
       })
     else
-      render_error("目標の更新に失敗しました", status: :unprocessable_entity, errors: objective.errors)
+      render_error("目標の更新に失敗しました", status: :unprocessable_entity, errors: objective.errors.full_messages)
     end
   rescue ActiveRecord::RecordNotFound
-    render_error("目標が見つかりません", :not_found)
+          render_error("目標が見つかりません", status: :not_found)
   end
 
   def destroy

@@ -84,7 +84,7 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
         practice_log: serialize_practice_log(@practice_log)
       }, "練習記録を更新しました")
     rescue ActiveRecord::RecordInvalid => e
-      render_error("練習記録の更新に失敗しました", status: :unprocessable_entity, errors: @practice_log.errors.as_json)
+      render_error(message: "練習記録の更新に失敗しました", status: :unprocessable_entity, errors: @practice_log.errors.as_json)
     end
   end
 
@@ -159,7 +159,7 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
         times_count: practice_log.practice_times.count
       }, "練習タイムとメニューを保存しました", :created)
     rescue ActiveRecord::RecordInvalid => e
-      render_error("練習データの保存に失敗しました", status: :unprocessable_entity, errors: practice_log.errors.as_json)
+      render_error(message: "練習データの保存に失敗しました", status: :unprocessable_entity, errors: practice_log.errors.as_json)
     end
   end
 
@@ -235,10 +235,10 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
         event: serialize_event_basic(attendance_event)
       }, "練習メニュー画像を更新しました")
     else
-      render_error("練習メニュー画像の更新に失敗しました", status: :unprocessable_entity, errors: attendance_event.errors.as_json)
+      render_error(message: "練習メニュー画像の更新に失敗しました", status: :unprocessable_entity, errors: attendance_event.errors.as_json)
     end
   rescue ActiveRecord::RecordNotFound
-    render_error("イベントが見つかりません", :not_found)
+    render_error("イベントが見つかりません", status: :not_found)
   end
 
   # GET /api/v1/admin/practices/attendees_list
@@ -270,7 +270,7 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
       absent_attendee_ids: absent_attendee_ids
     })
   rescue ActiveRecord::RecordNotFound
-    render_error("イベントが見つかりません", :not_found)
+    render_error("イベントが見つかりません", status: :not_found)
   end
 
   private

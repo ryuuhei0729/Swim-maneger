@@ -137,7 +137,7 @@ class Api::V1::Admin::ObjectivesController < Api::V1::Admin::BaseController
 
     render_success({}, "マイルストーンを削除しました")
   rescue ActiveRecord::RecordNotFound
-    render_error("マイルストーンが見つかりません", :not_found)
+          render_error("マイルストーンが見つかりません", status: :not_found)
   end
 
   # POST /api/v1/admin/objectives/milestones/:milestone_id/review
