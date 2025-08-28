@@ -8,8 +8,10 @@ RSpec.describe "Api::V1::Admin::Schedules", type: :request do
   let(:player_headers) { { 'Authorization' => "Bearer #{player_user_auth.authentication_token}" } }
 
   describe "GET /api/v1/admin/schedules" do
-    let!(:schedule1) { create(:attendance_event, title: "練習1", date: Date.today + 1.day) }
-    let!(:schedule2) { create(:attendance_event, title: "練習2", date: Date.today + 2.days) }
+    let!(:schedule1) { create(:attendance_event, title: "練習1", date: Date.today + 1.day, is_competition: false) }
+    let!(:schedule2) { create(:attendance_event, title: "練習2", date: Date.today + 2.days, is_competition: false) }
+    let!(:competition1) { create(:attendance_event, title: "大会1", date: Date.today + 3.days, is_competition: true) }
+    let!(:competition2) { create(:attendance_event, title: "大会2", date: Date.today + 4.days, is_competition: true) }
     
     context "管理者の場合" do
       it "スケジュール一覧を返す" do
@@ -19,7 +21,36 @@ RSpec.describe "Api::V1::Admin::Schedules", type: :request do
         json = JSON.parse(response.body)
         expect(json['success']).to be true
         expect(json['data']['schedules']).to be_an(Array)
+        expect(json['data']['schedules'].count).to eq(4)
+      end
+      
+      it "event_type=practiceで練習のみを返す" do
+        get "/api/v1/admin/schedules?event_type=practice", headers: headers
+        
+        expect(response).to have_http_status(:ok)
+        json = JSON.parse(response.body)
+        expect(json['success']).to be true
         expect(json['data']['schedules'].count).to eq(2)
+        expect(json['data']['schedules'].all? { |s| s['title'].include?('練習') }).to be true
+      end
+      
+      it "event_type=competitionで大会のみを返す" do
+        get "/api/v1/admin/schedules?event_type=competition", headers: headers
+        
+        expect(response).to have_http_status(:ok)
+        json = JSON.parse(response.body)
+        expect(json['success']).to be true
+        expect(json['data']['schedules'].count).to eq(2)
+        expect(json['data']['schedules'].all? { |s| s['title'].include?('大会') }).to be true
+      end
+      
+      it "無効なevent_typeでエラーを返す" do
+        get "/api/v1/admin/schedules?event_type=invalid", headers: headers
+        
+        expect(response).to have_http_status(:bad_request)
+        json = JSON.parse(response.body)
+        expect(json['success']).to be false
+        expect(json['message']).to eq("無効なevent_typeです。'practice'または'competition'を指定してください")
       end
     end
     

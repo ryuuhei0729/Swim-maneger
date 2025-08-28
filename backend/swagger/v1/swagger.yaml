@@ -453,6 +453,243 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+    post:
+      tags:
+        - 管理者
+      summary: スケジュール作成（管理者）
+      description: 新しいスケジュールを作成
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - schedule
+              properties:
+                schedule:
+                  type: object
+                  required:
+                    - title
+                    - date
+                  properties:
+                    title:
+                      type: string
+                      description: タイトル
+                      example: "練習"
+                    date:
+                      type: string
+                      format: date
+                      description: 日付
+                      example: "2025-01-15"
+                    place:
+                      type: string
+                      description: 場所
+                      example: "プール"
+                    note:
+                      type: string
+                      description: メモ
+                      example: "通常練習"
+                    is_competition:
+                      type: boolean
+                      description: 大会フラグ
+                      example: false
+                    is_attendance:
+                      type: boolean
+                      description: 出欠管理フラグ
+                      example: true
+      responses:
+        '201':
+          description: 作成成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminScheduleResponse'
+        '422':
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 権限エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /admin/schedules/{id}:
+    get:
+      tags:
+        - 管理者
+      summary: スケジュール詳細取得（管理者）
+      description: 指定されたスケジュールの詳細を取得
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: スケジュールID
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminScheduleResponse'
+        '404':
+          description: スケジュールが見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 権限エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    patch:
+      tags:
+        - 管理者
+      summary: スケジュール更新（管理者）
+      description: 指定されたスケジュールを更新
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: スケジュールID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - schedule
+              properties:
+                schedule:
+                  type: object
+                  properties:
+                    title:
+                      type: string
+                      description: タイトル
+                      example: "練習"
+                    date:
+                      type: string
+                      format: date
+                      description: 日付
+                      example: "2025-01-15"
+                    place:
+                      type: string
+                      description: 場所
+                      example: "プール"
+                    note:
+                      type: string
+                      description: メモ
+                      example: "通常練習"
+                    is_competition:
+                      type: boolean
+                      description: 大会フラグ
+                      example: false
+                    is_attendance:
+                      type: boolean
+                      description: 出欠管理フラグ
+                      example: true
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminScheduleResponse'
+        '422':
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: スケジュールが見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 権限エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - 管理者
+      summary: スケジュール削除（管理者）
+      description: 指定されたスケジュールを削除
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: スケジュールID
+      responses:
+        '200':
+          description: 削除成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+        '404':
+          description: スケジュールが見つかりません
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: 認証エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: 権限エラー
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
 components:
   securitySchemes:
     BearerAuth:
@@ -621,7 +858,7 @@ components:
                 calendar:
                   type: array
                   items:
-                    $ref: '#/components/schemas/EventSummary'
+                    $ref: '#/components/schemas/ScheduleSummary'
                   description: カレンダー情報
                 announcements:
                   type: array
@@ -719,7 +956,7 @@ components:
             data:
               type: array
               items:
-                $ref: '#/components/schemas/EventSummary'
+                $ref: '#/components/schemas/ScheduleSummary'
               description: イベント一覧
 
     # 出席管理
@@ -808,21 +1045,36 @@ components:
             data:
               type: object
               properties:
-                events:
+                schedules:
                   type: array
                   items:
-                    $ref: '#/components/schemas/EventDetail'
-                  description: イベント一覧
+                    $ref: '#/components/schemas/ScheduleDetail'
+                  description: スケジュール一覧
                 pagination:
                   $ref: '#/components/schemas/PaginationInfo'
 
+    AdminScheduleResponse:
+      allOf:
+        - $ref: '#/components/schemas/BaseResponse'
+        - type: object
+          properties:
+            success:
+              type: boolean
+              example: true
+            data:
+              type: object
+              properties:
+                schedule:
+                  $ref: '#/components/schemas/ScheduleDetail'
+                  description: スケジュール詳細
+
     # 詳細スキーマ
-    EventSummary:
+    ScheduleSummary:
       type: object
       properties:
         id:
           type: integer
-          description: イベントID
+          description: スケジュールID
         title:
           type: string
           description: タイトル
@@ -834,30 +1086,35 @@ components:
           type: string
           enum: [practice, competition]
           description: イベントタイプ
-        location:
+        is_competition:
+          type: boolean
+          description: 大会フラグ
+        place:
           type: string
           description: 場所
 
-    EventDetail:
+    ScheduleDetail:
       allOf:
-        - $ref: '#/components/schemas/EventSummary'
+        - $ref: '#/components/schemas/ScheduleSummary'
         - type: object
           properties:
-            description:
+            note:
               type: string
-              description: 説明
-            start_time:
-              type: string
-              format: date-time
-              description: 開始時間
-            end_time:
-              type: string
-              format: date-time
-              description: 終了時間
+              description: メモ
+            is_competition:
+              type: boolean
+              description: 大会フラグ
+            is_attendance:
+              type: boolean
+              description: 出欠管理フラグ
             created_at:
               type: string
               format: date-time
               description: 作成日時
+            updated_at:
+              type: string
+              format: date-time
+              description: 更新日時
 
     AnnouncementSummary:
       type: object
@@ -945,10 +1202,10 @@ components:
           type: integer
           description: 出席ID
         event:
-          $ref: '#/components/schemas/EventSummary'
+          $ref: '#/components/schemas/ScheduleSummary'
         status:
           type: string
-          enum: [present, absent, late]
+          enum: [present, absent, other]
           description: 出席状況
         created_at:
           type: string

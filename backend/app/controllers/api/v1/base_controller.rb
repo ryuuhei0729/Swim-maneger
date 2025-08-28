@@ -22,15 +22,10 @@ class Api::V1::BaseController < ApplicationController
     return render_unauthorized('認証トークンが提供されていません') unless token
 
     begin
-      decoded_token = JWT.decode(token, Rails.application.credentials.secret_key_base, true, { algorithm: 'HS256' })
-      user_id = decoded_token[0]['user_id']
-      @current_user_auth = UserAuth.find(user_id)
+      @current_user_auth = UserAuth.find_by!(authentication_token: token)
       @current_user = @current_user_auth.user
-    rescue JWT::DecodeError => e
-      Rails.logger.error "JWTデコードエラー: #{e.message}"
-      render_unauthorized('無効な認証トークンです')
     rescue ActiveRecord::RecordNotFound
-      render_unauthorized('ユーザーが見つかりません')
+      render_unauthorized('無効な認証トークンです')
     end
   end
 

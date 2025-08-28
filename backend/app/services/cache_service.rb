@@ -255,12 +255,14 @@ class CacheService
   def self.calculate_hit_rate
     return nil unless Rails.cache.respond_to?(:redis)
     
-    info = Rails.cache.redis.info
-    hits = info['keyspace_hits'].to_i
-    misses = info['keyspace_misses'].to_i
-    total = hits + misses
-    
-    total > 0 ? (hits.to_f / total * 100).round(2) : 0
+    Rails.cache.redis.with do |conn|
+      info = conn.info
+      hits = info['keyspace_hits'].to_i
+      misses = info['keyspace_misses'].to_i
+      total = hits + misses
+      
+      total > 0 ? (hits.to_f / total * 100).round(2) : 0
+    end
   rescue => e
     Rails.logger.error "キャッシュヒット率計算エラー: #{e.message}"
     nil
@@ -373,7 +375,7 @@ class CacheService
   # ネストしたHashを深くソートするヘルパー
   def self.deep_sort_hash(hash)
     sorted_hash = {}
-    hash.keys.sort.each do |key|
+    hash.keys.sort_by(&:to_s).each do |key|
       value = hash[key]
       sorted_hash[serialize_param(key)] = case value
       when Hash

@@ -6,6 +6,18 @@ class Api::V1::Admin::SchedulesController < Api::V1::Admin::BaseController
   # GET /api/v1/admin/schedules
   def index
     events = AttendanceEvent.order(date: :desc)
+    
+    # event_typeパラメータによるフィルタリング
+    if params[:event_type].present?
+      case params[:event_type].downcase
+      when 'practice'
+        events = events.where(is_competition: false)
+      when 'competition'
+        events = events.where(is_competition: true)
+      else
+        return render_error("無効なevent_typeです。'practice'または'competition'を指定してください", status: :bad_request)
+      end
+    end
 
     render_success({
       schedules: events.map do |event|
@@ -28,9 +40,9 @@ class Api::V1::Admin::SchedulesController < Api::V1::Admin::BaseController
     if event.save
       render_success({
         schedule: serialize_schedule(event)
-      }, "スケジュールを作成しました", :created)
+      }, "スケジュールを作成しました", status: :created)
     else
-      render_error("スケジュールの作成に失敗しました", status: :unprocessable_entity, errors: event.errors.as_json)
+      render_error("スケジュールの作成に失敗しました", status: :unprocessable_entity, errors: event.errors.full_messages)
     end
   end
 
@@ -41,7 +53,7 @@ class Api::V1::Admin::SchedulesController < Api::V1::Admin::BaseController
         schedule: serialize_schedule(@attendance_event)
       }, "スケジュールを更新しました")
     else
-      render_error("スケジュールの更新に失敗しました", status: :unprocessable_entity, errors: @attendance_event.errors.as_json)
+      render_error("スケジュールの更新に失敗しました", status: :unprocessable_entity, errors: @attendance_event.errors.full_messages)
     end
   end
 
