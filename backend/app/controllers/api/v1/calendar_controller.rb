@@ -71,7 +71,7 @@ class Api::V1::CalendarController < Api::V1::BaseController
 
   def build_monthly_statistics(all_events, current_month)
     # 現在のユーザーの出席状況統計
-    user_attendance = current_user_auth.user.attendance.joins(:attendance_event)
+    user_attendance = current_user_auth.user.attendances.joins(:attendance_event)
                         .where(events: { date: current_month.all_month })
 
     # イベントタイプ別の統計
@@ -107,7 +107,7 @@ class Api::V1::CalendarController < Api::V1::BaseController
   end
 
   def format_attendance_event(event)
-    user_attendance = current_user_auth.user.attendance.find_by(attendance_event: event)
+    user_attendance = current_user_auth.user.attendances.find_by(attendance_event: event)
     
     {
       id: event.id,

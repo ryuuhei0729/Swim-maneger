@@ -121,7 +121,7 @@ class CacheService
   def self.cache_search_results(query, filters = {}, expires_in: 10.minutes, &block)
     raise ArgumentError, "Block is required" if block.nil?
     normalized_filters = normalize_filters(filters)
-    cache_key = "search:#{Digest::MD5.hexdigest(query)}:#{Digest::MD5.hexdigest(serialize_param(filters))}"
+    cache_key = "search:#{Digest::MD5.hexdigest(query)}:#{Digest::MD5.hexdigest(serialize_param(normalized_filters))}"
     Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
   end
 
@@ -238,7 +238,7 @@ class CacheService
   # キャッシュキー数のカウント
   def self.count_cache_keys(pattern)
     return nil unless Rails.cache.respond_to?(:redis)
-    Rails.cache.redis.keys(pattern).count
+    Rails.cache.redis.scan_each(match: pattern).count
   rescue => e
     Rails.logger.error "キャッシュキーカウントエラー: #{e.message}"
     nil

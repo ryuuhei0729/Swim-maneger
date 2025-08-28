@@ -83,19 +83,19 @@ class Api::V1::BaseController < ApplicationController
   end
 
   def render_unauthorized(message = '認証が必要です')
-    render_error(message, :unauthorized)
+    render_error(message, status: :unauthorized)
   end
 
   def render_forbidden(message = 'アクセス権限がありません')
-    render_error(message, :forbidden)
+    render_error(message, status: :forbidden)
   end
 
   def render_not_found(message = 'リソースが見つかりません')
-    render_error(message, :not_found)
+    render_error(message, status: :not_found)
   end
 
   def render_validation_error(errors)
-    render_error('バリデーションエラー', :unprocessable_entity, errors)
+    render_error('バリデーションエラー', status: :unprocessable_entity, errors: errors)
   end
 
   def handle_standard_error(exception)
@@ -105,7 +105,7 @@ class Api::V1::BaseController < ApplicationController
     # エラー監視とアラート設定
     notify_error(exception, 'standard_error')
     
-    render_error('サーバー内部エラーが発生しました', :internal_server_error)
+    render_error('サーバー内部エラーが発生しました', status: :internal_server_error)
   end
 
   def handle_not_found(exception)
@@ -120,7 +120,7 @@ class Api::V1::BaseController < ApplicationController
 
   def handle_parameter_missing(exception)
     Rails.logger.warn "APIパラメータ不足: #{exception.message}"
-    render_error("必須パラメータが不足しています: #{exception.param}", :bad_request)
+    render_error("必須パラメータが不足しています: #{exception.param}", status: :bad_request)
   end
 
   def handle_unauthorized(exception)
@@ -303,7 +303,7 @@ class Api::V1::BaseController < ApplicationController
   end
 
   def sensitive_key?(key_str)
-    sensitive_keys = %w[password password_confirmation token secret api_key access_token]
+    sensitive_keys = %w[password password_confirmation token secret api_key access_token authorization id_token refresh_token]
     sensitive_keys.any? { |sensitive| key_str.include?(sensitive) }
   end
 
@@ -327,7 +327,11 @@ class Api::V1::BaseController < ApplicationController
   def self.get_popular_endpoints
     return [] unless Rails.cache.respond_to?(:redis)
     
-    keys = Rails.cache.redis.keys("api_stats:endpoint:*")
+    keys = []
+    Rails.cache.redis.scan_each(match: "api_stats:endpoint:*") do |key|
+      keys << key
+    end
+    
     keys.map do |key|
       path = key.split(':').last
       count = Rails.cache.redis.hget(key, 'count').to_i
@@ -338,7 +342,15 @@ class Api::V1::BaseController < ApplicationController
   def self.get_user_type_distribution
     return [] unless Rails.cache.respond_to?(:redis)
     
-    keys = Rails.cache.redis.keys("api_stats:user_type:*")
+    keys = []
+    cursor = 0
+    
+    loop do
+      cursor, matched_keys = Rails.cache.redis.scan(cursor, match: "api_stats:user_type:*")
+      keys.concat(matched_keys)
+      break if cursor == "0"
+    end
+    
     keys.map do |key|
       user_type = key.split(':').last
       count = Rails.cache.redis.hget(key, 'count').to_i
@@ -359,7 +371,11 @@ class Api::V1::BaseController < ApplicationController
   def self.get_performance_metrics
     return {} unless Rails.cache.respond_to?(:redis)
     
-    keys = Rails.cache.redis.keys("api_performance:*")
+    keys = []
+    Rails.cache.redis.scan_each(match: "api_performance:*") do |key|
+      keys << key
+    end
+    
     metrics = {}
     
     keys.each do |key|

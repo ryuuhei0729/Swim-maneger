@@ -36,10 +36,10 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
           }, "ユーザーを作成しました", :created)
         else
           user.destroy
-          render_error("ユーザー認証情報の作成に失敗しました", :unprocessable_entity, user_auth.errors.as_json)
+          render_error("ユーザー認証情報の作成に失敗しました", status: :unprocessable_entity, errors: user_auth.errors.as_json)
         end
       else
-        render_error("ユーザーの作成に失敗しました", :unprocessable_entity, user.errors.as_json)
+        render_error("ユーザーの作成に失敗しました", status: :unprocessable_entity, errors: user.errors.as_json)
       end
     end
   end
@@ -56,7 +56,7 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
               user: serialize_user(@user)
             }, "ユーザー情報を更新しました")
           else
-            render_error("ユーザー認証情報の更新に失敗しました", :unprocessable_entity, user_auth.errors.as_json)
+            render_error("ユーザー認証情報の更新に失敗しました", status: :unprocessable_entity, errors: user_auth.errors.as_json)
             raise ActiveRecord::Rollback
           end
         else
@@ -65,7 +65,7 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
           }, "ユーザー情報を更新しました")
         end
       else
-        render_error("ユーザー情報の更新に失敗しました", :unprocessable_entity, @user.errors.as_json)
+        render_error("ユーザー情報の更新に失敗しました", status: :unprocessable_entity, errors: @user.errors.as_json)
       end
     end
   end
@@ -79,7 +79,7 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
   # POST /api/v1/admin/users/import/preview
   def import_preview
     unless params[:file].present?
-      return render_error("ファイルを選択してください", :bad_request)
+      return render_error("ファイルを選択してください", status: :bad_request)
     end
 
     begin
@@ -131,24 +131,24 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
       
     rescue => e
       Rails.logger.error "ユーザーインポートプレビュー処理中にエラーが発生: #{e.message}"
-      render_error("ファイルの処理中にエラーが発生しました: #{e.message}", :unprocessable_entity)
+      render_error("ファイルの処理中にエラーが発生しました: #{e.message}", status: :unprocessable_entity)
     end
   end
 
   # POST /api/v1/admin/users/import/execute
   def import_execute
     unless params[:import_token].present?
-      return render_error("インポートトークンが見つかりません", :bad_request)
+      return render_error("インポートトークンが見つかりません", status: :bad_request)
     end
 
     # トークンを検証・デコード
     begin
       import_data = verify_import_token(params[:import_token])
     rescue ActiveSupport::MessageVerifier::InvalidSignature
-      return render_error("無効なインポートトークンです", :bad_request)
+      return render_error("無効なインポートトークンです", status: :bad_request)
     rescue => e
       Rails.logger.error "インポートトークンの検証中にエラーが発生: #{e.message}"
-      return render_error("インポートトークンの検証に失敗しました", :bad_request)
+      return render_error("インポートトークンの検証に失敗しました", status: :bad_request)
     end
 
     success_count = 0
@@ -206,7 +206,7 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
     end
 
     if error_count > 0
-      render_error("一括インポートに失敗しました", :unprocessable_entity, { errors: errors })
+      render_error("一括インポートに失敗しました", status: :unprocessable_entity, errors: { errors: errors })
     else
       render_success({
         imported_count: success_count
@@ -246,7 +246,7 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
   def set_user
     @user = User.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render_error("ユーザーが見つかりません", :not_found)
+    render_error("ユーザーが見つかりません", status: :not_found)
   end
 
   def user_params
@@ -290,7 +290,7 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
     serialize_user(user).merge({
       records_count: user.records.count,
       objectives_count: user.objectives.count,
-      attendances_count: user.attendance.count,
+      attendances_count: user.attendances.count,
       last_login_at: user.user_auth&.last_sign_in_at,
       sign_in_count: user.user_auth&.sign_in_count || 0
     })

@@ -44,7 +44,7 @@ class Api::V1::Admin::ObjectivesController < Api::V1::Admin::BaseController
         objective: serialize_objective(objective)
       }, "目標を作成しました", :created)
     else
-      render_error("目標の作成に失敗しました", :unprocessable_entity, objective.errors.as_json)
+      render_error("目標の作成に失敗しました", status: :unprocessable_entity, errors: objective.errors.as_json)
     end
   end
 
@@ -63,7 +63,7 @@ class Api::V1::Admin::ObjectivesController < Api::V1::Admin::BaseController
       }, "目標を更新しました")
     end
   rescue ActiveRecord::RecordInvalid => e
-    render_error("目標の更新に失敗しました", :unprocessable_entity, @objective.errors.as_json)
+    render_error("目標の更新に失敗しました", status: :unprocessable_entity, errors: @objective.errors.as_json)
   end
 
   # DELETE /api/v1/admin/objectives/:id
@@ -111,7 +111,7 @@ class Api::V1::Admin::ObjectivesController < Api::V1::Admin::BaseController
         milestone: serialize_milestone(milestone)
       }, "マイルストーンを作成しました", :created)
     else
-      render_error("マイルストーンの作成に失敗しました", :unprocessable_entity, milestone.errors.as_json)
+      render_error("マイルストーンの作成に失敗しました", status: :unprocessable_entity, errors: milestone.errors.as_json)
     end
   end
 
@@ -124,10 +124,10 @@ class Api::V1::Admin::ObjectivesController < Api::V1::Admin::BaseController
         milestone: serialize_milestone(milestone)
       }, "マイルストーンを更新しました")
     else
-      render_error("マイルストーンの更新に失敗しました", :unprocessable_entity, milestone.errors.as_json)
+      render_error("マイルストーンの更新に失敗しました", status: :unprocessable_entity, errors: milestone.errors.as_json)
     end
   rescue ActiveRecord::RecordNotFound
-    render_error("マイルストーンが見つかりません", :not_found)
+    render_error("マイルストーンが見つかりません", status: :not_found)
   end
 
   # DELETE /api/v1/admin/objectives/milestones/:milestone_id
@@ -150,10 +150,10 @@ class Api::V1::Admin::ObjectivesController < Api::V1::Admin::BaseController
         review: serialize_milestone_review(review)
       }, "マイルストーンレビューを作成しました", :created)
     else
-      render_error("レビューの作成に失敗しました", :unprocessable_entity, review.errors.as_json)
+      render_error("レビューの作成に失敗しました", status: :unprocessable_entity, errors: review.errors.as_json)
     end
   rescue ActiveRecord::RecordNotFound
-    render_error("マイルストーンが見つかりません", :not_found)
+    render_error("マイルストーンが見つかりません", status: :not_found)
   end
 
   private
@@ -161,7 +161,7 @@ class Api::V1::Admin::ObjectivesController < Api::V1::Admin::BaseController
   def set_objective
     @objective = Objective.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render_error("目標が見つかりません", :not_found)
+    render_error("目標が見つかりません", status: :not_found)
   end
 
   def objective_params

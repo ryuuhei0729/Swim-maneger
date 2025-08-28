@@ -26,6 +26,7 @@ paths:
         - 認証
       summary: ユーザーログイン
       description: メールアドレスとパスワードでログインし、JWTトークンを取得
+      security: []
       requestBody:
         required: true
         content:
@@ -55,6 +56,27 @@ paths:
                 $ref: '#/components/schemas/AuthResponse'
         '401':
           description: 認証失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/logout:
+    delete:
+      tags:
+        - 認証
+      summary: ユーザーログアウト
+      description: 現在のセッションを終了し、JWTトークンを無効化
+      security: []
+      responses:
+        '200':
+          description: ログアウト成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: 認証エラー
           content:
             application/json:
               schema:

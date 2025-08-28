@@ -126,8 +126,8 @@ RSpec.describe AttendanceController, type: :request do
       it '出席記録が正しく作成される' do
         post update_attendance_path, params: valid_params
 
-        attendance1 = user.attendance.find_by(attendance_event: event1)
-        attendance2 = user.attendance.find_by(attendance_event: event2)
+        attendance1 = user.attendances.find_by(attendance_event: event1)
+        attendance2 = user.attendances.find_by(attendance_event: event2)
 
         expect(attendance1.status).to eq('present')
         expect(attendance2.status).to eq('absent')

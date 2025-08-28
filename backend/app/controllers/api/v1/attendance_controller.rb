@@ -10,7 +10,7 @@ class Api::V1::AttendanceController < Api::V1::BaseController
     next_month_events = AttendanceEvent.where(date: next_month.beginning_of_month..next_month.end_of_month).order(date: :asc)
 
     # 現在のユーザーの出席情報を取得
-    user_attendance = current_user_auth.user.attendance.where(attendance_event: this_month_events + next_month_events)
+    user_attendance = current_user_auth.user.attendances.where(attendance_event: this_month_events + next_month_events)
     answered_event_ids = user_attendance.pluck(:attendance_event_id)
 
     # 未回答のイベントのみを取得
@@ -39,7 +39,7 @@ class Api::V1::AttendanceController < Api::V1::BaseController
     attendance_data.each do |event_id, data|
       begin
         event = AttendanceEvent.find(event_id)
-        attendance = current_user_auth.user.attendance.find_or_initialize_by(attendance_event: event)
+        attendance = current_user_auth.user.attendances.find_or_initialize_by(attendance_event: event)
 
         # バリデーション
         if data[:status].blank?
@@ -76,7 +76,7 @@ class Api::V1::AttendanceController < Api::V1::BaseController
         message: "出席状況を更新しました"
       })
     else
-      render_error("出席状況の更新中にエラーが発生しました", :unprocessable_entity, { details: errors })
+      render_error("出席状況の更新中にエラーが発生しました", status: :unprocessable_entity, errors: { details: errors })
     end
   end
 
@@ -118,7 +118,7 @@ class Api::V1::AttendanceController < Api::V1::BaseController
   end
 
   def format_event_with_attendance(event)
-    user_attendance = current_user_auth.user.attendance.find_by(attendance_event: event)
+    user_attendance = current_user_auth.user.attendances.find_by(attendance_event: event)
     event_data = format_event(event)
     
     if user_attendance

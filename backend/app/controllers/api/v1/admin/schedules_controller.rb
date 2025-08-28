@@ -30,7 +30,7 @@ class Api::V1::Admin::SchedulesController < Api::V1::Admin::BaseController
         schedule: serialize_schedule(event)
       }, "スケジュールを作成しました", :created)
     else
-      render_error("スケジュールの作成に失敗しました", :unprocessable_entity, event.errors.as_json)
+      render_error("スケジュールの作成に失敗しました", status: :unprocessable_entity, errors: event.errors.as_json)
     end
   end
 
@@ -41,7 +41,7 @@ class Api::V1::Admin::SchedulesController < Api::V1::Admin::BaseController
         schedule: serialize_schedule(@attendance_event)
       }, "スケジュールを更新しました")
     else
-      render_error("スケジュールの更新に失敗しました", :unprocessable_entity, @attendance_event.errors.as_json)
+      render_error("スケジュールの更新に失敗しました", status: :unprocessable_entity, errors: @attendance_event.errors.as_json)
     end
   end
 
@@ -54,7 +54,7 @@ class Api::V1::Admin::SchedulesController < Api::V1::Admin::BaseController
   # POST /api/v1/admin/schedules/import/preview
   def import_preview
     unless params[:file].present?
-      return render_error("ファイルを選択してください", :bad_request)
+      return render_error("ファイルを選択してください", status: :bad_request)
     end
 
     begin
@@ -96,14 +96,14 @@ class Api::V1::Admin::SchedulesController < Api::V1::Admin::BaseController
 
     rescue => e
       Rails.logger.error "インポートプレビュー処理中にエラーが発生: #{e.message}"
-      render_error("ファイルの処理中にエラーが発生しました: #{e.message}", :unprocessable_entity)
+      render_error("ファイルの処理中にエラーが発生しました: #{e.message}", status: :unprocessable_entity)
     end
   end
 
   # POST /api/v1/admin/schedules/import/execute
   def import_execute
     unless params[:preview_data].present?
-      return render_error("インポートデータが見つかりません", :bad_request)
+      return render_error("インポートデータが見つかりません", status: :bad_request)
     end
 
     success_count = 0
@@ -145,7 +145,7 @@ class Api::V1::Admin::SchedulesController < Api::V1::Admin::BaseController
     end
 
     if error_count > 0
-      render_error("一括インポートに失敗しました", :unprocessable_entity, { errors: errors })
+      render_error("一括インポートに失敗しました", status: :unprocessable_entity, errors: { errors: errors })
     else
       render_success({
         imported_count: success_count
@@ -173,7 +173,7 @@ class Api::V1::Admin::SchedulesController < Api::V1::Admin::BaseController
   def set_attendance_event
     @attendance_event = AttendanceEvent.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render_error("スケジュールが見つかりません", :not_found)
+    render_error("スケジュールが見つかりません", status: :not_found)
   end
 
   def schedule_params

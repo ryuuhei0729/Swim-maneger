@@ -33,7 +33,7 @@ class Api::V1::Admin::CompetitionsController < Api::V1::Admin::BaseController
     entry_status = params[:entry_status]
     
     unless Competition.entry_statuses.key?(entry_status)
-      return render_error("無効なエントリー状況です", :bad_request)
+      return render_error("無効なエントリー状況です", status: :bad_request)
     end
 
     if @competition.update(entry_status: entry_status)
@@ -41,7 +41,7 @@ class Api::V1::Admin::CompetitionsController < Api::V1::Admin::BaseController
         competition: serialize_competition(@competition)
       }, "エントリー受付状況を更新しました")
     else
-      render_error("エントリー状況の更新に失敗しました", :unprocessable_entity, @competition.errors.as_json)
+      render_error("エントリー状況の更新に失敗しました", status: :unprocessable_entity, errors: @competition.errors.as_json)
     end
   end
 
@@ -124,7 +124,7 @@ class Api::V1::Admin::CompetitionsController < Api::V1::Admin::BaseController
   # POST /api/v1/admin/competitions/:id/save_results
   def save_results
     unless params[:results].present?
-      return render_error("結果データが提供されていません", :bad_request)
+      return render_error("結果データが提供されていません", status: :bad_request)
     end
 
     success_count = 0
@@ -179,7 +179,7 @@ class Api::V1::Admin::CompetitionsController < Api::V1::Admin::BaseController
     end
 
     if error_count > 0
-      render_error("結果の保存中にエラーが発生しました", :unprocessable_entity, { errors: errors })
+      render_error("結果の保存中にエラーが発生しました", status: :unprocessable_entity, errors: { errors: errors })
     else
       render_success({
         saved_count: success_count
@@ -247,7 +247,7 @@ class Api::V1::Admin::CompetitionsController < Api::V1::Admin::BaseController
         competition: serialize_competition(event)
       }, "#{event.title}のエントリー受付を開始しました")
     else
-      render_error("エントリー受付の開始に失敗しました", :unprocessable_entity, event.errors.as_json)
+      render_error("エントリー受付の開始に失敗しました", status: :unprocessable_entity, errors: event.errors.as_json)
     end
   end
 
@@ -256,7 +256,7 @@ class Api::V1::Admin::CompetitionsController < Api::V1::Admin::BaseController
   def set_competition
     @competition = Competition.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render_error("大会が見つかりません", :not_found)
+    render_error("大会が見つかりません", status: :not_found)
   end
 
   def serialize_competition(competition)

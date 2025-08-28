@@ -41,14 +41,14 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
   # GET /api/v1/admin/attendances/check
   def check
     unless params[:attendance_event_id].present?
-      return render_error("イベントIDが必要です", :bad_request)
+      return render_error("イベントIDが必要です", status: :bad_request)
     end
 
     # イベントの存在確認
     begin
       @attendance_event = AttendanceEvent.find(params[:attendance_event_id])
     rescue ActiveRecord::RecordNotFound
-      return render_error("イベントが見つかりません", :not_found)
+      return render_error("イベントが見つかりません", status: :not_found)
     end
 
     # 「出席」「その他」で登録済みの人を取得
@@ -83,7 +83,7 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
     checked_user_ids = safe_checked_user_ids
 
     unless checked_user_ids.present?
-      return render_error(I18n.t("api.admin.attendances.errors.checked_users_required"), :bad_request)
+      return render_error(I18n.t("api.admin.attendances.errors.checked_users_required"), status: :bad_request)
     end
 
     # 出席予定者の全ユーザーID
@@ -127,14 +127,14 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
     save_check_params = attendance_save_check_params
 
     unless save_check_params[:attendance_event_id].present? && save_check_params[:updates].present?
-      return render_error(I18n.t("api.admin.attendances.errors.missing_parameters"), :bad_request)
+      return render_error(I18n.t("api.admin.attendances.errors.missing_parameters"), status: :bad_request)
     end
 
     # アップデートデータの正規化と検証
     normalized_updates = normalize_and_validate_updates(save_check_params[:updates])
 
     if normalized_updates[:errors].any?
-      return render_error(I18n.t("api.admin.attendances.errors.invalid_updates"), :bad_request, { errors: normalized_updates[:errors] })
+      return render_error(I18n.t("api.admin.attendances.errors.invalid_updates"), status: :bad_request, errors: { errors: normalized_updates[:errors] })
     end
 
     attendance_event = AttendanceEvent.find(save_check_params[:attendance_event_id])
@@ -172,14 +172,14 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
     end
 
     if errors.any?
-      render_error(I18n.t("api.admin.attendances.errors.update_error"), :unprocessable_entity, { errors: errors })
+      render_error(I18n.t("api.admin.attendances.errors.update_error"), status: :unprocessable_entity, errors: { errors: errors })
     else
       render_success({
         updated_count: update_count
       }, I18n.t("api.admin.attendances.messages.attendance_updated", count: update_count))
     end
   rescue ActiveRecord::RecordNotFound
-    render_error(I18n.t("api.admin.attendances.errors.event_not_found"), :not_found)
+    render_error(I18n.t("api.admin.attendances.errors.event_not_found"), status: :not_found)
   end
 
   # GET /api/v1/admin/attendances/status
@@ -218,7 +218,7 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
   # PATCH /api/v1/admin/attendances/status
   def update_status
     unless params[:updates].present?
-      return render_error("更新データが必要です", :bad_request)
+      return render_error("更新データが必要です", status: :bad_request)
     end
 
     updates = params[:updates]
@@ -260,14 +260,14 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
     end
 
     if errors.any?
-      render_error("出欠受付状況の更新中にエラーが発生しました", :unprocessable_entity, { errors: errors })
+      render_error("出欠受付状況の更新中にエラーが発生しました", status: :unprocessable_entity, errors: { errors: errors })
     else
       render_success({
         updated_count: updated_count
       }, "出欠受付状況を更新しました")
     end
   rescue ActiveRecord::RecordNotFound
-    render_error("指定されたイベントが見つかりません", :not_found)
+    render_error("指定されたイベントが見つかりません", status: :not_found)
   end
 
   private
@@ -275,7 +275,7 @@ class Api::V1::Admin::AttendancesController < Api::V1::Admin::BaseController
   def set_attendance_event
     @attendance_event = AttendanceEvent.find(params[:attendance_event_id])
   rescue ActiveRecord::RecordNotFound
-    render_error("イベントが見つかりません", :not_found)
+    render_error("イベントが見つかりません", status: :not_found)
   end
 
   def parse_month(month_param)

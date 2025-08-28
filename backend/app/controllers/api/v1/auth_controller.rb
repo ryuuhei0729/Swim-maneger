@@ -18,7 +18,7 @@ class Api::V1::AuthController < Api::V1::BaseController
         }
       }, "ログインに成功しました")
     else
-      render_error("メールアドレスまたはパスワードが間違っています", :unauthorized)
+      render_error("メールアドレスまたはパスワードが間違っています", status: :unauthorized)
     end
   end
 
@@ -27,7 +27,7 @@ class Api::V1::AuthController < Api::V1::BaseController
       current_user_auth.update(authentication_token: nil)
       render_success({}, "ログアウトしました")
     else
-      render_error("ログイン状態ではありません", :unauthorized)
+      render_error("ログイン状態ではありません", status: :unauthorized)
     end
   end
 end 

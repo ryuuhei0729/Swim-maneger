@@ -29,7 +29,7 @@ class Api::V1::Admin::AnnouncementsController < Api::V1::Admin::BaseController
         announcement: serialize_announcement(announcement)
       }, "お知らせを作成しました", :created)
     else
-      render_error("お知らせの作成に失敗しました", :unprocessable_entity, announcement.errors.as_json)
+      render_error("お知らせの作成に失敗しました", status: :unprocessable_entity, errors: announcement.errors.as_json)
     end
   end
 
@@ -40,7 +40,7 @@ class Api::V1::Admin::AnnouncementsController < Api::V1::Admin::BaseController
         announcement: serialize_announcement(@announcement)
       }, "お知らせを更新しました")
     else
-      render_error("お知らせの更新に失敗しました", :unprocessable_entity, @announcement.errors.as_json)
+      render_error("お知らせの更新に失敗しました", status: :unprocessable_entity, errors: @announcement.errors.as_json)
     end
   end
 
@@ -60,14 +60,14 @@ class Api::V1::Admin::AnnouncementsController < Api::V1::Admin::BaseController
         announcement: serialize_announcement(@announcement)
       }, "お知らせを#{status_message}にしました")
     else
-      render_error(@announcement.errors.full_messages.join(", "), :unprocessable_entity)
+      render_error(@announcement.errors.full_messages.join(", "), status: :unprocessable_entity)
     end
   end
 
   # POST /api/v1/admin/announcements/bulk_action
   def bulk_action
     unless params[:action_type].present? && params[:announcement_ids].present?
-      return render_error("必要なパラメータが不足しています", :bad_request)
+      return render_error("必要なパラメータが不足しています", status: :bad_request)
     end
 
     action_type = params[:action_type]
@@ -95,7 +95,7 @@ class Api::V1::Admin::AnnouncementsController < Api::V1::Admin::BaseController
       }, "#{destroyed_count}件のお知らせを削除しました")
       
     else
-      render_error("無効なアクションタイプです", :bad_request)
+      render_error("無効なアクションタイプです", status: :bad_request)
     end
   end
 
@@ -130,7 +130,7 @@ class Api::V1::Admin::AnnouncementsController < Api::V1::Admin::BaseController
   def set_announcement
     @announcement = Announcement.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render_error("お知らせが見つかりません", :not_found) and return
+    render_error("お知らせが見つかりません", status: :not_found) and return
   end
 
   def announcement_params
