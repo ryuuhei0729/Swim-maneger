@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_26_153248) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_28_063023) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -55,19 +55,19 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_26_153248) do
     t.index ["published_at"], name: "index_announcements_on_published_at"
   end
 
-  create_table "attendance", force: :cascade do |t|
+  create_table "attendances", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "attendance_event_id", null: false
     t.text "note"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "status"
-    t.index ["attendance_event_id", "status"], name: "index_attendance_on_event_and_status"
-    t.index ["attendance_event_id"], name: "index_attendance_on_attendance_event_id"
-    t.index ["status", "created_at"], name: "index_attendance_on_status_and_created_at"
-    t.index ["user_id", "attendance_event_id"], name: "index_attendance_on_user_id_and_attendance_event_id", unique: true
-    t.index ["user_id", "status"], name: "index_attendance_on_user_id_and_status"
-    t.index ["user_id"], name: "index_attendance_on_user_id"
+    t.index ["attendance_event_id", "status"], name: "index_attendances_on_event_and_status"
+    t.index ["attendance_event_id"], name: "index_attendances_on_attendance_event_id"
+    t.index ["status", "created_at"], name: "index_attendances_on_status_and_created_at"
+    t.index ["user_id", "attendance_event_id"], name: "index_attendances_on_user_id_and_attendance_event_id", unique: true
+    t.index ["user_id", "status"], name: "index_attendances_on_user_id_and_status"
+    t.index ["user_id"], name: "index_attendances_on_user_id"
     t.check_constraint "status = ANY (ARRAY[0, 1, 2])", name: "check_status"
   end
 
@@ -304,8 +304,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_26_153248) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "attendance", "events", column: "attendance_event_id"
-  add_foreign_key "attendance", "users"
+  add_foreign_key "attendances", "events", column: "attendance_event_id"
+  add_foreign_key "attendances", "users"
   add_foreign_key "entries", "events", column: "attendance_event_id"
   add_foreign_key "entries", "styles"
   add_foreign_key "entries", "users"
