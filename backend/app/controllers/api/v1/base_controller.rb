@@ -4,7 +4,6 @@ class Api::V1::BaseController < ApplicationController
   # APIコントローラーではCSRF保護を無効化（JWT認証を使用するため）
   skip_forgery_protection
 
-  before_action :authenticate_user_auth!
   before_action :log_api_request
   after_action :log_api_response
   around_action :measure_performance
@@ -191,13 +190,20 @@ class Api::V1::BaseController < ApplicationController
 
   def measure_performance
     start_time = Time.current
-    yield
-    duration = (Time.current - start_time) * 1000
+    result = nil
     
-    # パフォーマンス監視
-    if duration > 500 # 500ms以上
-      Rails.logger.warn "パフォーマンス警告: #{controller_name}##{action_name} - #{duration.round(2)}ms"
+    begin
+      result = yield
+    ensure
+      duration = (Time.current - start_time) * 1000
+      
+      # パフォーマンス監視（例外時も実行）
+      if duration > 500 # 500ms以上
+        Rails.logger.warn "パフォーマンス警告: #{controller_name}##{action_name} - #{duration.round(2)}ms"
+      end
     end
+    
+    result
   end
 
   def collect_api_usage_stats(log_data)
