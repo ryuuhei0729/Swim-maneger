@@ -133,9 +133,83 @@
   - [ ] 開発用ダミーデータの充実
   - [ ] API テスト用のヘルパーメソッド追加
 
-## 🗂️ Phase 2: 段階的移行
+## 🗂️ Phase 2: 認証システム移行（優先）
 
-### 2.1 JavaScript/Ajax化 (中間ステップ)
+### 2.1 devise-jwtの導入と並行運用
+- [ ] devise-jwt gemの追加
+- [ ] JWT設定ファイルの作成（config/initializers/devise.rb）
+- [ ] JWT秘密鍵の生成と設定
+- [ ] JWT認証用のコントローラー作成
+- [ ] 既存authentication_tokenとの並行運用設定
+- [ ] JWTトークンの有効期限設定
+- [ ] JWTトークンのリフレッシュ機能実装
+- [ ] 認証ミドルウェアの更新（BaseController）
+- [ ] JWT認証のテスト実装
+
+### 2.2 新規機能でのJWT使用開始
+- [ ] Flutterアプリ用のJWT認証エンドポイント作成
+- [ ] JWT認証でのログイン・ログアウト機能
+- [ ] JWTトークンの自動更新機能
+- [ ] 新規APIエンドポイントでのJWT認証適用
+- [ ] JWT認証のセキュリティテスト
+
+### 2.3 既存機能の段階的移行
+- [ ] 既存APIエンドポイントのJWT認証対応
+  - [ ] 管理者系API（admin/*）の移行
+  - [ ] 一般機能API（auth, home, mypage等）の移行
+- [ ] 認証トークンの互換性確保
+- [ ] 段階的移行のための認証ミドルウェア更新
+- [ ] 移行状況の監視・ログ機能
+
+### 2.4 authentication_tokenの廃止
+- [ ] 全機能のJWT認証移行完了確認
+- [ ] authentication_tokenカラムの削除
+- [ ] 関連するコードの削除・整理
+- [ ] データベースマイグレーション実行
+- [ ] 最終テスト・動作確認
+
+## 🗂️ Phase 3: Flutterアプリ開発
+
+### 3.1 Flutterプロジェクトセットアップ
+- [ ] Flutter開発環境の構築
+- [ ] プロジェクト構造の設計
+- [ ] 依存関係の設定（dio, provider等）
+- [ ] 環境設定（開発・本番）
+
+### 3.2 認証・ログイン機能
+- [ ] ログイン画面の実装
+- [ ] JWT認証の実装
+- [ ] セッション管理
+- [ ] パスワードリセット機能
+
+### 3.3 主要機能画面の実装
+- [ ] ホーム画面（お知らせ、カレンダー、ベストタイム）
+- [ ] マイページ（プロフィール編集）
+- [ ] メンバー一覧（選手・コーチ一覧）
+- [ ] 練習記録（練習ログ、タイム記録）
+- [ ] レース管理（エントリー、結果）
+- [ ] 出席管理（出席状況入力・確認）
+- [ ] 目標管理（目標設定・進捗確認）
+
+### 3.4 管理者機能画面
+- [ ] 管理者ダッシュボード
+- [ ] ユーザー管理（一覧・編集・インポート）
+- [ ] お知らせ管理（作成・編集・配信）
+- [ ] スケジュール管理（練習・大会予定）
+- [ ] 練習管理（タイム入力・メニュー登録）
+- [ ] 出欠管理（出席確認・統計）
+- [ ] 大会管理（エントリー・結果管理）
+
+### 3.5 共通機能・UX
+- [ ] ナビゲーション設計
+- [ ] エラーハンドリング
+- [ ] ローディング状態管理
+- [ ] オフライン対応
+- [ ] プッシュ通知機能
+
+## 🗂️ Phase 4: Web画面の段階的移行（後回し）
+
+### 4.1 JavaScript/Ajax化 (中間ステップ)
 - [ ] 既存ViewファイルのAPI利用への変更
   - [ ] ホーム画面 (`home/index`)
   - [ ] マイページ (`mypage/index`)
@@ -145,7 +219,7 @@
   - [ ] 出席管理 (`attendance/index`)
   - [ ] 目標管理 (`objective/index`)
 
-### 2.2 管理者画面のAPI利用移行
+### 4.2 管理者画面のAPI利用移行
 - [ ] 管理者ダッシュボード (`admin/index`)
 - [ ] ユーザー管理画面
 - [ ] お知らせ管理画面
@@ -154,7 +228,7 @@
 - [ ] 出欠管理画面
 - [ ] 大会管理画面
 
-## 🗂️ Phase 3: Flutter準備・最適化
+## 🗂️ Phase 5: Flutter準備・最適化
 
 ### 3.1 Flutter向けAPI調整
 - [ ] レスポンス形式の統一
@@ -167,7 +241,7 @@
 - [ ] API Rate Limiting
 - [ ] セキュリティヘッダーの強化
 
-## 🗂️ Phase 4: レガシーコード削除
+## 🗂️ Phase 6: レガシーコード削除
 
 ### 4.1 コントローラー削除
 - [ ] 従来のコントローラー削除
@@ -211,10 +285,11 @@
 - エラーメッセージの日本語化
 
 ### セキュリティ要件
-- JWT認証の適切な実装
+- JWT認証の適切な実装（devise-jwt）
 - 管理者権限の二重チェック
 - SQLインジェクション対策
 - XSS対策
+- 認証トークンの適切な管理
 
 ### パフォーマンス要件
 - N+1問題の回避
@@ -224,7 +299,10 @@
 ## 🐛 課題・注意事項
 
 ### 技術的課題
-- [ ] 既存セッション管理とJWT認証の併用
+- [ ] 既存authentication_tokenとJWT認証の併用
+- [ ] devise-jwtの適切な設定とカスタマイズ
+- [ ] JWTトークンの有効期限管理
+- [ ] 認証システムの段階的移行
 - [ ] CSRF対策のAPI対応
 - [ ] ファイルアップロードのAPI化
 
@@ -237,9 +315,11 @@
 
 ### 完了率
 - **Phase 1**: 100% ✅ (管理者系API完全実装、一般機能API完全実装、技術改善完了)
-- **Phase 2**: 0% (未着手)
-- **Phase 3**: 0% (未着手) 
-- **Phase 4**: 0% (未着手)
+- **Phase 2**: 0% (認証システム移行開始予定)
+- **Phase 3**: 0% (Flutterアプリ開発開始予定)
+- **Phase 4**: 0% (Web画面移行は後回し)
+- **Phase 5**: 0% (Flutter準備・最適化)
+- **Phase 6**: 0% (レガシーコード削除)
 
 ### 今週の成果 ✅
 - [x] 管理者系API実装の完了
@@ -255,9 +335,9 @@
 - [x] 包括的なテスト（統合・パフォーマンス・セキュリティ）
 
 ### 来週の目標（Phase 2開始）
-- [ ] JavaScript/Ajax化の開始
-- [ ] Flutter向けAPI調整の開始
-- [ ] レガシーコントローラーの段階的移行
+- [ ] devise-jwt gemの追加と設定
+- [ ] JWT認証システムの基盤構築
+- [ ] 既存authentication_tokenとの並行運用開始
 
 ## 📚 参考資料
 
@@ -267,11 +347,16 @@
 - [Flutter HTTP Guide](https://docs.flutter.dev/development/data-and-backend/networking)
 
 ### 実装例
-- `backend/app/controllers/api/v1/base_controller.rb` - ベースコントローラー
-- `backend/app/controllers/api/v1/auth_controller.rb` - 認証実装例
+- `backend/app/controllers/api/v1/base_controller.rb` - ベースコントローラー（認証ミドルウェア）
+- `backend/app/controllers/api/v1/auth_controller.rb` - 認証実装例（authentication_token）
 - `backend/app/controllers/api/v1/admin/schedules_controller.rb` - スケジュール管理API
 - `backend/app/controllers/api/v1/admin/users_controller.rb` - ユーザー管理API
 - `backend/app/controllers/api/v1/admin/dashboard_controller.rb` - ダッシュボードAPI
+
+### 認証移行参考資料
+- [devise-jwt Documentation](https://github.com/waiting-for-dev/devise-jwt)
+- [JWT Best Practices](https://auth0.com/blog/a-look-at-the-latest-draft-for-jwt-bcp/)
+- [Rails API Authentication](https://guides.rubyonrails.org/api_app.html#authentication)
 
 ### 完成済みAPI一覧
 #### 管理者向けAPI
