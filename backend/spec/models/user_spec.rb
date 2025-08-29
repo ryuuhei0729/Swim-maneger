@@ -69,10 +69,10 @@ RSpec.describe User, type: :model do
       expect(user.user_auth).to eq(user_auth)
     end
 
-    it 'attendanceとの関連を持つこと' do
+    it 'attendancesとの関連を持つこと' do
       user = create(:user)
       attendance = create(:attendance, user: user)
-      expect(user.attendance).to include(attendance)
+      expect(user.attendances).to include(attendance)
     end
 
     it 'attendance_eventsとの関連を持つこと' do

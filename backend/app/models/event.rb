@@ -1,6 +1,5 @@
 class Event < ApplicationRecord
-  # STIを無効化してtypeカラムを通常のカラムとして扱う
-  self.inheritance_column = :_type_disabled
+  # STIを有効にする（typeカラムを使用）
   
   validates :title, presence: true
   validates :date, presence: true

@@ -44,7 +44,7 @@ class Api::V1::PracticeController < Api::V1::BaseController
 
     # ユーザーが参加していない練習記録の場合はエラー
     if user_practice_times.empty?
-      render_error("この練習記録にはあなたのタイムが記録されていません", :not_found)
+      render_error("この練習記録にはあなたのタイムが記録されていません", status: :not_found)
       return
     end
 
@@ -64,7 +64,7 @@ class Api::V1::PracticeController < Api::V1::BaseController
                                     .where(user_id: current_user_auth.user.id)
 
     if user_practice_times.empty?
-      render_error("この練習記録にはあなたのタイムが記録されていません", :not_found)
+      render_error("この練習記録にはあなたのタイムが記録されていません", status: :not_found)
       return
     end
 

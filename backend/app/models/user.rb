@@ -1,8 +1,8 @@
 class User < ApplicationRecord
   has_one :user_auth, dependent: :destroy
   has_one_attached :avatar
-  has_many :attendance, dependent: :destroy
-  has_many :attendance_events, through: :attendance
+  has_many :attendances, dependent: :destroy
+  has_many :attendance_events, through: :attendances
   has_many :records, dependent: :destroy
   has_many :objectives, dependent: :destroy
   has_many :race_goals, dependent: :destroy

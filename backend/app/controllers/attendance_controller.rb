@@ -13,11 +13,11 @@ class AttendanceController < ApplicationController
     open_events = AttendanceEvent.where(date: today.., attendance_status: 'open').order(date: :asc)
 
     # 現在のユーザーの出席情報を取得
-    answered_event_ids = current_user_auth.user.attendance.where(attendance_event: open_events).pluck(:attendance_event_id)
+    answered_event_ids = current_user_auth.user.attendances.where(attendance_event: open_events).pluck(:attendance_event_id)
 
     # 未回答のイベントのみを取得
     @open_events = open_events.where.not(id: answered_event_ids)
-    @attendance = current_user_auth.user.attendance.where(attendance_event: @open_events)
+    @attendance = current_user_auth.user.attendances.where(attendance_event: @open_events)
 
     # カレンダー表示用のデータ（STI構造では全てのイベントをEventテーブルから取得）
     all_events = Event
@@ -26,7 +26,7 @@ class AttendanceController < ApplicationController
 
     # ログインユーザーの出席情報を取得（カレンダー表示用）
     @user_attendance_by_event = {}
-    current_user_auth.user.attendance
+    current_user_auth.user.attendances
       .joins(:attendance_event)
       .where(events: { date: @current_month.beginning_of_month..@current_month.end_of_month })
       .each do |attendance|
@@ -72,7 +72,7 @@ class AttendanceController < ApplicationController
 
     attendance_params.each do |event_id, data|
       event = AttendanceEvent.find(event_id)
-      attendance = current_user_auth.user.attendance.find_or_initialize_by(attendance_event: event)
+      attendance = current_user_auth.user.attendances.find_or_initialize_by(attendance_event: event)
 
       if data[:status].blank?
         error_messages << "#{event.title}の出席状況を選択してください。"
@@ -115,7 +115,7 @@ class AttendanceController < ApplicationController
 
     # 既存の出席情報を取得
     @user_attendance = {}
-    current_user_auth.user.attendance
+    current_user_auth.user.attendances
       .joins(:attendance_event)
       .where(events: { date: today.. })
       .each do |attendance|
@@ -130,7 +130,7 @@ class AttendanceController < ApplicationController
 
     attendance_params.each do |event_id, data|
       event = AttendanceEvent.find(event_id)
-      attendance = current_user_auth.user.attendance.find_or_initialize_by(attendance_event: event)
+      attendance = current_user_auth.user.attendances.find_or_initialize_by(attendance_event: event)
 
       if data[:status].blank?
         error_messages << "#{event.title}の出席状況を選択してください。"
@@ -163,7 +163,7 @@ class AttendanceController < ApplicationController
   def save_individual
     begin
       event = AttendanceEvent.find(params[:event_id])
-      attendance = current_user_auth.user.attendance.find_or_initialize_by(attendance_event: event)
+      attendance = current_user_auth.user.attendances.find_or_initialize_by(attendance_event: event)
 
       if params[:status].blank?
         render json: { success: false, message: "出席状況を選択してください。" }

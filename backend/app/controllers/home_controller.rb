@@ -17,7 +17,7 @@ class HomeController < ApplicationController
       Date.current.beginning_of_month
     end
 
-    # イベントを取得
+    # イベントを取得（AttendanceEventとCompetitionを含む）
     all_events = Event.where(date: @current_month.beginning_of_month..@current_month.end_of_month)
                      .order(:date, :created_at)
 

@@ -17,7 +17,7 @@ class Api::V1::RacesController < Api::V1::BaseController
 
     # 他のユーザーのタイムが含まれていないかチェック
     if practice_times.empty?
-      render_error("この練習記録にはあなたのタイムが記録されていません", :not_found)
+      render_error("この練習記録にはあなたのタイムが記録されていません", status: :not_found)
       return
     end
 

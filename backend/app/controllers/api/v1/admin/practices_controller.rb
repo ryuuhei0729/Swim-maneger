@@ -84,7 +84,7 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
         practice_log: serialize_practice_log(@practice_log)
       }, "練習記録を更新しました")
     rescue ActiveRecord::RecordInvalid => e
-      render_error("練習記録の更新に失敗しました", :unprocessable_entity, @practice_log.errors.as_json)
+      render_error(message: "練習記録の更新に失敗しました", status: :unprocessable_entity, errors: @practice_log.errors.full_messages)
     end
   end
 
@@ -112,7 +112,7 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
     practice_log = PracticeLog.new(practice_log_get_params)
     
     unless practice_log.rep_count.present? && practice_log.set_count.present?
-      return render_error("本数とセット数を入力してください", :bad_request)
+      return render_error("本数とセット数を入力してください", status: :bad_request)
     end
 
     event_id = practice_log.attendance_event_id
@@ -139,7 +139,7 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
       attendees: attendees.map { |user| serialize_user_basic(user) }
     })
   rescue ActiveRecord::RecordNotFound
-    render_error("イベントが見つかりません", :not_found)
+    render_error("イベントが見つかりません", status: :not_found)
   end
 
   # POST /api/v1/admin/practices/time_save
@@ -159,7 +159,7 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
         times_count: practice_log.practice_times.count
       }, "練習タイムとメニューを保存しました", :created)
     rescue ActiveRecord::RecordInvalid => e
-      render_error("練習データの保存に失敗しました", :unprocessable_entity, practice_log.errors.as_json)
+      render_error(message: "練習データの保存に失敗しました", status: :unprocessable_entity, errors: practice_log.errors.full_messages)
     end
   end
 
@@ -170,7 +170,7 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
     attendee_id = params[:attendee_id]&.to_i
 
     unless event_id.present? && action_type.in?(['add', 'remove']) && attendee_id.present?
-      return render_error("無効なパラメータです", :bad_request)
+      return render_error("無効なパラメータです", status: :bad_request)
     end
 
     event = AttendanceEvent.find(event_id)
@@ -205,9 +205,9 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
       current_attendees: updated_attendees.map { |user| serialize_user_basic(user) }
     }, "参加者リストを更新しました")
   rescue ActiveRecord::RecordNotFound
-    render_error("イベントまたはユーザーが見つかりません", :not_found)
+    render_error("イベントまたはユーザーが見つかりません", status: :not_found)
   rescue => e
-    render_error("参加者リストの更新に失敗しました", :unprocessable_entity)
+    render_error("参加者リストの更新に失敗しました", status: :unprocessable_entity)
   end
 
   # GET /api/v1/admin/practices/register_setup
@@ -225,7 +225,7 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
   # POST /api/v1/admin/practices/register
   def create_register
     unless params[:attendance_event_id].present?
-      return render_error("イベントIDが必要です", :bad_request)
+      return render_error("イベントIDが必要です", status: :bad_request)
     end
 
     attendance_event = AttendanceEvent.find(params[:attendance_event_id])
@@ -235,16 +235,16 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
         event: serialize_event_basic(attendance_event)
       }, "練習メニュー画像を更新しました")
     else
-      render_error("練習メニュー画像の更新に失敗しました", :unprocessable_entity, attendance_event.errors.as_json)
+      render_error(message: "練習メニュー画像の更新に失敗しました", status: :unprocessable_entity, errors: attendance_event.errors.full_messages)
     end
   rescue ActiveRecord::RecordNotFound
-    render_error("イベントが見つかりません", :not_found)
+    render_error("イベントが見つかりません", status: :not_found)
   end
 
   # GET /api/v1/admin/practices/attendees_list
   def attendees_list
     unless params[:event_id].present?
-      return render_error("イベントIDが必要です", :bad_request)
+      return render_error("イベントIDが必要です", status: :bad_request)
     end
 
     event = AttendanceEvent.find(params[:event_id])
@@ -270,7 +270,7 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
       absent_attendee_ids: absent_attendee_ids
     })
   rescue ActiveRecord::RecordNotFound
-    render_error("イベントが見つかりません", :not_found)
+    render_error("イベントが見つかりません", status: :not_found)
   end
 
   private
@@ -278,7 +278,7 @@ class Api::V1::Admin::PracticesController < Api::V1::Admin::BaseController
   def set_practice_log
     @practice_log = PracticeLog.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render_error("練習記録が見つかりません", :not_found)
+    render_error("練習記録が見つかりません", status: :not_found)
   end
 
   def practice_log_params
