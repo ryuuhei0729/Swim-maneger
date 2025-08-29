@@ -36,7 +36,7 @@ class Api::V1::BaseController < ApplicationController
       @current_user_auth = UserAuth.find_by!(authentication_token: token)
       @current_user = @current_user_auth.user
     rescue ActiveRecord::RecordNotFound
-      render_unauthorized('無効な認証トークンです')
+      return render_unauthorized('無効な認証トークンです')
     end
   end
 
@@ -66,7 +66,7 @@ class Api::V1::BaseController < ApplicationController
   def require_admin!
     unless admin_user?
       Rails.logger.warn "管理者権限が必要なAPIにアクセス: #{current_user&.id} - #{request.path}"
-      render_forbidden('管理者権限が必要です')
+      return render_forbidden('管理者権限が必要です')
     end
   end
 
@@ -370,7 +370,7 @@ class Api::V1::BaseController < ApplicationController
       ns = CacheService.detect_cache_namespace rescue nil
       pattern = ns ? "#{ns}:api_stats:user_type:*" : "api_stats:user_type:*"
       keys = []
-      cursor = 0
+      cursor = "0"
       
       Rails.cache.redis.with do |conn|
         loop do
