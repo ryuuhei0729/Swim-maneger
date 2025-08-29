@@ -74,14 +74,17 @@ class CacheService
 
   # 重いクエリのバックグラウンド処理用キャッシュ
   def self.cache_heavy_query(query_name, params = {}, expires_in: 1.hour, &block)
-    raise ArgumentError, "Block is required" if block.nil?
     normalized_params = normalize_filters(params)
     cache_key = "heavy_query:#{query_name}:#{Digest::MD5.hexdigest(normalized_params)}"
     processing_key = "#{cache_key}:processing"
     
     # まず結果キャッシュをチェック
     if Rails.cache.exist?(cache_key)
-      return Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
+      if block_given?
+        return Rails.cache.fetch(cache_key, expires_in: expires_in, &block)
+      else
+        return Rails.cache.read(cache_key)
+      end
     end
     
     # 処理中フラグをアトミックに設定（重複実行を防止）

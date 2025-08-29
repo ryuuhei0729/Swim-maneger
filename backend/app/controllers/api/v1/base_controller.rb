@@ -18,8 +18,19 @@ class Api::V1::BaseController < ApplicationController
   private
 
   def authenticate_user_auth!
-    token = extract_token_from_header
-    return render_unauthorized('認証トークンが提供されていません') unless token
+    header = request.headers['Authorization']
+    
+    # Authorizationヘッダーが存在しない場合
+    return render_unauthorized('認証トークンが提供されていません') unless header.present?
+    
+    # Bearerスキームを厳密に検証
+    match = header.match(/^Bearer\s+(\S+)$/)
+    unless match
+      Rails.logger.warn "不正なAuthorizationヘッダー形式: #{header} - #{request.path}"
+      return render_unauthorized('不正な認証ヘッダー形式です')
+    end
+    
+    token = match[1]
 
     begin
       @current_user_auth = UserAuth.find_by!(authentication_token: token)
@@ -31,7 +42,13 @@ class Api::V1::BaseController < ApplicationController
 
   def extract_token_from_header
     header = request.headers['Authorization']
-    header&.split(' ')&.last
+    return nil unless header.present?
+
+    # Bearerスキームを厳密に検証
+    match = header.match(/^Bearer\s+(\S+)$/)
+    return nil unless match
+
+    match[1]
   end
 
   def current_user_auth
@@ -126,10 +143,9 @@ class Api::V1::BaseController < ApplicationController
   # API監視・ログ改善
   def log_api_request
     @request_start_time = Time.current
-    @request_id = SecureRandom.uuid
     
     log_data = {
-      request_id: @request_id,
+      request_id: request.request_id,
       method: request.method,
       path: request.path,
       user_id: current_user&.id,
@@ -152,7 +168,7 @@ class Api::V1::BaseController < ApplicationController
     duration = (Time.current - @request_start_time) * 1000 # ミリ秒
     
     log_data = {
-      request_id: @request_id,
+      request_id: request.request_id,
       method: request.method,
       path: request.path,
       status: response.status,
@@ -189,20 +205,23 @@ class Api::V1::BaseController < ApplicationController
     return unless Rails.cache.respond_to?(:redis)
     
     begin
-      # エンドポイント別アクセス数
-      endpoint_key = "api_stats:endpoint:#{log_data[:path]}"
-      Rails.cache.redis.hincrby(endpoint_key, 'count', 1)
-      Rails.cache.redis.expire(endpoint_key, 1.day)
-      
-      # ユーザータイプ別アクセス数
-      user_type_key = "api_stats:user_type:#{log_data[:user_type]}"
-      Rails.cache.redis.hincrby(user_type_key, 'count', 1)
-      Rails.cache.redis.expire(user_type_key, 1.day)
-      
-      # 時間帯別アクセス数
-      hour_key = "api_stats:hour:#{Time.current.hour}"
-      Rails.cache.redis.hincrby(hour_key, 'count', 1)
-      Rails.cache.redis.expire(hour_key, 1.day)
+      ns = CacheService.detect_cache_namespace rescue nil
+      Rails.cache.redis.with do |conn|
+        # エンドポイント別アクセス数
+        endpoint_key = ns ? "#{ns}:api_stats:endpoint:#{log_data[:path]}" : "api_stats:endpoint:#{log_data[:path]}"
+        conn.hincrby(endpoint_key, 'count', 1)
+        conn.expire(endpoint_key, 1.day)
+        
+        # ユーザータイプ別アクセス数
+        user_type_key = ns ? "#{ns}:api_stats:user_type:#{log_data[:user_type]}" : "api_stats:user_type:#{log_data[:user_type]}"
+        conn.hincrby(user_type_key, 'count', 1)
+        conn.expire(user_type_key, 1.day)
+        
+        # 時間帯別アクセス数
+        hour_key = ns ? "#{ns}:api_stats:hour:#{Time.current.hour}" : "api_stats:hour:#{Time.current.hour}"
+        conn.hincrby(hour_key, 'count', 1)
+        conn.expire(hour_key, 1.day)
+      end
       
     rescue => e
       Rails.logger.error "API統計収集エラー: #{e.message}"
@@ -214,23 +233,26 @@ class Api::V1::BaseController < ApplicationController
     return unless Rails.cache.respond_to?(:redis)
     
     begin
-      # エンドポイント別平均レスポンス時間
-      endpoint_key = "api_performance:#{log_data[:path]}"
-      Rails.cache.redis.hincrby(endpoint_key, 'total_time', log_data[:duration_ms].to_i)
-      Rails.cache.redis.hincrby(endpoint_key, 'count', 1)
-      Rails.cache.redis.expire(endpoint_key, 1.day)
-      
-      # レスポンス時間の分布
-      duration_bucket = case log_data[:duration_ms]
-                       when 0..100 then '0-100ms'
-                       when 100..500 then '100-500ms'
-                       when 500..1000 then '500-1000ms'
-                       else '1000ms+'
-                       end
-      
-      bucket_key = "api_performance:buckets:#{duration_bucket}"
-      Rails.cache.redis.hincrby(bucket_key, 'count', 1)
-      Rails.cache.redis.expire(bucket_key, 1.day)
+      ns = CacheService.detect_cache_namespace rescue nil
+      Rails.cache.redis.with do |conn|
+        # エンドポイント別平均レスポンス時間
+        endpoint_key = ns ? "#{ns}:api_performance:#{log_data[:path]}" : "api_performance:#{log_data[:path]}"
+        conn.hincrby(endpoint_key, 'total_time', log_data[:duration_ms].to_i)
+        conn.hincrby(endpoint_key, 'count', 1)
+        conn.expire(endpoint_key, 1.day)
+        
+        # レスポンス時間の分布
+        duration_bucket = case log_data[:duration_ms]
+                         when 0..100 then '0-100ms'
+                         when 100..500 then '100-500ms'
+                         when 500..1000 then '500-1000ms'
+                         else '1000ms+'
+                         end
+        
+        bucket_key = ns ? "#{ns}:api_performance:buckets:#{duration_bucket}" : "api_performance:buckets:#{duration_bucket}"
+        conn.hincrby(bucket_key, 'count', 1)
+        conn.expire(bucket_key, 1.day)
+      end
       
     rescue => e
       Rails.logger.error "パフォーマンスメトリクス記録エラー: #{e.message}"
@@ -286,7 +308,9 @@ class Api::V1::BaseController < ApplicationController
       obj.each_with_object({}) do |(key, value), sanitized|
         # 機密キーかどうかをチェック（文字列・シンボル両方に対応）
         key_str = key.to_s.downcase
-        unless sensitive_key?(key_str)
+        if sensitive_key?(key_str)
+          sanitized[key] = "[FILTERED]"
+        else
           sanitized[key] = recursive_sanitize(value)
         end
       end
@@ -322,71 +346,96 @@ class Api::V1::BaseController < ApplicationController
   def self.get_popular_endpoints
     return [] unless Rails.cache.respond_to?(:redis)
     
-    keys = []
-    Rails.cache.redis.scan_each(match: "api_stats:endpoint:*") do |key|
-      keys << key
+    begin
+      ns = CacheService.detect_cache_namespace rescue nil
+      pattern = ns ? "#{ns}:api_stats:endpoint:*" : "api_stats:endpoint:*"
+      keys = []
+      Rails.cache.redis.with { |conn| conn.scan_each(match: pattern) { |k| keys << k } }
+      
+      keys.map do |key|
+        path = key.split(':').last
+        count = Rails.cache.redis.with { |c| c.hget(key, 'count') }.to_i
+        { path: path, count: count }
+      end.sort_by { |item| -item[:count] }.first(10)
+    rescue => e
+      Rails.logger.error "人気エンドポイント取得エラー: #{e.message}"
+      []
     end
-    
-    keys.map do |key|
-      path = key.split(':').last
-      count = Rails.cache.redis.hget(key, 'count').to_i
-      { path: path, count: count }
-    end.sort_by { |item| -item[:count] }.first(10)
   end
 
   def self.get_user_type_distribution
     return [] unless Rails.cache.respond_to?(:redis)
     
-    keys = []
-    cursor = 0
-    
-    loop do
-      cursor, matched_keys = Rails.cache.redis.scan(cursor, match: "api_stats:user_type:*")
-      keys.concat(matched_keys)
-      break if cursor == "0"
+    begin
+      ns = CacheService.detect_cache_namespace rescue nil
+      pattern = ns ? "#{ns}:api_stats:user_type:*" : "api_stats:user_type:*"
+      keys = []
+      cursor = 0
+      
+      Rails.cache.redis.with do |conn|
+        loop do
+          cursor, matched_keys = conn.scan(cursor, match: pattern)
+          keys.concat(matched_keys)
+          break if cursor == "0"
+        end
+      end
+      
+      keys.map do |key|
+        user_type = key.split(':').last
+        count = Rails.cache.redis.with { |c| c.hget(key, 'count') }.to_i
+        { user_type: user_type, count: count }
+      end.sort_by { |item| -item[:count] }
+    rescue => e
+      Rails.logger.error "ユーザータイプ分布取得エラー: #{e.message}"
+      []
     end
-    
-    keys.map do |key|
-      user_type = key.split(':').last
-      count = Rails.cache.redis.hget(key, 'count').to_i
-      { user_type: user_type, count: count }
-    end.sort_by { |item| -item[:count] }
   end
 
   def self.get_hourly_activity
     return [] unless Rails.cache.respond_to?(:redis)
     
-    (0..23).map do |hour|
-      key = "api_stats:hour:#{hour}"
-      count = Rails.cache.redis.hget(key, 'count').to_i
-      { hour: hour, count: count }
+    begin
+      ns = CacheService.detect_cache_namespace rescue nil
+      (0..23).map do |hour|
+        key = ns ? "#{ns}:api_stats:hour:#{hour}" : "api_stats:hour:#{hour}"
+        count = Rails.cache.redis.with { |c| c.hget(key, 'count') }.to_i
+        { hour: hour, count: count }
+      end
+    rescue => e
+      Rails.logger.error "時間別アクティビティ取得エラー: #{e.message}"
+      []
     end
   end
 
   def self.get_performance_metrics
     return {} unless Rails.cache.respond_to?(:redis)
     
-    keys = []
-    Rails.cache.redis.scan_each(match: "api_performance:*") do |key|
-      keys << key
-    end
-    
-    metrics = {}
-    
-    keys.each do |key|
-      if key.include?(':buckets:')
-        bucket = key.split(':').last
-        count = Rails.cache.redis.hget(key, 'count').to_i
-        metrics[bucket] = count
-      else
-        path = key.split(':').last
-        total_time = Rails.cache.redis.hget(key, 'total_time').to_i
-        count = Rails.cache.redis.hget(key, 'count').to_i
-        avg_time = count > 0 ? (total_time.to_f / count).round(2) : 0
-        metrics[path] = { avg_time: avg_time, count: count }
+    begin
+      ns = CacheService.detect_cache_namespace rescue nil
+      pattern = ns ? "#{ns}:api_performance:*" : "api_performance:*"
+      keys = []
+      Rails.cache.redis.with { |conn| conn.scan_each(match: pattern) { |k| keys << k } }
+      
+      metrics = {}
+      
+      keys.each do |key|
+        if key.include?(':buckets:')
+          bucket = key.split(':').last
+          count = Rails.cache.redis.with { |c| c.hget(key, 'count') }.to_i
+          metrics[bucket] = count
+        else
+          path = key.split(':').last
+          total_time = Rails.cache.redis.with { |c| c.hget(key, 'total_time') }.to_i
+          count = Rails.cache.redis.with { |c| c.hget(key, 'count') }.to_i
+          avg_time = count > 0 ? (total_time.to_f / count).round(2) : 0
+          metrics[path] = { avg_time: avg_time, count: count }
+        end
       end
+      
+      metrics
+    rescue => e
+      Rails.logger.error "パフォーマンスメトリクス取得エラー: #{e.message}"
+      {}
     end
-    
-    metrics
   end
 end 

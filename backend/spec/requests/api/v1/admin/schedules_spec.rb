@@ -64,6 +64,38 @@ RSpec.describe "Api::V1::Admin::Schedules", type: :request do
         expect(json['message']).to eq("管理者権限が必要です")
       end
     end
+    
+    context "不正なAuthorizationヘッダーの場合" do
+      it "不正な形式のヘッダーで401エラーを返す" do
+        invalid_headers = { 'Authorization' => 'InvalidScheme token123' }
+        get "/api/v1/admin/schedules", headers: invalid_headers
+        
+        expect(response).to have_http_status(:unauthorized)
+        json = JSON.parse(response.body)
+        expect(json['success']).to be false
+        expect(json['message']).to eq("不正な認証ヘッダー形式です")
+      end
+      
+      it "Bearerの後に空白がない場合に401エラーを返す" do
+        invalid_headers = { 'Authorization' => 'Bearertoken123' }
+        get "/api/v1/admin/schedules", headers: invalid_headers
+        
+        expect(response).to have_http_status(:unauthorized)
+        json = JSON.parse(response.body)
+        expect(json['success']).to be false
+        expect(json['message']).to eq("不正な認証ヘッダー形式です")
+      end
+      
+      it "Bearerの後にトークンがない場合に401エラーを返す" do
+        invalid_headers = { 'Authorization' => 'Bearer ' }
+        get "/api/v1/admin/schedules", headers: invalid_headers
+        
+        expect(response).to have_http_status(:unauthorized)
+        json = JSON.parse(response.body)
+        expect(json['success']).to be false
+        expect(json['message']).to eq("不正な認証ヘッダー形式です")
+      end
+    end
   end
 
   describe "GET /api/v1/admin/schedules/:id" do
