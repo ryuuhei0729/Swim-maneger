@@ -21,7 +21,7 @@ RSpec.describe 'API Security', type: :request do
       # 実際の期限切れトークンのテスト
       # トークンを生成してから無効化
       token = get_auth_token(user_auth)
-      user_auth.update!(authentication_token: nil) # トークンを無効化
+      # JWTトークンの無効化は別途実装が必要
 
       get '/api/v1/home', headers: { 'Authorization' => "Bearer #{token}" }
       expect(response).to have_http_status(:unauthorized)
@@ -187,8 +187,7 @@ RSpec.describe 'API Security', type: :request do
 
       # 期限切れトークンのシミュレーション
       # 実際の認証フローで期限切れトークンが拒否されることをテスト
-      expired_user_auth = UserAuth.find_by(authentication_token: token)
-      expired_user_auth.update!(authentication_token: nil) # トークンを無効化
+              # JWTトークンの無効化は別途実装が必要
 
       get '/api/v1/home', headers: { 'Authorization' => "Bearer #{token}" }
       expect(response).to have_http_status(:unauthorized)
@@ -227,7 +226,7 @@ RSpec.describe 'API Security', type: :request do
       expect(response_body).not_to include('password')
       expect(response_body).not_to include('encrypted_password')
       expect(response_body).not_to include('reset_password_token')
-      expect(response_body).not_to include('authentication_token')
+              expect(response_body).not_to include('token')
     end
 
     it 'エラーメッセージでの情報漏洩防止' do

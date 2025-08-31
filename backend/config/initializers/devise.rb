@@ -14,7 +14,7 @@ Devise.setup do |config|
   # confirmation, reset password and unlock tokens in the database.
   # Devise will use the `secret_key_base` as its `secret_key`
   # by default. You can change it below and use your own secret key.
-  # config.secret_key = '5fe33b35a18629d9ce7aff47200b2aff34d7e28fc34ce534582983244498fcde8f3e58fd47b315bff8235be64caf5c7907b7f5c79c5135328d3395fe6ac3ed16'
+  # config.secret_key = '888ea25822fa9d7301faf0b7d9365882517a14061b9948fa0ff19ce9071a7e83978d69dfe9f8e1937c2e37070732fd8867a8d3689fccf7ddb31d375602ba51f0'
 
   # ==> Controller configuration
   # Configure the parent class to the devise controllers.
@@ -24,7 +24,7 @@ Devise.setup do |config|
   # Configure the e-mail address which will be shown in Devise::Mailer,
   # note that it will be overwritten if you use your own mailer class
   # with default "from" parameter.
-  config.mailer_sender = "please-change-me-at-config-initializers-devise@example.com"
+  config.mailer_sender = 'please-change-me-at-config-initializers-devise@example.com'
 
   # Configure the class responsible to send e-mails.
   # config.mailer = 'Devise::Mailer'
@@ -36,7 +36,7 @@ Devise.setup do |config|
   # Load and configure the ORM. Supports :active_record (default) and
   # :mongoid (bson_ext recommended) by default. Other ORMs may be
   # available as additional gems.
-  require "devise/orm/active_record"
+  require 'devise/orm/active_record'
 
   # ==> Configuration for any authentication mechanism
   # Configure which keys are used when authenticating a user. The default is
@@ -58,12 +58,12 @@ Devise.setup do |config|
   # Configure which authentication keys should be case-insensitive.
   # These keys will be downcased upon creating or modifying a user and when used
   # to authenticate or find a user. Default is :email.
-  config.case_insensitive_keys = [ :email ]
+  config.case_insensitive_keys = [:email]
 
   # Configure which authentication keys should have whitespace stripped.
   # These keys will have whitespace before and after removed upon creating or
   # modifying a user and when used to authenticate or find a user. Default is :email.
-  config.strip_whitespace_keys = [ :email ]
+  config.strip_whitespace_keys = [:email]
 
   # Tell if authentication through request.params is enabled. True by default.
   # It can be set to an array that will enable params authentication only for the
@@ -97,7 +97,21 @@ Devise.setup do |config|
   # Notice that if you are skipping storage for all authentication paths, you
   # may want to disable generating routes to Devise's sessions controller by
   # passing skip: :sessions to `devise_for` in your config/routes.rb
-  config.skip_session_storage = [ :http_auth ]
+  config.skip_session_storage = [:http_auth]
+
+  # ==> JWT Configuration
+  # JWT認証の設定（カスタム実装を使用）
+  # config.jwt do |jwt|
+  #   jwt.secret = Rails.application.credentials.jwt_secret_key || Rails.application.secret_key_base
+  #   jwt.dispatch_requests = [
+  #     ['POST', %r{^/api/v1/jwt_auth/login$}]
+  #   ]
+  #   jwt.revocation_requests = [
+  #     ['DELETE', %r{^/api/v1/jwt_auth/logout$}]
+  #   ]
+  #   jwt.expiration_time = 24.hours.to_i
+  #   jwt.request_formats = { user_auth: [:json] }
+  # end
 
   # By default, Devise cleans up the CSRF token on authentication to
   # avoid CSRF token fixation attacks. This means that, when using AJAX
@@ -126,7 +140,7 @@ Devise.setup do |config|
   config.stretches = Rails.env.test? ? 1 : 12
 
   # Set up a pepper to generate the hashed password.
-  # config.pepper = '5bd6b6833754cc96887bddc908bde2e09d2b1cf9022144d51343cbf478ef49f2e7c606a43eccf1c73b8a1db0bf3aea36813025c5ca44352cc01c683878b786eb'
+  # config.pepper = '52ada23a1e3817fd0de5ea248a95bac35da5e91286f85307fe3f8a8071cc52fc8d3f2e7c250804a5f29dbfe620a72f2c563a03988835552d89c3bc687567e6b5'
 
   # Send a notification to the original email when the user's email is changed.
   # config.send_email_changed_notification = false
@@ -164,7 +178,7 @@ Devise.setup do |config|
 
   # ==> Configuration for :rememberable
   # The time the user will be remembered without asking for credentials again.
-  config.remember_for = 4.weeks
+  # config.remember_for = 2.weeks
 
   # Invalidates all the remember me tokens when the user signs out.
   config.expire_all_remember_me_on_sign_out = true
@@ -174,7 +188,7 @@ Devise.setup do |config|
 
   # Options to be passed to the created cookie. For instance, you can set
   # secure: true in order to force SSL only cookies.
-  config.rememberable_options = { secure: Rails.env.production? }
+  # config.rememberable_options = {}
 
   # ==> Configuration for :validatable
   # Range for password length.
@@ -188,7 +202,7 @@ Devise.setup do |config|
   # ==> Configuration for :timeoutable
   # The time you want to timeout the user session without activity. After this
   # time the user will be asked for credentials again. Default is 30 minutes.
-  config.timeout_in = 30.minutes
+  # config.timeout_in = 30.minutes
 
   # ==> Configuration for :lockable
   # Defines which strategy will be used to lock an account.

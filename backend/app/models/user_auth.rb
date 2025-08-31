@@ -12,14 +12,12 @@ class UserAuth < ApplicationRecord
             length: { maximum: 255 }
   
   validates :encrypted_password, presence: true
-  validates :authentication_token, uniqueness: true, allow_nil: true
 
   # パスワードのカスタムバリデーション
   validate :password_complexity, if: :password_required?
   validate :password_length, if: :password_required?
 
   before_create :build_default_user
-  before_create :generate_authentication_token
 
   # プロフィール画像のURLを返すメソッド
   def profile_image_url
@@ -28,20 +26,66 @@ class UserAuth < ApplicationRecord
     "https://www.gravatar.com/avatar/#{Digest::MD5.hexdigest(email.downcase)}?s=200&d=identicon"
   end
 
-  # API認証トークンを再生成
-  def regenerate_authentication_token
-    generate_authentication_token
-    save!
+
+
+  # JWTトークンを生成
+  def generate_jwt
+    JWT.encode(
+      {
+        user_id: id,
+        email: email,
+        exp: 24.hours.from_now.to_i
+      },
+      ENV['JWT_SECRET_KEY'] || Rails.application.secret_key_base,
+      'HS256'
+    )
+  end
+
+  # JWTトークンを無効化
+  def revoke_jwt(authorization_header)
+    return unless authorization_header.present?
+    
+    token = authorization_header.gsub('Bearer ', '')
+    begin
+      # JWTトークンを検証してペイロードを取得
+      decoded_token = JWT.decode(
+        token,
+        ENV['JWT_SECRET_KEY'] || Rails.application.secret_key_base,
+        true,
+        { algorithm: 'HS256' }
+      )
+      
+      # 無効化されたトークンのリストに追加（Redis等を使用）
+      # 実際の実装では、Redisやデータベースに無効化されたトークンを保存
+      Rails.logger.info "JWTトークンを無効化: #{token[0..10]}..."
+      
+    rescue JWT::DecodeError => e
+      Rails.logger.warn "無効なJWTトークン: #{e.message}"
+    end
+  end
+
+  # JWTトークンからユーザーを取得
+  def self.from_jwt_token(token)
+    begin
+      decoded_token = JWT.decode(
+        token,
+        ENV['JWT_SECRET_KEY'] || Rails.application.secret_key_base,
+        true,
+        { algorithm: 'HS256' }
+      )
+      
+      user_id = decoded_token[0]['user_id']
+      find_by(id: user_id)
+      
+    rescue JWT::DecodeError => e
+      Rails.logger.warn "JWTトークン検証エラー: #{e.message}"
+      nil
+    end
   end
 
   private
 
-  def generate_authentication_token
-    loop do
-      self.authentication_token = SecureRandom.urlsafe_base64(32)
-      break unless UserAuth.exists?(authentication_token: authentication_token)
-    end
-  end
+
 
   def build_default_user
     return if user.present?

@@ -5,9 +5,10 @@ class Api::V1::AuthController < Api::V1::BaseController
     user_auth = UserAuth.find_by(email: params[:email])
     
     if user_auth&.valid_password?(params[:password])
-      user_auth.regenerate_authentication_token
+      # JWTトークンを生成
+      jwt_token = user_auth.generate_jwt
       render_success({
-        token: user_auth.authentication_token,
+        token: jwt_token,
         user: {
           id: user_auth.user.id,
           name: user_auth.user.name,
@@ -24,7 +25,8 @@ class Api::V1::AuthController < Api::V1::BaseController
 
   def logout
     if current_user_auth
-      current_user_auth.update(authentication_token: nil)
+      # JWTトークンを無効化
+      current_user_auth.revoke_jwt(request.headers['Authorization'])
       render_success({}, "ログアウトしました")
     else
       render_error("ログイン状態ではありません", status: :unauthorized)

@@ -31,12 +31,15 @@ class Api::V1::BaseController < ApplicationController
     
     token = match[1]
 
-    begin
-      @current_user_auth = UserAuth.find_by!(authentication_token: token)
-      @current_user = @current_user_auth.user
-    rescue ActiveRecord::RecordNotFound
+    # JWT認証を試行
+    @current_user_auth = UserAuth.from_jwt_token(token)
+    
+    # JWT認証が失敗した場合
+    unless @current_user_auth
       return render_unauthorized('無効な認証トークンです')
     end
+    
+    @current_user = @current_user_auth.user
   end
 
   def extract_token_from_header
