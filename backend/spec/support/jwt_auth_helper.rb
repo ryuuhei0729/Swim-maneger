@@ -5,7 +5,8 @@ module JwtAuthHelper
     begin
       # Devise JWTを使用してトークンを生成
       token = user_auth.generate_jwt
-      Rails.logger.debug "JWTトークン生成成功: #{token[0..20]}..."
+      jti = extract_jti_from_token(token)
+      Rails.logger.debug "JWTトークン生成成功: jti=#{jti}"
       token
     rescue => e
       Rails.logger.error "JWTトークン生成エラー: #{e.message}"
@@ -16,7 +17,13 @@ module JwtAuthHelper
 
   def auth_headers(user_auth)
     token = generate_jwt_token(user_auth)
-    Rails.logger.debug "認証ヘッダー生成: Bearer #{token[0..20]}..."
+    # トークンからjtiを直接抽出してログに出力（トークン自体はログしない）
+    jti = JWT.decode(token, nil, false)[0]['jti']
+    Rails.logger.debug "認証ヘッダー生成: jti=#{jti}"
+    { 'Authorization' => "Bearer #{token}" }
+  rescue => e
+    Rails.logger.warn "JWTトークンからjti抽出失敗: #{e.message}"
+    Rails.logger.debug "認証ヘッダー生成: jti=unknown"
     { 'Authorization' => "Bearer #{token}" }
   end
 
@@ -33,6 +40,20 @@ module JwtAuthHelper
   # Devise JWTを使用したトークン検証メソッド
   def decode_jwt_token(token)
     Warden::JWTAuth::TokenDecoder.new.call(token)
+  end
+
+  private
+
+  # JWTトークンからjtiを抽出（検証なしでデコード）
+  def extract_jti_from_token(token)
+    begin
+      # 検証なしでペイロードを取得（テストヘルパー用）
+      payload = JWT.decode(token, nil, false)[0]
+      payload['jti']
+    rescue => e
+      Rails.logger.warn "JWTトークンからjti抽出失敗: #{e.message}"
+      'unknown_jti'
+    end
   end
 end
 

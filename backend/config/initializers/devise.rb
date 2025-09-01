@@ -128,7 +128,7 @@ Devise.setup do |config|
     jwt.expiration_time = 24.hours.to_i
     
     # リクエスト形式の指定
-    jwt.request_formats = { user_auth: [:json] }
+    jwt.request_formats = { user_auths: [:json] }
   end
 
   # By default, Devise cleans up the CSRF token on authentication to
@@ -280,7 +280,7 @@ Devise.setup do |config|
 
   # Configure the default scope given to Warden. By default it's the first
   # devise role declared in your routes (usually :user).
-  # config.default_scope = :user
+  config.default_scope = :user_auth
 
   # Set this configuration to false if you want /users/sign_out to sign out
   # only the current scope. By default, Devise signs out all scopes.

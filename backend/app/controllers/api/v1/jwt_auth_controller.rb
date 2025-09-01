@@ -74,19 +74,25 @@ class Api::V1::JwtAuthController < Api::V1::BaseController
         return render_error("JWTトークンにjtiが含まれていません", status: :bad_request)
       end
       
-      # 有効期限をTimeオブジェクトに変換
-      expiration_time = exp.present? ? Time.at(exp) : nil
-      
-      # 既にdenylistに存在するかチェック
-      if JwtDenylist.exists?(jti: jti)
-        Rails.logger.info "JWTは既に無効化済み: jti=#{jti}"
-        render_success({}, "JWTログアウトしました")
-        return
+      # 有効期限(exp)の必須チェック
+      unless exp.present?
+        Rails.logger.warn "JWTトークンに有効期限(exp)が設定されていません: jti=#{jti}"
+        return render_error("認証トークンに有効期限(exp)が設定されていません", status: :bad_request)
       end
       
-      # JwtDenylistにトークンを追加
-      JwtDenylist.create!(jti: jti, exp: expiration_time)
-      Rails.logger.info "JWT無効化成功: jti=#{jti}"
+      # 有効期限をTimeオブジェクトに変換（expが存在することが保証されている）
+      expiration_time = Time.at(exp)
+      
+      # JwtDenylistにトークンを追加（アトミック操作でTOCTOU問題を回避）
+      denylist_entry, created = JwtDenylist.find_or_create_by!(jti: jti) do |entry|
+        entry.exp = expiration_time
+      end
+      
+      if created
+        Rails.logger.info "JWT無効化成功: jti=#{jti}"
+      else
+        Rails.logger.info "JWTは既に無効化済み: jti=#{jti}"
+      end
       
       render_success({}, "JWTログアウトしました")
       

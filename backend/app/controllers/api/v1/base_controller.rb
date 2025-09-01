@@ -51,7 +51,12 @@ class Api::V1::BaseController < ApplicationController
       
       # 有効期限チェック
       exp = payload['exp']
-      if exp.present? && Time.current.to_i > exp
+      if exp.blank?
+        Rails.logger.warn "JWTトークンに有効期限(exp)が設定されていません: #{jti}"
+        return render_unauthorized('認証トークンに有効期限(exp)が設定されていません')
+      end
+      
+      if Time.current.to_i > exp
         Rails.logger.warn "有効期限切れのJWTトークン: #{jti}, exp=#{Time.at(exp)}"
         return render_unauthorized('認証トークンの有効期限が切れています')
       end

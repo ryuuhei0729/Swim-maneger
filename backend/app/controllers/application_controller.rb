@@ -1,9 +1,13 @@
 class ApplicationController < ActionController::Base
-  # APIコントローラーではDeviseの認証をスキップ（before_actionの前に配置）
-  skip_before_action :authenticate_user_auth!, if: :api_controller?
+  # Deviseの認証メソッドを明示的に読み込み
+  include Devise::Controllers::Helpers
   
+  # Deviseコントローラー以外で認証を要求
   before_action :authenticate_user_auth!, unless: :devise_controller?
   before_action :configure_permitted_parameters, if: :devise_controller?
+  
+  # APIコントローラーではDeviseの認証をスキップ（before_actionの後に配置）
+  skip_before_action :authenticate_user_auth!, if: :api_controller?
 
   protected
 
@@ -16,7 +20,7 @@ class ApplicationController < ActionController::Base
   end
 
   def after_sign_out_path_for(_resource)
-    new_user_auth_session_path
+    new_user_auths_session_path
   end
 
   # エラーハンドリング
