@@ -1,5 +1,5 @@
 class ErrorsController < ApplicationController
-  skip_before_action :authenticate_api_user!
+  skip_before_action :authenticate_user_auth!
 
   def not_found
     respond_to do |format|

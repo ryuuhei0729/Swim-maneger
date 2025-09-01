@@ -23,8 +23,9 @@ class Api::V1::JwtAuthController < Api::V1::BaseController
       return render_error("ユーザー情報が見つかりません", status: :internal_server_error)
     end
     
-    # Devise JWTを使用してトークンを生成
-    jwt_token = user_auth.generate_jwt
+    # Devise JWTの自動発行を使用（手動でJWTを生成しない）
+    # レスポンスヘッダーからJWTトークンを取得
+    jwt_token = request.env['warden-jwt_auth.token']
     
     render_success({
       token: jwt_token,
@@ -121,8 +122,9 @@ class Api::V1::JwtAuthController < Api::V1::BaseController
       return render_error("ユーザー情報が見つかりません", status: :internal_server_error)
     end
     
-    # Devise JWTを使用して新しいトークンを生成
-    new_token = current_user_auth.generate_jwt
+    # Devise JWTの自動発行を使用（手動でJWTを生成しない）
+    # レスポンスヘッダーからJWTトークンを取得
+    new_token = request.env['warden-jwt_auth.token']
     
     render_success({
       token: new_token,

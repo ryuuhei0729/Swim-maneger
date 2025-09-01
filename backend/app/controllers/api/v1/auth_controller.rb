@@ -5,8 +5,10 @@ class Api::V1::AuthController < Api::V1::BaseController
     user_auth = UserAuth.find_by(email: params[:email])
     
     if user_auth&.valid_password?(params[:password])
-      # JWTトークンを生成
-      jwt_token = user_auth.generate_jwt
+      # Devise JWTの自動発行を使用（手動でJWTを生成しない）
+      # レスポンスヘッダーからJWTトークンを取得
+      jwt_token = request.env['warden-jwt_auth.token']
+      
       render_success({
         token: jwt_token,
         user: {

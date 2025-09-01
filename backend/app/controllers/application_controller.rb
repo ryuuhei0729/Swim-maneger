@@ -5,9 +5,6 @@ class ApplicationController < ActionController::Base
   # Deviseコントローラー以外で認証を要求
   before_action :authenticate_user_auth!, unless: :devise_controller?
   before_action :configure_permitted_parameters, if: :devise_controller?
-  
-  # APIコントローラーではDeviseの認証をスキップ（before_actionの後に配置）
-  skip_before_action :authenticate_api_user!, if: :api_controller?
 
   protected
 
