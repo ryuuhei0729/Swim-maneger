@@ -16,15 +16,19 @@ module JwtAuthHelper
   end
 
   def auth_headers(user_auth)
-    token = generate_jwt_token(user_auth)
-    # トークンからjtiを直接抽出してログに出力（トークン自体はログしない）
-    jti = JWT.decode(token, nil, false)[0]['jti']
-    Rails.logger.debug "認証ヘッダー生成: jti=#{jti}"
-    { 'Authorization' => "Bearer #{token}" }
-  rescue => e
-    Rails.logger.warn "JWTトークンからjti抽出失敗: #{e.message}"
-    Rails.logger.debug "認証ヘッダー生成: jti=unknown"
-    { 'Authorization' => "Bearer #{token}" }
+    token = nil
+    begin
+      token = generate_jwt_token(user_auth)
+      # トークンからjtiを直接抽出してログに出力（トークン自体はログしない）
+      jti = JWT.decode(token, nil, false)[0]['jti']
+      Rails.logger.debug "認証ヘッダー生成: jti=#{jti}"
+      { 'Authorization' => "Bearer #{token}" }
+    rescue => e
+      Rails.logger.error "認証ヘッダー生成エラー: #{e.class} - #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      # 元の例外を再発生させる（テスト失敗を表面化）
+      raise e
+    end
   end
 
   def admin_auth_headers

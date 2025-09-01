@@ -9,6 +9,8 @@ class Api::V1::BaseController < ApplicationController
   after_action :log_api_response
   around_action :measure_performance
   
+
+  
   rescue_from StandardError, with: :handle_standard_error
   rescue_from ActiveRecord::RecordNotFound, with: :handle_not_found
   rescue_from ActiveRecord::RecordInvalid, with: :handle_validation_error
