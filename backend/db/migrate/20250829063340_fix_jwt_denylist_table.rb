@@ -1,8 +1,8 @@
 class FixJwtDenylistTable < ActiveRecord::Migration[8.0]
   def up
     # 既存のテーブルが存在する場合は削除
-    if table_exists?(:jwt_denylist)
-      drop_table :jwt_denylist
+    if table_exists?(:jwt_denylists)
+      drop_table :jwt_denylists
     end
     
     # 正しいテーブルを作成
@@ -13,6 +13,7 @@ class FixJwtDenylistTable < ActiveRecord::Migration[8.0]
     end
     
     add_index :jwt_denylists, :jti, unique: true
+    add_index :jwt_denylists, :exp
   end
 
   def down

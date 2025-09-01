@@ -1,6 +1,13 @@
 class ApplicationController < ActionController::Base
+  # Deviseの認証メソッドを明示的に読み込み
+  include Devise::Controllers::Helpers
+  
+  # Deviseコントローラー以外で認証を要求
   before_action :authenticate_user_auth!, unless: :devise_controller?
   before_action :configure_permitted_parameters, if: :devise_controller?
+  
+  # APIコントローラーではDeviseの認証をスキップ（before_actionの後に配置）
+  skip_before_action :authenticate_api_user!, if: :api_controller?
 
   protected
 
@@ -50,5 +57,11 @@ class ApplicationController < ActionController::Base
     payload[:errors] = errors unless errors.empty?
     payload[:code] = code if code.present?
     render json: payload, status: status
+  end
+
+  private
+
+  def api_controller?
+    controller_path.start_with?('api/')
   end
 end

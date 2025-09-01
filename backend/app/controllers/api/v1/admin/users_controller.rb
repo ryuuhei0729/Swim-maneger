@@ -332,15 +332,29 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
     errors
   end
 
-  # インポートデータの署名付きトークンを生成
+  # インポートデータの暗号化トークンを生成
   def generate_import_token(data)
-    verifier = ActiveSupport::MessageVerifier.new(Rails.application.secret_key_base)
-    verifier.generate(data, expires_in: 1.hour)
+    import_token_encryptor.encrypt_and_sign(data, expires_in: 1.hour)
   end
 
-  # インポートトークンを検証・デコード
+  # インポートトークンを検証・復号化
   def verify_import_token(token)
-    verifier = ActiveSupport::MessageVerifier.new(Rails.application.secret_key_base)
-    verifier.verify(token)
+    import_token_encryptor.decrypt_and_verify(token)
+  end
+
+  private
+
+  # インポートトークン用の暗号化器を生成
+  def import_token_encryptor
+    salt = "users_import_token_salt"
+    
+    # JwtSecret.keyを使用してキーを生成
+    key_generator = ActiveSupport::KeyGenerator.new(JwtSecret.key)
+    
+    # MessageEncryptor.key_lenに一致する長さのキーを生成
+    key = key_generator.generate_key(salt, ActiveSupport::MessageEncryptor.key_len)
+    
+    # aes-256-gcmを使用してMessageEncryptorをインスタンス化
+    ActiveSupport::MessageEncryptor.new(key, cipher: 'aes-256-gcm')
   end
 end

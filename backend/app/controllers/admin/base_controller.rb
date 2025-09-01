@@ -26,7 +26,17 @@ class Admin::BaseController < ApplicationController
   end
 
   def encryption_key
-    # 本番環境では環境変数から取得することを推奨
-    Rails.application.secret_key_base[0, 32]
+    # ActiveSupport::KeyGeneratorを使用してセキュアなキーを生成
+    # 安定したソルト文字列を使用して一貫性を保つ
+    salt = "jwt encryption"
+    
+    # Rails.application.credentials.secret_key_baseからキーを生成
+    # MessageEncryptor.key_lenに一致する長さのキーを生成
+    key_generator = ActiveSupport::KeyGenerator.new(
+      Rails.application.credentials.secret_key_base
+    )
+    
+    # 32バイト（256ビット）のキーを生成
+    key_generator.generate_key(salt, ActiveSupport::MessageEncryptor.key_len)
   end
 end 

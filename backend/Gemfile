@@ -21,6 +21,7 @@ gem "jbuilder"
 gem "devise"
 gem "bcrypt", "~> 3.1.7"
 gem "devise-jwt", "~> 0.9.0"
+gem "rack-cors"
 gem "jwt", ">= 2.6", "< 3"
 
 # セッションストア用のgem
@@ -68,6 +69,9 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+  
+  # Environment variables management
+  gem 'dotenv-rails', '~> 2.8'
 end
 
 group :development do

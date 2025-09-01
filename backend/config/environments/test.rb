@@ -50,4 +50,8 @@ Rails.application.configure do
 
   # Raise error when a before_action's only/except options reference missing actions.
   config.action_controller.raise_on_missing_callback_actions = true
+
+  # JWT認証のテスト環境設定
+  # テスト環境でのJWT有効期限を短縮（テストの高速化）
+  config.jwt_expiration_time = 5.minutes.to_i
 end

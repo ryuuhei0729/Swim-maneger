@@ -12,6 +12,15 @@ Rails.application.routes.draw do
           delete 'logout'
         end
       end
+      
+      # JWT認証エンドポイント
+      resources :jwt_auth, only: [] do
+        collection do
+          post 'login'
+          delete 'logout'
+          post 'refresh'
+        end
+      end
       resources :members, only: [:index]
       resources :races, only: [:index, :show]
       resources :attendance, only: [] do

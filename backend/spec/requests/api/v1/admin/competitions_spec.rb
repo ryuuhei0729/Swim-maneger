@@ -4,8 +4,8 @@ RSpec.describe "Api::V1::Admin::Competitions", type: :request do
   let(:admin_user_auth) { create(:user_auth, :admin) }
   let(:admin_user) { admin_user_auth.user }
   let(:player_user_auth) { create(:user_auth, :player) }
-  let(:headers) { { 'Authorization' => "Bearer #{admin_user_auth.authentication_token}" } }
-  let(:player_headers) { { 'Authorization' => "Bearer #{player_user_auth.authentication_token}" } }
+  let(:headers) { auth_headers(admin_user_auth) }
+  let(:player_headers) { auth_headers(player_user_auth) }
 
   describe "GET /api/v1/admin/competitions" do
     let!(:upcoming_competition) { create(:competition, title: "今後の大会", date: Date.today + 1.month) }

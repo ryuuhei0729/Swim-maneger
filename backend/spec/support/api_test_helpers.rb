@@ -5,16 +5,9 @@ module ApiTestHelpers
     # テスト用のヘルパーメソッドを追加
   end
 
-  # JWTトークンを取得するヘルパー
-  def get_auth_token(user_auth)
-    payload = { user_id: user_auth.id, exp: 24.hours.from_now.to_i }
-    JWT.encode(payload, Rails.application.credentials.secret_key_base, 'HS256')
-  end
 
-  # 認証ヘッダーを生成するヘルパー
-  def auth_headers(user_auth)
-    { 'Authorization' => "Bearer #{get_auth_token(user_auth)}" }
-  end
+
+
 
   # APIレスポンスの検証ヘルパー
   def expect_successful_response(response, expected_status = :ok)
@@ -517,6 +510,8 @@ module ApiTestHelpers
 end
 
 RSpec.configure do |config|
+  # JWT認証関連のメソッドはJwtAuthHelperで提供されるため、
+  # 認証関連のメソッドは含めない
   config.include ApiTestHelpers, type: :request
   config.include ApiTestHelpers, type: :controller
 end

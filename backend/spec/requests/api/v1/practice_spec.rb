@@ -4,7 +4,7 @@ RSpec.describe "Api::V1::Practice", type: :request do
   let(:user_auth) { create(:user_auth, :player) }
   let(:user) { user_auth.user }
   let!(:other_user) { create(:user, user_type: "player") }
-  let(:headers) { { 'Authorization' => "Bearer #{user_auth.authentication_token}" } }
+  let(:headers) { auth_headers(user_auth) }
   
   let!(:attendance_event) { create(:attendance_event, date: 1.week.ago) }
   let!(:practice_log) { create(:practice_log, attendance_event: attendance_event) }
