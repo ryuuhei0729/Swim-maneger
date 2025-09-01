@@ -1,6 +1,9 @@
 class ApplicationController < ActionController::Base
   before_action :authenticate_user_auth!, unless: :devise_controller?
   before_action :configure_permitted_parameters, if: :devise_controller?
+  
+  # APIコントローラーではDeviseの認証をスキップ
+  skip_before_action :authenticate_user_auth!, if: :api_controller?
 
   protected
 
@@ -50,5 +53,11 @@ class ApplicationController < ActionController::Base
     payload[:errors] = errors unless errors.empty?
     payload[:code] = code if code.present?
     render json: payload, status: status
+  end
+
+  private
+
+  def api_controller?
+    controller_path.start_with?('api/')
   end
 end

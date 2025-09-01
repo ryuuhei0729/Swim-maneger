@@ -100,18 +100,33 @@ Devise.setup do |config|
   config.skip_session_storage = [:http_auth]
 
   # ==> JWT Configuration
-  # JWT認証の設定（カスタム実装を使用）
-  # config.jwt do |jwt|
-  #   jwt.secret = Rails.application.credentials.jwt_secret_key || Rails.application.secret_key_base
-  #   jwt.dispatch_requests = [
-  #     ['POST', %r{^/api/v1/jwt_auth/login$}]
-  #   ]
-  #   jwt.revocation_requests = [
-  #     ['DELETE', %r{^/api/v1/jwt_auth/logout$}]
-  #   ]
-  #   jwt.expiration_time = 24.hours.to_i
-  #   jwt.request_formats = { user_auth: [:json] }
-  # end
+  # JWT認証の設定（Flutter連携対応）
+  config.jwt do |jwt|
+    # 環境別の秘密鍵設定
+    jwt.secret = if Rails.env.test?
+                   Rails.application.config.jwt_secret_key || 'test-secret-key'
+                 else
+                   Rails.application.credentials.jwt_secret_key || Rails.application.secret_key_base
+                 end
+    
+    # JWT発行対象のリクエスト（ログイン時）
+    jwt.dispatch_requests = [
+      ['POST', %r{^/api/v1/auth/login$}],
+      ['POST', %r{^/api/v1/jwt_auth/login$}]
+    ]
+    
+    # JWT無効化対象のリクエスト（ログアウト時）
+    jwt.revocation_requests = [
+      ['DELETE', %r{^/api/v1/auth/logout$}],
+      ['DELETE', %r{^/api/v1/jwt_auth/logout$}]
+    ]
+    
+    # トークンの有効期限（24時間）
+    jwt.expiration_time = 24.hours.to_i
+    
+    # リクエスト形式の指定
+    jwt.request_formats = { user_auth: [:json] }
+  end
 
   # By default, Devise cleans up the CSRF token on authentication to
   # avoid CSRF token fixation attacks. This means that, when using AJAX

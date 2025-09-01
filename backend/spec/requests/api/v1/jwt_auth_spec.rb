@@ -85,13 +85,9 @@ RSpec.describe 'Api::V1::JwtAuth', type: :request do
       
       # 新しいトークンが有効であることを確認
       new_token = json['data']['token']
-      decoded_token = JWT.decode(
-        new_token,
-        ENV['JWT_SECRET_KEY'] || Rails.application.secret_key_base,
-        true,
-        { algorithm: 'HS256' }
-      )
-      expect(decoded_token[0]['user_id']).to eq(user_auth.id)
+      # テスト環境用のJWT検証メソッドを使用
+      decoded_token = decode_jwt_token(new_token)
+      expect(decoded_token['sub'].to_i).to eq(user_auth.id)
     end
   end
 

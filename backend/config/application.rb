@@ -3,6 +3,12 @@ require_relative "boot"
 require "rails/all"
 require "holiday_jp"
 
+# 環境変数ファイルの読み込み（テスト環境のみ）
+if Rails.env.test?
+  require 'dotenv'
+  Dotenv.load
+end
+
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
 Bundler.require(*Rails.groups)

@@ -4,6 +4,7 @@ class Api::V1::BaseController < ApplicationController
   # APIコントローラーではCSRF保護を無効化（JWT認証を使用するため）
   skip_forgery_protection
 
+  before_action :authenticate_api_user!
   before_action :log_api_request
   after_action :log_api_response
   around_action :measure_performance
@@ -16,7 +17,7 @@ class Api::V1::BaseController < ApplicationController
 
   private
 
-  def authenticate_user_auth!
+  def authenticate_api_user!
     header = request.headers['Authorization']
     
     # Authorizationヘッダーが存在しない場合
@@ -31,15 +32,34 @@ class Api::V1::BaseController < ApplicationController
     
     token = match[1]
 
-    # JWT認証を試行
-    @current_user_auth = UserAuth.from_jwt_token(token)
-    
-    # JWT認証が失敗した場合
-    unless @current_user_auth
-      return render_unauthorized('無効な認証トークンです')
+    begin
+      # Devise JWTを使用してトークンを検証・デコード
+      payload = Warden::JWTAuth::TokenDecoder.new.call(token)
+      
+      # JWTが無効化されていないかチェック
+      jti = payload['jti']
+      if JwtDenylist.exists?(jti: jti)
+        Rails.logger.warn "無効化されたJWTトークン: #{jti}"
+        return render_unauthorized('無効な認証トークンです')
+      end
+      
+      # ユーザー情報を取得
+      user_auth_id = payload['sub']
+      @current_user_auth = UserAuth.find(user_auth_id)
+      @current_user = @current_user_auth.user
+      
+      Rails.logger.debug "JWT認証成功: user_auth_id=#{user_auth_id}, user_id=#{@current_user&.id}"
+      
+    rescue JWT::DecodeError => e
+      Rails.logger.warn "JWT認証エラー: #{e.message}"
+      render_unauthorized('無効な認証トークンです')
+    rescue ActiveRecord::RecordNotFound => e
+      Rails.logger.warn "ユーザーが見つかりません: #{e.message}"
+      render_unauthorized('ユーザーが見つかりません')
+    rescue => e
+      Rails.logger.error "認証エラー: #{e.message}"
+      render_unauthorized('認証に失敗しました')
     end
-    
-    @current_user = @current_user_auth.user
   end
 
   def extract_token_from_header

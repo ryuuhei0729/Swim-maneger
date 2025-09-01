@@ -1,5 +1,5 @@
 class Api::V1::AuthController < Api::V1::BaseController
-  skip_before_action :authenticate_user_auth!, only: [:login]
+  skip_before_action :authenticate_api_user!, only: [:login]
 
   def login
     user_auth = UserAuth.find_by(email: params[:email])

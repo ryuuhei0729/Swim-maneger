@@ -2,7 +2,8 @@ class UserAuth < ApplicationRecord
   # Include default devise modules. Others available are:
   # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
   devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :validatable, :timeoutable
+         :recoverable, :rememberable, :validatable, :timeoutable,
+         :jwt_authenticatable, jwt_revocation_strategy: JwtDenylist
 
   belongs_to :user, optional: true
 
@@ -19,6 +20,54 @@ class UserAuth < ApplicationRecord
 
   before_create :build_default_user
 
+  # JWT認証用のメソッド（Devise JWT標準実装）
+  def generate_jwt
+    Rails.logger.debug "UserAuth#generate_jwt開始: id=#{id}, email=#{email}"
+    
+    begin
+      # Devise JWTを使用してトークンを生成
+      token = Warden::JWTAuth::UserEncoder.new.call(self, :user_auth, nil).first
+      Rails.logger.debug "JWTトークン生成成功: #{token[0..20]}..."
+      token
+    rescue => e
+      Rails.logger.error "UserAuth#generate_jwtエラー: #{e.message}"
+      Rails.logger.error e.backtrace.join("\n")
+      raise e
+    end
+  end
+
+  def revoke_jwt(authorization_header)
+    return unless authorization_header.present?
+    
+    token = authorization_header.gsub('Bearer ', '')
+    Rails.logger.debug "JWT無効化開始: #{token[0..20]}..."
+    
+    begin
+      # Devise JWTを使用してトークンを無効化
+      payload = Warden::JWTAuth::TokenDecoder.new.call(token)
+      jti = payload['jti']
+      exp = Time.at(payload['exp'])
+      
+      if jti && exp
+        JwtDenylist.create!(jti: jti, exp: exp)
+        Rails.logger.debug "JWT無効化成功: jti=#{jti}"
+      end
+    rescue => e
+      Rails.logger.error "JWT無効化エラー: #{e.message}"
+      # エラーが発生してもログアウトは成功とする
+    end
+  end
+
+  # Devise JWTのコールバック用メソッド
+  def jwt_payload
+    # JWTペイロードに追加したいカスタム情報
+    {
+      user_id: user&.id,
+      user_type: user&.user_type,
+      generation: user&.generation
+    }
+  end
+
   # プロフィール画像のURLを返すメソッド
   def profile_image_url
     # ここでは仮の実装として、GravatarのURLを返す
@@ -26,66 +75,7 @@ class UserAuth < ApplicationRecord
     "https://www.gravatar.com/avatar/#{Digest::MD5.hexdigest(email.downcase)}?s=200&d=identicon"
   end
 
-
-
-  # JWTトークンを生成
-  def generate_jwt
-    JWT.encode(
-      {
-        user_id: id,
-        email: email,
-        exp: 24.hours.from_now.to_i
-      },
-      ENV['JWT_SECRET_KEY'] || Rails.application.secret_key_base,
-      'HS256'
-    )
-  end
-
-  # JWTトークンを無効化
-  def revoke_jwt(authorization_header)
-    return unless authorization_header.present?
-    
-    token = authorization_header.gsub('Bearer ', '')
-    begin
-      # JWTトークンを検証してペイロードを取得
-      decoded_token = JWT.decode(
-        token,
-        ENV['JWT_SECRET_KEY'] || Rails.application.secret_key_base,
-        true,
-        { algorithm: 'HS256' }
-      )
-      
-      # 無効化されたトークンのリストに追加（Redis等を使用）
-      # 実際の実装では、Redisやデータベースに無効化されたトークンを保存
-      Rails.logger.info "JWTトークンを無効化: #{token[0..10]}..."
-      
-    rescue JWT::DecodeError => e
-      Rails.logger.warn "無効なJWTトークン: #{e.message}"
-    end
-  end
-
-  # JWTトークンからユーザーを取得
-  def self.from_jwt_token(token)
-    begin
-      decoded_token = JWT.decode(
-        token,
-        ENV['JWT_SECRET_KEY'] || Rails.application.secret_key_base,
-        true,
-        { algorithm: 'HS256' }
-      )
-      
-      user_id = decoded_token[0]['user_id']
-      find_by(id: user_id)
-      
-    rescue JWT::DecodeError => e
-      Rails.logger.warn "JWTトークン検証エラー: #{e.message}"
-      nil
-    end
-  end
-
   private
-
-
 
   def build_default_user
     return if user.present?
