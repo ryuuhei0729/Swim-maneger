@@ -1,9 +1,9 @@
 class ApplicationController < ActionController::Base
+  # APIコントローラーではDeviseの認証をスキップ（before_actionの前に配置）
+  skip_before_action :authenticate_user_auth!, if: :api_controller?
+  
   before_action :authenticate_user_auth!, unless: :devise_controller?
   before_action :configure_permitted_parameters, if: :devise_controller?
-  
-  # APIコントローラーではDeviseの認証をスキップ
-  skip_before_action :authenticate_user_auth!, if: :api_controller?
 
   protected
 

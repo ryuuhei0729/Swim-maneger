@@ -27,6 +27,6 @@ class Admin::BaseController < ApplicationController
 
   def encryption_key
     # 本番環境では環境変数から取得することを推奨
-    Rails.application.secret_key_base[0, 32]
+    JwtSecret.fixed_length_key(32)
   end
 end 

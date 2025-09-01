@@ -37,5 +37,9 @@ module JwtAuthHelper
 end
 
 RSpec.configure do |config|
+  # 認証関連のヘルパーを全てのテストタイプで利用可能にする
   config.include JwtAuthHelper, type: :request
+  config.include JwtAuthHelper, type: :controller
+  config.include JwtAuthHelper, type: :model
+  config.include JwtAuthHelper, type: :system
 end

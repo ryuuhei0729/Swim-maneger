@@ -334,13 +334,13 @@ class Api::V1::Admin::UsersController < Api::V1::Admin::BaseController
 
   # インポートデータの署名付きトークンを生成
   def generate_import_token(data)
-    verifier = ActiveSupport::MessageVerifier.new(Rails.application.secret_key_base)
+    verifier = ActiveSupport::MessageVerifier.new(JwtSecret.key)
     verifier.generate(data, expires_in: 1.hour)
   end
 
   # インポートトークンを検証・デコード
   def verify_import_token(token)
-    verifier = ActiveSupport::MessageVerifier.new(Rails.application.secret_key_base)
+    verifier = ActiveSupport::MessageVerifier.new(JwtSecret.key)
     verifier.verify(token)
   end
 end

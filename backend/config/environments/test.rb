@@ -52,9 +52,6 @@ Rails.application.configure do
   config.action_controller.raise_on_missing_callback_actions = true
 
   # JWT認証のテスト環境設定
-  # テスト環境では環境変数または固定の秘密鍵を使用
-  config.jwt_secret_key = ENV.fetch('TEST_JWT_SECRET_KEY', 'test_jwt_secret_key_for_testing_only_do_not_use_in_production')
-  
   # テスト環境でのJWT有効期限を短縮（テストの高速化）
-  config.jwt_expiration_time = 1.hour.to_i
+  config.jwt_expiration_time = 5.minutes.to_i
 end

@@ -27,7 +27,15 @@ class UserAuth < ApplicationRecord
     begin
       # Devise JWTを使用してトークンを生成
       token = Warden::JWTAuth::UserEncoder.new.call(self, :user_auth, nil).first
-      Rails.logger.debug "JWTトークン生成成功: #{token[0..20]}..."
+      
+      # トークンのjti値を抽出してログに出力（トークン文字列は出力しない）
+      jti = extract_jti_from_token(token)
+      if jti
+        Rails.logger.debug "JWTトークン生成成功: jti=#{jti}"
+      else
+        Rails.logger.debug "JWTトークン生成成功: jti抽出失敗"
+      end
+      
       token
     rescue => e
       Rails.logger.error "UserAuth#generate_jwtエラー: #{e.message}"
@@ -39,22 +47,44 @@ class UserAuth < ApplicationRecord
   def revoke_jwt(authorization_header)
     return unless authorization_header.present?
     
-    token = authorization_header.gsub('Bearer ', '')
-    Rails.logger.debug "JWT無効化開始: #{token[0..20]}..."
+    # Bearerプレフィックスを除去
+    token = authorization_header.gsub(/^Bearer\s+/, '')
+    
+    # トークンのjti値を抽出してログに出力（トークン文字列は出力しない）
+    jti = extract_jti_from_token(token)
+    if jti
+      Rails.logger.debug "JWT無効化開始: jti=#{jti}"
+    else
+      Rails.logger.debug "JWT無効化開始: jti抽出失敗"
+    end
     
     begin
-      # Devise JWTを使用してトークンを無効化
+      # Devise JWTを使用してトークンをデコード
       payload = Warden::JWTAuth::TokenDecoder.new.call(token)
       jti = payload['jti']
-      exp = Time.at(payload['exp'])
+      exp = payload['exp']
       
-      if jti && exp
-        JwtDenylist.create!(jti: jti, exp: exp)
-        Rails.logger.debug "JWT無効化成功: jti=#{jti}"
+      if jti.present? && exp.present?
+        # 有効期限をTimeオブジェクトに変換
+        expiration_time = Time.at(exp)
+        
+        # 既にdenylistに存在するかチェック
+        unless JwtDenylist.exists?(jti: jti)
+          JwtDenylist.create!(jti: jti, exp: expiration_time)
+          Rails.logger.debug "JWT無効化成功: jti=#{jti}, exp=#{expiration_time}"
+        else
+          Rails.logger.debug "JWTは既に無効化済み: jti=#{jti}"
+        end
+      else
+        Rails.logger.warn "JWTペイロードにjtiまたはexpが含まれていません: jti=#{jti}, exp=#{exp}"
       end
+    rescue JWT::DecodeError => e
+      Rails.logger.warn "JWTデコードエラー（無効化スキップ）: #{e.message}"
+      # JWTデコードエラーが発生した場合は警告ログを出力
     rescue => e
       Rails.logger.error "JWT無効化エラー: #{e.message}"
-      # エラーが発生してもログアウトは成功とする
+      Rails.logger.error e.backtrace.join("\n")
+      # その他のエラーが発生した場合はエラーログを出力
     end
   end
 
@@ -76,6 +106,24 @@ class UserAuth < ApplicationRecord
   end
 
   private
+
+  # JWTトークンからjti値を安全に抽出するメソッド
+  def extract_jti_from_token(token)
+    return nil unless token.present?
+    
+    begin
+      # JWTトークンをデコードしてjti値を抽出（署名検証なし）
+      # 注意: 署名検証なしでデコードするため、セキュリティ上の問題はない
+      payload = JWT.decode(token, nil, false, { verify_signature: false }).first
+      payload['jti']
+    rescue JWT::DecodeError => e
+      Rails.logger.debug "JWTデコードエラー（jti抽出失敗）: #{e.message}"
+      nil
+    rescue => e
+      Rails.logger.debug "JWT処理エラー（jti抽出失敗）: #{e.message}"
+      nil
+    end
+  end
 
   def build_default_user
     return if user.present?

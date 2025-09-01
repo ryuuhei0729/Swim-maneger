@@ -38,13 +38,31 @@ class Api::V1::BaseController < ApplicationController
       
       # JWTが無効化されていないかチェック
       jti = payload['jti']
+      if jti.blank?
+        Rails.logger.warn "JWTペイロードにjtiが含まれていません"
+        return render_unauthorized('無効な認証トークンです')
+      end
+      
+      # JWTがdenylistに存在するかチェック
       if JwtDenylist.exists?(jti: jti)
         Rails.logger.warn "無効化されたJWTトークン: #{jti}"
         return render_unauthorized('無効な認証トークンです')
       end
       
+      # 有効期限チェック
+      exp = payload['exp']
+      if exp.present? && Time.current.to_i > exp
+        Rails.logger.warn "有効期限切れのJWTトークン: #{jti}, exp=#{Time.at(exp)}"
+        return render_unauthorized('認証トークンの有効期限が切れています')
+      end
+      
       # ユーザー情報を取得
       user_auth_id = payload['sub']
+      if user_auth_id.blank?
+        Rails.logger.warn "JWTペイロードにsubが含まれていません"
+        return render_unauthorized('無効な認証トークンです')
+      end
+      
       @current_user_auth = UserAuth.find(user_auth_id)
       @current_user = @current_user_auth.user
       

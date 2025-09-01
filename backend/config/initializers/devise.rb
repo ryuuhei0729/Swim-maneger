@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+# JwtSecretクラスを明示的に読み込み
+require_relative '../../app/lib/jwt_secret'
+
 # Assuming you have not yet modified this file, each configuration option below
 # is set to its default value. Note that some are commented out while others
 # are not: uncommented lines are intended to protect your configuration from
@@ -104,9 +107,9 @@ Devise.setup do |config|
   config.jwt do |jwt|
     # 環境別の秘密鍵設定
     jwt.secret = if Rails.env.test?
-                   Rails.application.config.jwt_secret_key || 'test-secret-key'
+                   JwtSecret.test_key
                  else
-                   Rails.application.credentials.jwt_secret_key || Rails.application.secret_key_base
+                   JwtSecret.key
                  end
     
     # JWT発行対象のリクエスト（ログイン時）
