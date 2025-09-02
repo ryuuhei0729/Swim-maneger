@@ -2,17 +2,17 @@ import 'package:flutter/material.dart';
 
 class Attendance {
   final int id;
-  final DateTime date;
-  final String status; // 'present', 'absent', 'late', 'excused'
-  final String? reason;
+  final DateTime? date;
+  final String status; // 'present', 'absent', 'other'
+  final String? note;
   final DateTime createdAt;
   final DateTime? updatedAt;
 
   Attendance({
     required this.id,
-    required this.date,
+    this.date,
     required this.status,
-    this.reason,
+    this.note,
     required this.createdAt,
     this.updatedAt,
   });
@@ -20,9 +20,9 @@ class Attendance {
   factory Attendance.fromJson(Map<String, dynamic> json) {
     return Attendance(
       id: json['id'],
-      date: DateTime.parse(json['date']),
+      date: json['date'] != null ? DateTime.tryParse(json['date']) : null,
       status: json['status'],
-      reason: json['reason'],
+      note: json['note'],
       createdAt: DateTime.parse(json['created_at']),
       updatedAt: json['updated_at'] != null 
           ? DateTime.parse(json['updated_at']) 
@@ -33,16 +33,17 @@ class Attendance {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'date': date.toIso8601String(),
+      'date': date?.toIso8601String(),
       'status': status,
-      'reason': reason,
+      'note': note,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
   }
 
   String get formattedDate {
-    return '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
+    if (date == null) return '日付未設定';
+    return '${date!.year}/${date!.month.toString().padLeft(2, '0')}/${date!.day.toString().padLeft(2, '0')}';
   }
 
   String get statusText {
@@ -51,10 +52,8 @@ class Attendance {
         return '出席';
       case 'absent':
         return '欠席';
-      case 'late':
-        return '遅刻';
-      case 'excused':
-        return '公欠';
+      case 'other':
+        return 'その他';
       default:
         return '不明';
     }
@@ -66,10 +65,8 @@ class Attendance {
         return Colors.green;
       case 'absent':
         return Colors.red;
-      case 'late':
+      case 'other':
         return Colors.orange;
-      case 'excused':
-        return Colors.blue;
       default:
         return Colors.grey;
     }
@@ -79,7 +76,7 @@ class Attendance {
 class AttendanceEvent {
   final int id;
   final String title;
-  final DateTime date;
+  final DateTime? date;
   final String? description;
   final List<Attendance> attendances;
   final DateTime createdAt;
@@ -87,7 +84,7 @@ class AttendanceEvent {
   AttendanceEvent({
     required this.id,
     required this.title,
-    required this.date,
+    this.date,
     this.description,
     required this.attendances,
     required this.createdAt,
@@ -97,7 +94,7 @@ class AttendanceEvent {
     return AttendanceEvent(
       id: json['id'],
       title: json['title'],
-      date: DateTime.parse(json['date']),
+      date: json['date'] != null ? DateTime.tryParse(json['date']) : null,
       description: json['description'],
       attendances: (json['attendances'] as List?)
           ?.map((attendance) => Attendance.fromJson(attendance))
@@ -110,7 +107,7 @@ class AttendanceEvent {
     return {
       'id': id,
       'title': title,
-      'date': date.toIso8601String(),
+      'date': date?.toIso8601String(),
       'description': description,
       'attendances': attendances.map((attendance) => attendance.toJson()).toList(),
       'created_at': createdAt.toIso8601String(),
@@ -118,7 +115,8 @@ class AttendanceEvent {
   }
 
   String get formattedDate {
-    return '${date.year}/${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
+    if (date == null) return '日付未設定';
+    return '${date!.year}/${date!.month.toString().padLeft(2, '0')}/${date!.day.toString().padLeft(2, '0')}';
   }
 
   int get presentCount {
@@ -129,17 +127,13 @@ class AttendanceEvent {
     return attendances.where((a) => a.status == 'absent').length;
   }
 
-  int get lateCount {
-    return attendances.where((a) => a.status == 'late').length;
-  }
-
-  int get excusedCount {
-    return attendances.where((a) => a.status == 'excused').length;
+  int get otherCount {
+    return attendances.where((a) => a.status == 'other').length;
   }
 
   double get attendanceRate {
     if (attendances.isEmpty) return 0.0;
-    final present = presentCount + lateCount;
+    final present = presentCount;
     return (present / attendances.length) * 100;
   }
 }

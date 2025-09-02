@@ -19,15 +19,27 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const _DashboardTab(),
-    const _MembersTab(),
-    const _PracticeTab(),
-    const _RacesTab(),
-    const _AttendanceTab(),
-    const _ObjectivesTab(),
-    const _AdminTab(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = 0;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 権限変更時にインデックスを調整
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.user;
+    final isAdmin = user?.isAdmin == true;
+    final maxIndex = isAdmin ? 6 : 5; // 管理者: 7タブ、一般: 6タブ
+    
+    if (_currentIndex > maxIndex) {
+      _currentIndex = maxIndex;
+    }
+  }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +51,55 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
           final user = authProvider.user;
+          final isAdmin = user?.isAdmin == true;
+          
+          // 管理者権限に基づいてスクリーンとナビゲーションアイテムを生成
+          final List<Widget> screens = [
+            const _DashboardTab(),
+            const _MembersTab(),
+            const _PracticeTab(),
+            const _RacesTab(),
+            const _AttendanceTab(),
+            const _ObjectivesTab(),
+            if (isAdmin) const _AdminTab(),
+          ];
+          
+          final List<BottomNavigationBarItem> navigationItems = [
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: AppStrings.home,
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.people),
+              label: AppStrings.members,
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.fitness_center),
+              label: AppStrings.practice,
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.emoji_events),
+              label: AppStrings.races,
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.check_circle),
+              label: AppStrings.attendance,
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.flag),
+              label: AppStrings.objectives,
+            ),
+            if (isAdmin)
+              const BottomNavigationBarItem(
+                icon: Icon(Icons.admin_panel_settings),
+                label: AppStrings.admin,
+              ),
+          ];
+          
+          // 現在のインデックスが範囲内かチェックし、必要に応じて調整
+          if (_currentIndex >= screens.length) {
+            _currentIndex = screens.length - 1;
+          }
           
           return Scaffold(
             appBar: AppBar(
@@ -56,46 +117,19 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ],
             ),
-            body: _screens[_currentIndex],
+            body: IndexedStack(
+              index: _currentIndex,
+              children: screens,
+            ),
             bottomNavigationBar: BottomNavigationBar(
               type: BottomNavigationBarType.fixed,
               currentIndex: _currentIndex,
               onTap: (index) {
                 setState(() {
-                  _currentIndex = index;
+                  _currentIndex = index.clamp(0, screens.length - 1);
                 });
               },
-              items: [
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.home),
-                  label: AppStrings.home,
-                ),
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.people),
-                  label: AppStrings.members,
-                ),
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.fitness_center),
-                  label: AppStrings.practice,
-                ),
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.emoji_events),
-                  label: AppStrings.races,
-                ),
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.check_circle),
-                  label: AppStrings.attendance,
-                ),
-                const BottomNavigationBarItem(
-                  icon: Icon(Icons.flag),
-                  label: AppStrings.objectives,
-                ),
-                if (user?.isAdmin == true)
-                  const BottomNavigationBarItem(
-                    icon: Icon(Icons.admin_panel_settings),
-                    label: AppStrings.admin,
-                  ),
-              ],
+              items: navigationItems,
             ),
           );
         },
@@ -150,6 +184,20 @@ class _DashboardTabState extends State<_DashboardTab> {
     });
   }
 
+  /// ユーザー名から安全にイニシャルを抽出する
+  String _getInitial(String? name) {
+    if (name == null || name.isEmpty) {
+      return 'U';
+    }
+    
+    final runes = name.runes;
+    if (runes.isEmpty) {
+      return 'U';
+    }
+    
+    return String.fromCharCode(runes.first);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer2<AuthProvider, AnnouncementProvider>(
@@ -159,8 +207,10 @@ class _DashboardTabState extends State<_DashboardTab> {
         return RefreshIndicator(
           onRefresh: () async {
             await announcementProvider.refresh();
-            final practiceProvider = Provider.of<PracticeProvider>(context, listen: false);
-            await practiceProvider.refresh();
+            if (context.mounted) {
+              final practiceProvider = Provider.of<PracticeProvider>(context, listen: false);
+              await practiceProvider.refresh();
+            }
           },
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(16),
@@ -177,7 +227,7 @@ class _DashboardTabState extends State<_DashboardTab> {
                           radius: 30,
                           backgroundColor: Colors.blue.shade100,
                           child: Text(
-                            user?.name.substring(0, 1) ?? 'U',
+                            _getInitial(user?.name),
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -469,13 +519,30 @@ class _PracticeTab extends StatefulWidget {
 }
 
 class _PracticeTabState extends State<_PracticeTab> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final practiceProvider = Provider.of<PracticeProvider>(context, listen: false);
       practiceProvider.loadPracticeLogs();
+      _scrollController.addListener(() {
+        final p = Provider.of<PracticeProvider>(context, listen: false);
+        if (_scrollController.position.pixels >=
+                _scrollController.position.maxScrollExtent - 200 &&
+            p.hasMore &&
+            !p.isLoading) {
+          p.loadPracticeLogs();
+        }
+      });
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -485,65 +552,68 @@ class _PracticeTabState extends State<_PracticeTab> {
         return Scaffold(
           body: RefreshIndicator(
             onRefresh: () => practiceProvider.refresh(),
-            child: practiceProvider.isLoading && practiceProvider.practiceLogs.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : practiceProvider.practiceLogs.isEmpty
-                    ? const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.fitness_center, size: 64, color: Colors.grey),
-                            SizedBox(height: 16),
-                            Text(
-                              '練習記録がありません',
-                              style: TextStyle(fontSize: 18, color: Colors.grey),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              '練習を記録して記録を残しましょう',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: practiceProvider.practiceLogs.length + 1,
-                        itemBuilder: (context, index) {
-                          if (index == practiceProvider.practiceLogs.length) {
-                            if (practiceProvider.hasMore) {
-                              return const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            }
-                            return const SizedBox.shrink();
-                          }
-
-                          final practiceLog = practiceProvider.practiceLogs[index];
-                          return Card(
-                            margin: const EdgeInsets.only(bottom: 12),
-                            child: ListTile(
-                              leading: const Icon(Icons.fitness_center, color: Colors.blue),
-                              title: Text(practiceLog.title ?? '練習'),
-                              subtitle: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(practiceLog.formattedDate),
-                                  Text('距離: ${practiceLog.totalDistance.toInt()}m'),
-                                  Text('時間: ${practiceLog.totalTime.inMinutes}分'),
-                                ],
-                              ),
-                              trailing: const Icon(Icons.chevron_right),
-                              onTap: () {
-                                // 練習記録詳細画面に遷移
-                              },
-                            ),
-                          );
-                        },
+            child: ListView.builder(
+              controller: _scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16),
+              itemCount: practiceProvider.practiceLogs.length + 1,
+              itemBuilder: (context, index) {
+                if (practiceProvider.isLoading && practiceProvider.practiceLogs.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+                if (practiceProvider.practiceLogs.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.only(top: 80),
+                    child: Center(
+                      child: Column(
+                        children: [
+                          Icon(Icons.fitness_center, size: 64, color: Colors.grey),
+                          SizedBox(height: 16),
+                          Text('練習記録がありません', style: TextStyle(fontSize: 18, color: Colors.grey)),
+                          SizedBox(height: 8),
+                          Text('練習を記録して記録を残しましょう', style: TextStyle(color: Colors.grey)),
+                        ],
                       ),
+                    ),
+                  );
+                }
+                if (index == practiceProvider.practiceLogs.length) {
+                  if (practiceProvider.hasMore) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }
+
+                final practiceLog = practiceProvider.practiceLogs[index];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  child: ListTile(
+                    leading: const Icon(Icons.fitness_center, color: Colors.blue),
+                    title: Text(practiceLog.title ?? '練習'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(practiceLog.formattedDate),
+                        Text('距離: ${practiceLog.totalDistance.toInt()}m'),
+                        Text('時間: ${practiceLog.totalTime.inMinutes}分'),
+                      ],
+                    ),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () {
+                      // 練習記録詳細画面に遷移
+                    },
+                  ),
+                );
+              },
+            ),
           ),
           floatingActionButton: FloatingActionButton(
             onPressed: () {
@@ -654,48 +724,53 @@ class _UpcomingRacesTabState extends State<_UpcomingRacesTab> {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: _loadRaces,
-      child: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _races.isEmpty
-              ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.emoji_events, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text(
-                        '今後のレースはありません',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _races.length,
-                  itemBuilder: (context, index) {
-                    final race = _races[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        leading: const Icon(Icons.emoji_events, color: Colors.orange),
-                        title: Text(race.name),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(race.formattedDate),
-                            Text(race.venue),
-                            if (race.description != null) Text(race.description!),
-                          ],
-                        ),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () {
-                          // レース詳細画面に遷移
-                        },
-                      ),
-                    );
-                  },
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        children: [
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.all(32),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (_races.isEmpty)
+            const Padding(
+              padding: EdgeInsets.only(top: 80),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(Icons.emoji_events, size: 64, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      '今後のレースはありません',
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                  ],
                 ),
+              ),
+            )
+          else
+            ..._races.map((race) => Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: ListTile(
+                leading: const Icon(Icons.emoji_events, color: Colors.orange),
+                title: Text(race.name),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(race.formattedDate),
+                    Text(race.venue),
+                    if (race.description != null) Text(race.description!),
+                  ],
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  // レース詳細画面に遷移
+                },
+              ),
+            )),
+        ],
+      ),
     );
   }
 }
@@ -742,48 +817,53 @@ class _PastRacesTabState extends State<_PastRacesTab> {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: _loadRaces,
-      child: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _races.isEmpty
-              ? const Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.emoji_events, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text(
-                        '過去のレースはありません',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                )
-              : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: _races.length,
-                  itemBuilder: (context, index) {
-                    final race = _races[index];
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 12),
-                      child: ListTile(
-                        leading: const Icon(Icons.emoji_events, color: Colors.grey),
-                        title: Text(race.name),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(race.formattedDate),
-                            Text(race.venue),
-                            if (race.description != null) Text(race.description!),
-                          ],
-                        ),
-                        trailing: const Icon(Icons.chevron_right),
-                        onTap: () {
-                          // レース詳細画面に遷移
-                        },
-                      ),
-                    );
-                  },
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(16),
+        children: [
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.all(32),
+              child: Center(child: CircularProgressIndicator()),
+            )
+          else if (_races.isEmpty)
+            const Padding(
+              padding: EdgeInsets.only(top: 80),
+              child: Center(
+                child: Column(
+                  children: [
+                    Icon(Icons.emoji_events, size: 64, color: Colors.grey),
+                    SizedBox(height: 16),
+                    Text(
+                      '過去のレースはありません',
+                      style: TextStyle(fontSize: 18, color: Colors.grey),
+                    ),
+                  ],
                 ),
+              ),
+            )
+          else
+            ..._races.map((race) => Card(
+              margin: const EdgeInsets.only(bottom: 12),
+              child: ListTile(
+                leading: const Icon(Icons.emoji_events, color: Colors.grey),
+                title: Text(race.name),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(race.formattedDate),
+                    Text(race.venue),
+                    if (race.description != null) Text(race.description!),
+                  ],
+                ),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  // レース詳細画面に遷移
+                },
+              ),
+            )),
+        ],
+      ),
     );
   }
 }
@@ -884,18 +964,9 @@ class _AttendanceTabState extends State<_AttendanceTab> {
                                 children: [
                                   Expanded(
                                     child: _AttendanceStatusCard(
-                                      title: '遅刻',
-                                      count: _todayEvent!.lateCount,
+                                      title: 'その他',
+                                      count: _todayEvent!.otherCount,
                                       color: Colors.orange,
-                                      icon: Icons.schedule,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Expanded(
-                                    child: _AttendanceStatusCard(
-                                      title: '公欠',
-                                      count: _todayEvent!.excusedCount,
-                                      color: Colors.blue,
                                       icon: Icons.info,
                                     ),
                                   ),
@@ -1046,9 +1117,9 @@ class _AttendanceStatusCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+                                color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+                                border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         children: [
@@ -1196,7 +1267,7 @@ class _ObjectivesTabState extends State<_ObjectivesTab> {
                                       vertical: 4,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: objective.statusColor.withOpacity(0.1),
+                                      color: objective.statusColor.withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: Text(

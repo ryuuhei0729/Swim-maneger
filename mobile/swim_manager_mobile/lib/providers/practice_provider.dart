@@ -41,6 +41,11 @@ class PracticeProvider with ChangeNotifier {
         perPage: 20,
       );
 
+      // サービスが空の配列を返した場合、エラーとして扱う
+      if (practiceLogs.isEmpty && _currentPage == 1) {
+        throw Exception('練習記録が見つかりません');
+      }
+
       if (refresh) {
         _practiceLogs = practiceLogs;
       } else {
@@ -51,7 +56,8 @@ class PracticeProvider with ChangeNotifier {
       _currentPage++;
       notifyListeners();
     } catch (e) {
-      _setError('練習記録の取得に失敗しました');
+      _setError('練習記録の取得に失敗しました: ${e.toString()}');
+      rethrow; // エラーを再スローして、呼び出し元でも処理できるようにする
     } finally {
       _setLoading(false);
     }
@@ -63,10 +69,18 @@ class PracticeProvider with ChangeNotifier {
     _clearError();
     
     try {
-      _todayPracticeLog = await _practiceService.getTodayPracticeLog();
+      final todayLog = await _practiceService.getTodayPracticeLog();
+      
+      // サービスがnullを返した場合、エラーとして扱う
+      if (todayLog == null) {
+        throw Exception('今日の練習記録の取得に失敗しました: サービスがnullを返しました');
+      }
+      
+      _todayPracticeLog = todayLog;
       notifyListeners();
     } catch (e) {
-      _setError('今日の練習記録の取得に失敗しました');
+      _setError('今日の練習記録の取得に失敗しました: ${e.toString()}');
+      rethrow; // エラーを再スローして、呼び出し元でも処理できるようにする
     } finally {
       _setLoading(false);
     }
@@ -78,10 +92,18 @@ class PracticeProvider with ChangeNotifier {
     _clearError();
     
     try {
-      _bestTimes = await _practiceService.getBestTimes();
+      final bestTimes = await _practiceService.getBestTimes();
+      
+      // サービスが空の配列を返した場合、エラーとして扱う
+      if (bestTimes.isEmpty) {
+        throw Exception('ベストタイムが見つかりません');
+      }
+      
+      _bestTimes = bestTimes;
       notifyListeners();
     } catch (e) {
-      _setError('ベストタイムの取得に失敗しました');
+      _setError('ベストタイムの取得に失敗しました: ${e.toString()}');
+      rethrow; // エラーを再スローして、呼び出し元でも処理できるようにする
     } finally {
       _setLoading(false);
     }
@@ -93,13 +115,21 @@ class PracticeProvider with ChangeNotifier {
     _clearError();
     
     try {
-      _stats = await _practiceService.getPracticeStats(
+      final stats = await _practiceService.getPracticeStats(
         startDate: startDate,
         endDate: endDate,
       );
+      
+      // サービスがnullを返した場合、エラーとして扱う
+      if (stats == null) {
+        throw Exception('練習統計の取得に失敗しました: サービスがnullを返しました');
+      }
+      
+      _stats = stats;
       notifyListeners();
     } catch (e) {
-      _setError('練習統計の取得に失敗しました');
+      _setError('練習統計の取得に失敗しました: ${e.toString()}');
+      rethrow; // エラーを再スローして、呼び出し元でも処理できるようにする
     } finally {
       _setLoading(false);
     }
@@ -112,14 +142,17 @@ class PracticeProvider with ChangeNotifier {
     
     try {
       final practiceLog = await _practiceService.createPracticeLog(data);
-      if (practiceLog != null) {
-        _practiceLogs.insert(0, practiceLog);
-        notifyListeners();
-        return true;
+      
+      // サービスがnullを返した場合、エラーとして扱う
+      if (practiceLog == null) {
+        throw Exception('練習記録の作成に失敗しました: サービスがnullを返しました');
       }
-      return false;
+      
+      _practiceLogs.insert(0, practiceLog);
+      notifyListeners();
+      return true;
     } catch (e) {
-      _setError('練習記録の作成に失敗しました');
+      _setError('練習記録の作成に失敗しました: ${e.toString()}');
       return false;
     } finally {
       _setLoading(false);
@@ -133,17 +166,20 @@ class PracticeProvider with ChangeNotifier {
     
     try {
       final practiceLog = await _practiceService.updatePracticeLog(id, data);
-      if (practiceLog != null) {
-        final index = _practiceLogs.indexWhere((log) => log.id == id);
-        if (index != -1) {
-          _practiceLogs[index] = practiceLog;
-          notifyListeners();
-        }
-        return true;
+      
+      // サービスがnullを返した場合、エラーとして扱う
+      if (practiceLog == null) {
+        throw Exception('練習記録の更新に失敗しました: サービスがnullを返しました');
       }
-      return false;
+      
+      final index = _practiceLogs.indexWhere((log) => log.id == id);
+      if (index != -1) {
+        _practiceLogs[index] = practiceLog;
+        notifyListeners();
+      }
+      return true;
     } catch (e) {
-      _setError('練習記録の更新に失敗しました');
+      _setError('練習記録の更新に失敗しました: ${e.toString()}');
       return false;
     } finally {
       _setLoading(false);
@@ -157,13 +193,19 @@ class PracticeProvider with ChangeNotifier {
     
     try {
       final success = await _practiceService.deletePracticeLog(id);
+      
+      // サービスがfalseを返した場合、エラーとして扱う
+      if (success == false) {
+        throw Exception('練習記録の削除に失敗しました: サービスがfalseを返しました');
+      }
+      
       if (success) {
         _practiceLogs.removeWhere((log) => log.id == id);
         notifyListeners();
       }
       return success;
     } catch (e) {
-      _setError('練習記録の削除に失敗しました');
+      _setError('練習記録の削除に失敗しました: ${e.toString()}');
       return false;
     } finally {
       _setLoading(false);
@@ -173,9 +215,16 @@ class PracticeProvider with ChangeNotifier {
   // 練習記録詳細を取得
   Future<PracticeLog?> getPracticeLog(int id) async {
     try {
-      return await _practiceService.getPracticeLog(id);
+      final practiceLog = await _practiceService.getPracticeLog(id);
+      
+      // サービスがnullを返した場合、エラーとして扱う
+      if (practiceLog == null) {
+        throw Exception('練習記録詳細の取得に失敗しました: サービスがnullを返しました');
+      }
+      
+      return practiceLog;
     } catch (e) {
-      _setError('練習記録詳細の取得に失敗しました');
+      _setError('練習記録詳細の取得に失敗しました: ${e.toString()}');
       return null;
     }
   }

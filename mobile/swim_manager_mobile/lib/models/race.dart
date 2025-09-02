@@ -1,7 +1,7 @@
 class Race {
   final int id;
   final String name;
-  final DateTime raceDate;
+  final DateTime? raceDate;
   final String venue;
   final String? description;
   final List<Event> events;
@@ -11,7 +11,7 @@ class Race {
   Race({
     required this.id,
     required this.name,
-    required this.raceDate,
+    this.raceDate,
     required this.venue,
     this.description,
     required this.events,
@@ -23,7 +23,7 @@ class Race {
     return Race(
       id: json['id'],
       name: json['name'],
-      raceDate: DateTime.parse(json['race_date']),
+      raceDate: json['race_date'] != null ? DateTime.tryParse(json['race_date']) : null,
       venue: json['venue'],
       description: json['description'],
       events: (json['events'] as List?)
@@ -40,7 +40,7 @@ class Race {
     return {
       'id': id,
       'name': name,
-      'race_date': raceDate.toIso8601String(),
+      'race_date': raceDate?.toIso8601String(),
       'venue': venue,
       'description': description,
       'events': events.map((event) => event.toJson()).toList(),
@@ -50,18 +50,21 @@ class Race {
   }
 
   String get formattedDate {
-    return '${raceDate.year}/${raceDate.month.toString().padLeft(2, '0')}/${raceDate.day.toString().padLeft(2, '0')}';
+    if (raceDate == null) return '大会日未設定';
+    return '${raceDate!.year}/${raceDate!.month.toString().padLeft(2, '0')}/${raceDate!.day.toString().padLeft(2, '0')}';
   }
 
   bool get isUpcoming {
-    return raceDate.isAfter(DateTime.now());
+    if (raceDate == null) return false;
+    return raceDate!.isAfter(DateTime.now());
   }
 
   bool get isToday {
+    if (raceDate == null) return false;
     final now = DateTime.now();
-    return raceDate.year == now.year &&
-           raceDate.month == now.month &&
-           raceDate.day == now.day;
+    return raceDate!.year == now.year &&
+           raceDate!.month == now.month &&
+           raceDate!.day == now.day;
   }
 }
 
@@ -119,7 +122,7 @@ class Event {
   }
 
   String get fullName {
-    return '${distance}m ${style}';
+    return '${distance}m $style';
   }
 }
 
@@ -148,8 +151,8 @@ class Entry {
       userId: json['user_id'],
       userName: json['user_name'],
       status: json['status'],
-      time: json['time_seconds'] != null 
-          ? Duration(seconds: json['time_seconds'])
+      time: (json['time_seconds'] as num?) != null
+          ? Duration(milliseconds: ((json['time_seconds'] as num) * 1000).round())
           : null,
       rank: json['rank'],
       createdAt: DateTime.parse(json['created_at']),
@@ -162,7 +165,8 @@ class Entry {
       'user_id': userId,
       'user_name': userName,
       'status': status,
-      'time_seconds': time?.inSeconds,
+      // 秒(小数)で書き戻す。精度維持のためミリ秒から変換
+      'time_seconds': time != null ? time!.inMilliseconds / 1000.0 : null,
       'rank': rank,
       'created_at': createdAt.toIso8601String(),
     };
@@ -170,10 +174,13 @@ class Entry {
 
   String get formattedTime {
     if (time == null) return '-';
-    final minutes = time!.inMinutes;
-    final seconds = time!.inSeconds % 60;
-    final milliseconds = (time!.inMilliseconds % 1000 / 10).round();
-    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}.${milliseconds.toString().padLeft(2, '0')}';
+    var totalMs = time!.inMilliseconds;
+    var minutes = totalMs ~/ 60000;
+    var seconds = (totalMs % 60000) ~/ 1000;
+    var centi = ((totalMs % 1000) / 10).round(); // 0..100
+    if (centi == 100) { centi = 0; seconds += 1; }
+    if (seconds == 60) { seconds = 0; minutes += 1; }
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}.${centi.toString().padLeft(2, '0')}';
   }
 
   String get statusText {
