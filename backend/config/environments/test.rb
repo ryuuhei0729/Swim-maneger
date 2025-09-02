@@ -54,4 +54,8 @@ Rails.application.configure do
   # JWT認証のテスト環境設定
   # テスト環境でのJWT有効期限を短縮（テストの高速化）
   config.jwt_expiration_time = 5.minutes.to_i
+  
+  # テスト環境用のJWT秘密鍵設定
+  # 環境変数から取得、なければ動的に生成された安全な鍵を使用
+  config.jwt_secret_key = ENV['TEST_JWT_SECRET_KEY'] || SecureRandom.hex(32)
 end
