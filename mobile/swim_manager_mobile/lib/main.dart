@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'providers/auth_provider.dart';
 import 'services/api_service.dart';
 import 'screens/auth/login_screen.dart';
@@ -32,7 +33,7 @@ class MyApp extends StatelessWidget {
             brightness: Brightness.light,
           ),
           useMaterial3: true,
-          fontFamily: 'Noto Sans JP',
+          fontFamily: GoogleFonts.notoSans().fontFamily,
           appBarTheme: const AppBarTheme(
             centerTitle: true,
             elevation: 0,

@@ -28,6 +28,9 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        
+        // manifestPlaceholdersを追加してapplicationNameプレースホルダーを定義
+        manifestPlaceholders["applicationName"] = "io.flutter.app.FlutterApplication"
     }
 
     buildTypes {

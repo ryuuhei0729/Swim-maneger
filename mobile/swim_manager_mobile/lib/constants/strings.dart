@@ -10,6 +10,8 @@ class AppStrings {
   static const String forgotPassword = 'パスワードを忘れた方';
   static const String loginError = 'ログインに失敗しました';
   static const String networkError = 'ネットワークエラーが発生しました';
+  static const String passwordResetSent = 'パスワードリセットメールを送信しました';
+  static const String passwordResetError = 'パスワードリセットに失敗しました';
   
   // ナビゲーション
   static const String home = 'ホーム';

@@ -2,6 +2,11 @@
 
 A new Flutter project.
 
+## Requirements
+
+- **Flutter SDK**: >=3.6.0 <4.0.0
+- **Dart SDK**: >=3.6.0 <4.0.0
+
 ## Getting Started
 
 This project is a starting point for a Flutter application.

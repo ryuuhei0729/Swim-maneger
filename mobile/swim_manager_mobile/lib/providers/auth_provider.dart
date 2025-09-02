@@ -135,15 +135,23 @@ class AuthProvider with ChangeNotifier {
     try {
       final isValid = await _authService.validateToken();
       if (!isValid) {
-        // トークンが無効な場合、ログアウト状態にする
-        _user = null;
-        _isAuthenticated = false;
-        notifyListeners();
+        // トークンが無効な場合、永続的なトークンを削除し、ローカルユーザー状態をクリア
+        await _authService.logout();
+        await _clearUserData();
       }
       return isValid;
     } catch (e) {
       return false;
     }
+  }
+
+  // ユーザーデータをクリア（永続的なトークンとローカル状態を削除）
+  Future<void> _clearUserData() async {
+    _user = null;
+    _isAuthenticated = false;
+    // セキュアストレージからトークンを削除
+    await _authService.logout();
+    notifyListeners();
   }
 
   // エラーをクリア

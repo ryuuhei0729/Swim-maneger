@@ -32,7 +32,7 @@ class CustomTextField extends StatelessWidget {
     this.maxLines = 1,
     this.maxLength,
     this.readOnly = false,
-  });
+  }) : assert(!(obscureText && (maxLines ?? 1) > 1), 'obscureText cannot be used with multiple lines');
 
   @override
   Widget build(BuildContext context) {

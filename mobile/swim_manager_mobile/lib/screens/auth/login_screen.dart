@@ -40,8 +40,8 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _showForgotPasswordDialog() {
-    showDialog(
+  Future<bool?> _showForgotPasswordDialog() async {
+    return await showDialog<bool>(
       context: context,
       builder: (context) => _ForgotPasswordDialog(),
     );
@@ -125,7 +125,19 @@ class _LoginScreenState extends State<LoginScreen> {
                   Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: _showForgotPasswordDialog,
+                      onPressed: () async {
+                        final success = await _showForgotPasswordDialog();
+                        if (success == true && mounted) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(AppStrings.passwordResetSent),
+                                backgroundColor: Colors.green,
+                              ),
+                            );
+                          }
+                        }
+                      },
                       child: Text(AppStrings.forgotPassword),
                     ),
                   ),
@@ -201,13 +213,7 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
     final success = await authProvider.forgotPassword(_emailController.text.trim());
 
     if (success && mounted) {
-      Navigator.of(context).pop();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('パスワードリセットメールを送信しました'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      Navigator.of(context).pop(true);
     }
   }
 
