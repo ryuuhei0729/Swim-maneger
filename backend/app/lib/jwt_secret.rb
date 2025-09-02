@@ -44,10 +44,15 @@ class JwtSecret
     end
 
     # テスト環境用の秘密鍵を取得
-    # テスト環境では固定値を使用してテストの一貫性を保つ
+    # テスト環境では環境変数または安全なデフォルト値を使用
     # @return [String] テスト用秘密鍵
     def test_key
-      Rails.env.test? ? 'test-secret-key-for-jwt-authentication' : key
+      if Rails.env.test?
+        # テスト環境ではRails設定から取得
+        Rails.application.config.jwt_secret_key
+      else
+        key
+      end
     end
 
     # テスト環境用のJWT有効期限を取得
